@@ -23568,6 +23568,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             let result: Ternary;
             let originalErrorInfo: DiagnosticMessageChain | undefined;
             let varianceCheckFailed = false;
+            let writableTypeArgument: [source: Type, target: Type] | undefined;
             let sourceFlags = source.flags;
             const targetFlags = target.flags;
             if (relation === identityRelation) {
@@ -23665,7 +23666,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 const minParams = getMinTypeArgumentCount(params);
                 const sourceTypes = fillMissingTypeArguments(source.aliasTypeArguments, params, minParams, isInJSFile(source.aliasSymbol.valueDeclaration));
                 const targetTypes = fillMissingTypeArguments(target.aliasTypeArguments, params, minParams, isInJSFile(source.aliasSymbol.valueDeclaration));
-                const varianceResult = relateVariances(sourceTypes, targetTypes, variances, intersectionState);
+                const varianceResult = relateVariances(sourceTypes, targetTypes, variances, intersectionState, typeLevelVariances(() => getAliasVariances(source.aliasSymbol!, assignableRelation)));
                 if (varianceResult !== undefined) {
                     return varianceResult;
                 }
@@ -24068,14 +24069,16 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     // We have type references to the same generic type, and the type references are not marker
                     // type references (which are intended by be compared structurally). Obtain the variance
                     // information for the type parameters and relate the type arguments accordingly.
-                    const variances = getVariances((source as TypeReference).target, relation);
+                    // L (soundness/mutable-array-or-tuple): an array literal is held by nothing else, so it relates with the
+                    // variances a type-level question uses.
+                    const variances = getVariances((source as TypeReference).target, relationGrantsWrites() && isUnaliasedLiteral(source) ? assignableRelation : relation);
                     // We return Ternary.Maybe for a recursive invocation of getVariances (signalled by emptyArray). This
                     // effectively means we measure variance only from type parameter occurrences that aren't nested in
                     // recursive instantiations of the generic type.
                     if (variances === emptyArray) {
                         return Ternary.Unknown;
                     }
-                    const varianceResult = relateVariances(getTypeArguments(source as TypeReference), getTypeArguments(target as TypeReference), variances, intersectionState);
+                    const varianceResult = relateVariances(getTypeArguments(source as TypeReference), getTypeArguments(target as TypeReference), variances, intersectionState, typeLevelVariances(() => getVariances((source as TypeReference).target, assignableRelation)));
                     if (varianceResult !== undefined) {
                         return varianceResult;
                     }
@@ -24125,6 +24128,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     else if (result) {
                         return result;
                     }
+                    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): name the writable type argument above the
+                    // structural elaboration, which reports the first member that fails and not why the type is invariant.
+                    if (writableTypeArgument && reportErrors) {
+                        reportError(Diagnostics._0_can_be_written_through_so_its_type_argument_1_cannot_be_widened_to_2, typeToString(source), typeToString(writableTypeArgument[0]), typeToString(writableTypeArgument[1]));
+                    }
                 }
                 // If S is an object type and T is a discriminated union, S may be related to T if
                 // there exists a constituent of T for every combination of the discriminants of S
@@ -24147,9 +24155,25 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 return reduceLeft(info, (value, chain) => value + 1 + countMessageChainBreadth(chain.next), 0);
             }
 
-            function relateVariances(sourceTypeArguments: readonly Type[] | undefined, targetTypeArguments: readonly Type[] | undefined, variances: VarianceFlags[], intersectionState: IntersectionState) {
+            // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the variances a type-level question uses, needed only
+            // to name a failure, so only when the value relation is reporting one.
+            function typeLevelVariances(get: () => VarianceFlags[]) {
+                return relationGrantsWrites() && reportErrors ? get() : undefined;
+            }
+
+            function relateVariances(sourceTypeArguments: readonly Type[] | undefined, targetTypeArguments: readonly Type[] | undefined, variances: VarianceFlags[], intersectionState: IntersectionState, typeLevel: VarianceFlags[] | undefined) {
                 if (result = typeArgumentsRelatedTo(sourceTypeArguments, targetTypeArguments, variances, reportErrors, intersectionState)) {
                     return result;
+                }
+                // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a type argument that widens at the type level
+                // but not into a value was made invariant by a writable position. Remember it, to name it above the elaboration.
+                const i = typeLevel ? findIndex(variances, (v, i) =>
+                    (v & VarianceFlags.VarianceMask) === VarianceFlags.Invariant && (typeLevel[i] & VarianceFlags.VarianceMask) === VarianceFlags.Covariant &&
+                    !!sourceTypeArguments?.[i] && !!targetTypeArguments?.[i] &&
+                    !!isRelatedTo(sourceTypeArguments[i], targetTypeArguments[i], RecursionFlags.Both, /*reportErrors*/ false) &&
+                    !isRelatedTo(targetTypeArguments[i], sourceTypeArguments[i], RecursionFlags.Both, /*reportErrors*/ false)) : -1;
+                if (i >= 0) {
+                    writableTypeArgument = [sourceTypeArguments![i], targetTypeArguments![i]];
                 }
                 if (some(variances, v => !!(v & VarianceFlags.AllowsStructuralFallback))) {
                     // If some type parameter was `Unmeasurable` or `Unreliable`, and we couldn't pass by assuming it was identical, then we
@@ -24327,30 +24351,36 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             return relation === valueAssignableRelation;
         }
 
-        function isPropertySymbolTypeRelated(sourceProp: Symbol, targetProp: Symbol, getTypeOfSourceProperty: (sym: Symbol) => Type, reportErrors: boolean, intersectionState: IntersectionState, freshSource = false): Ternary {
+        // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a fresh object or array literal, or JSX
+        // attributes, is held by nothing else, so widening it gives no second name to write through.
+        function isUnaliasedLiteral(type: Type) {
+            return !!(getObjectFlags(type) & (ObjectFlags.FreshLiteral | ObjectFlags.ArrayLiteral | ObjectFlags.JsxAttributes));
+        }
+
+        function isPropertySymbolTypeRelated(sourceProp: Symbol, targetProp: Symbol, getTypeOfSourceProperty: (sym: Symbol) => Type, reportErrors: boolean, intersectionState: IntersectionState, unaliasedSource: boolean): Ternary {
             const targetIsOptional = strictNullChecks && !!(getCheckFlags(targetProp) & CheckFlags.Partial);
             const effectiveTarget = addOptionality(getNonMissingTypeOfSymbol(targetProp), /*isProperty*/ false, targetIsOptional);
-            // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a writable target position is read and written through the target, so its type must
-            // relate both ways. A fresh object literal has no other alias, so widening it creates no second
-            // name through which it could be written (the array-literal case is in checkArrayLiteral).
-            const writable = relationGrantsWrites() && isWritablePosition(targetProp) && !freshSource;
+            // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a writable target position is read and
+            // written through the target, so its type must relate both ways, unless nothing else holds the source.
+            const writable = relationGrantsWrites() && isWritablePosition(targetProp) && !unaliasedSource;
             // source could resolve to `any` and that's not related to `unknown` target under strict subtype relation
             if (!writable && effectiveTarget.flags & (relation === strictSubtypeRelation ? TypeFlags.Any : TypeFlags.AnyOrUnknown)) {
                 return Ternary.True;
             }
             const effectiveSource = getTypeOfSourceProperty(sourceProp);
             const related = isRelatedTo(effectiveSource, effectiveTarget, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
-            if (!related || !writable) {
-                return related;
+            return related && writable ? relatedBack(effectiveSource, effectiveTarget, related, reportErrors, intersectionState) : related;
+        }
+
+        // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the target can store a value of its own type into
+        // a writable position, so the source's type there must accept the target's. Every writable position is checked here,
+        // and a failure names the position that could be written through.
+        function relatedBack(source: Type, target: Type, forward: Ternary, reportErrors: boolean, intersectionState: IntersectionState): Ternary {
+            const back = isRelatedTo(target, source, RecursionFlags.Both, /*reportErrors*/ false, /*headMessage*/ undefined, intersectionState);
+            if (!back && reportErrors) {
+                reportError(Diagnostics.A_value_of_type_0_could_be_written_into_this_position_which_holds_1, typeToString(target), typeToString(source));
             }
-            const back = isRelatedTo(effectiveTarget, effectiveSource, RecursionFlags.Both, /*reportErrors*/ false, /*headMessage*/ undefined, intersectionState);
-            if (!back) {
-                if (reportErrors) {
-                    reportError(Diagnostics.Type_0_is_not_assignable_to_type_1, typeToString(effectiveSource), typeToString(effectiveTarget));
-                }
-                return Ternary.False;
-            }
-            return related & back;
+            return forward & back;
         }
 
         function propertyRelatedTo(source: Type, target: Type, sourceProp: Symbol, targetProp: Symbol, getTypeOfSourceProperty: (sym: Symbol) => Type, reportErrors: boolean, intersectionState: IntersectionState, skipOptional: boolean): Ternary {
@@ -24397,7 +24427,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 return Ternary.False;
             }
             // If the target comes from a partial union prop, allow `undefined` in the target type
-            const related = isPropertySymbolTypeRelated(sourceProp, targetProp, getTypeOfSourceProperty, reportErrors, intersectionState, !!(getObjectFlags(source) & (ObjectFlags.FreshLiteral | ObjectFlags.JsxAttributes)));
+            const related = isPropertySymbolTypeRelated(sourceProp, targetProp, getTypeOfSourceProperty, reportErrors, intersectionState, isUnaliasedLiteral(source));
             if (!related) {
                 if (reportErrors) {
                     reportIncompatibleError(Diagnostics.Types_of_property_0_are_incompatible, symbolToString(targetProp));
@@ -24829,12 +24859,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                         ? propType
                         : getTypeWithFacts(propType, TypeFacts.NEUndefined);
                     const forward = isRelatedTo(type, targetInfo.type, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
-                    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the target's writable index signature can store into this source property,
-                    // unless the source is a fresh object literal, which nothing else holds.
-                    const related = forward && relationGrantsWrites() && !targetInfo.isReadonly && isWritablePosition(prop) &&
-                            !(getObjectFlags(source) & (ObjectFlags.FreshLiteral | ObjectFlags.JsxAttributes)) &&
-                            !isRelatedTo(targetInfo.type, type, RecursionFlags.Both, /*reportErrors*/ false, /*headMessage*/ undefined, intersectionState)
-                        ? Ternary.False
+                    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the target's writable index signature can
+                    // store into this source property, unless nothing else holds the source.
+                    const related = forward && relationGrantsWrites() && !targetInfo.isReadonly && isWritablePosition(prop) && !isUnaliasedLiteral(source)
+                        ? relatedBack(type, targetInfo.type, forward, reportErrors, intersectionState)
                         : forward;
                     if (!related) {
                         if (reportErrors) {
@@ -24847,7 +24875,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             }
             for (const info of getIndexInfosOfType(source)) {
                 if (isApplicableIndexType(info.keyType, keyType)) {
-                    const related = indexInfoRelatedTo(info, targetInfo, reportErrors, intersectionState);
+                    const related = indexInfoRelatedTo(info, targetInfo, reportErrors, intersectionState, isUnaliasedLiteral(source));
                     if (!related) {
                         return Ternary.False;
                     }
@@ -24857,13 +24885,13 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             return result;
         }
 
-        function indexInfoRelatedTo(sourceInfo: IndexInfo, targetInfo: IndexInfo, reportErrors: boolean, intersectionState: IntersectionState) {
+        function indexInfoRelatedTo(sourceInfo: IndexInfo, targetInfo: IndexInfo, reportErrors: boolean, intersectionState: IntersectionState, unaliasedSource: boolean) {
             const forward = isRelatedTo(sourceInfo.type, targetInfo.type, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
-            // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a writable index signature on the target is a store position; see isPropertySymbolTypeRelated.
-            const back = forward && relationGrantsWrites() && !targetInfo.isReadonly
-                ? isRelatedTo(targetInfo.type, sourceInfo.type, RecursionFlags.Both, /*reportErrors*/ false, /*headMessage*/ undefined, intersectionState)
-                : Ternary.True;
-            const related = forward & back;
+            // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a writable index signature on the target is a
+            // store position, unless nothing else holds the source.
+            const related = forward && relationGrantsWrites() && !targetInfo.isReadonly && !unaliasedSource
+                ? relatedBack(sourceInfo.type, targetInfo.type, forward, reportErrors, intersectionState)
+                : forward;
             if (!related && reportErrors) {
                 if (sourceInfo.keyType === targetInfo.keyType) {
                     reportError(Diagnostics._0_index_signatures_are_incompatible, typeToString(sourceInfo.keyType));
@@ -24897,7 +24925,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         function typeRelatedToIndexInfo(source: Type, targetInfo: IndexInfo, reportErrors: boolean, intersectionState: IntersectionState): Ternary {
             const sourceInfo = getApplicableIndexInfo(source, targetInfo.keyType);
             if (sourceInfo) {
-                return indexInfoRelatedTo(sourceInfo, targetInfo, reportErrors, intersectionState);
+                return indexInfoRelatedTo(sourceInfo, targetInfo, reportErrors, intersectionState, isUnaliasedLiteral(source));
             }
             // Intersection constituents are never considered to have an inferred index signature. Also, in the strict subtype relation,
             // only fresh object literals are considered to have inferred index signatures. This ensures { [x: string]: xxx } <: {} but
@@ -33475,19 +33503,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         if (forceTuple || inConstContext || inTupleContext) {
             return createArrayLiteralType(createTupleType(elementTypes, elementFlags, /*readonly*/ inConstContext && !(contextualType && someType(contextualType, isMutableArrayLikeType))));
         }
-        const elementType = elementTypes.length ?
-            getUnionType(sameMap(elementTypes, (t, i) => elementFlags[i] & ElementFlags.Variadic ? getIndexedAccessTypeOrUndefined(t, numberType) || anyType : t), UnionReduction.Subtype) :
-            strictNullChecks ? implicitNeverType : undefinedWideningType;
-        // L (soundness/mutable-array-or-tuple): a fresh array literal has no other alias, so widening it to the contextual element type
-        // creates no second name through which the original could be written. Give it that type directly,
-        // so the invariant relation is between identical types. Only when the contextual type has exactly one
-        // mutable Array<E> (alone or in a union), E has no type variables, and not while inferring.
-        const contextualArrays = !(checkMode && checkMode & CheckMode.Inferential) && contextualType && elementTypes.length
-            ? filter(contextualType.flags & TypeFlags.Union ? (contextualType as UnionType).types : [contextualType], t => isArrayType(t) && !isReadonlyArrayType(t))
-            : emptyArray;
-        const contextualElement = contextualArrays.length === 1 ? getTypeArguments(contextualArrays[0] as TypeReference)[0] : undefined;
         return createArrayLiteralType(createArrayType(
-            contextualElement && !couldContainTypeVariables(contextualElement) && isTypeAssignableTo(elementType, contextualElement) ? contextualElement : elementType,
+            elementTypes.length ?
+                getUnionType(sameMap(elementTypes, (t, i) => elementFlags[i] & ElementFlags.Variadic ? getIndexedAccessTypeOrUndefined(t, numberType) || anyType : t), UnionReduction.Subtype) :
+                strictNullChecks ? implicitNeverType : undefinedWideningType,
             inConstContext,
         ));
     }

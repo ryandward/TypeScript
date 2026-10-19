@@ -4026,6 +4026,14 @@
         "category": "Error",
         "code": 2883
     },
+    "A value of type '{0}' could be written into this position, which holds '{1}'.": {
+        "category": "Error",
+        "code": 2890
+    },
+    "'{0}' can be written through, so its type argument '{1}' cannot be widened to '{2}'.": {
+        "category": "Error",
+        "code": 2891
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",
