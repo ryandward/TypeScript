@@ -3,12 +3,12 @@
 //
 //   node L/tracker.mjs [rule ...]          default: every rule
 //
-// Each rule is a folder, L/<rule>/, holding its rule.txt and its cases. rule.txt names the rule's kind and its
-// mechanisms, each with the L code it reports; written as a proof, it cites every case under the obligation the case
-// supports, and the tracker holds the folder to it (see rules.mjs). A case's first line says what it is for:
+// Each rule is a folder, L/<rule>/, holding its rule.txt and its cases. rule.txt is the rule's proof: its obligations,
+// each with the L code its mechanism reports, cite every case they rest on, and the tracker holds the folder to the
+// proof (see rules.mjs). A case's first line says what it is for:
 // `// witness:`, `// control:` or `// rejected sound code:`. A marked line names the diagnostic its mechanism emits,
 // `// rejected here: TS2890`, optionally followed by text that diagnostic's chain must contain. A rejection only counts
-// when a diagnostic on that line carries both, and the code must be one of the rule's mechanisms.
+// when a diagnostic on that line carries both.
 //
 // Cases are judged under L's catalog options: strict, noUncheckedIndexedAccess and exactOptionalPropertyTypes.
 import { spawnSync } from 'node:child_process';
@@ -88,18 +88,18 @@ function judge(c) {
   if (c.kind !== 'witness' && threw) problems.push(`Node throws: ${run.stderr.split('\n').find((l) => /Error/.test(l)) ?? run.stderr.trim()}`);
   if (c.kind === 'control' && marks.length) problems.push('a control marks a line to reject');
   for (const m of marks.filter((m) => m.code === undefined)) problems.push(`line ${m.line} is marked without the diagnostic its mechanism emits`);
-  // A rule written as a proof cites the case under one obligation, in the role the case's first line claims, and
-  // the case's markers name that obligation's code. Otherwise a marker names one of the rule's mechanisms.
+  // rule.txt cites the case under each obligation it supports, in the role the case's first line claims. A marker
+  // names the code of an obligation that cites the case, and a rejection cited under an obligation marks its code.
   const base = c.file.split(sep).pop();
-  const obligation = c.rule.mechanisms.find((o) => o.cites.some((x) => x.file === base));
-  const cited = obligation?.cites.find((x) => x.file === base);
-  if (c.rule.proof && cited === undefined) problems.push('rule.txt doesn\'t cite this case under any obligation');
-  if (cited && c.kind !== undefined && cited.role !== c.kind) problems.push(`rule.txt cites it as ${ROLE_NAME[cited.role]}, but its first line says ${ROLE_NAME[c.kind]}`);
-  const allowed = c.rule.proof ? (obligation ? [obligation] : undefined) : c.rule.mechanisms;
-  for (const m of allowed ? marks.filter((m) => m.code !== undefined && !allowed.some((x) => x.code === m.code)) : []) {
-    problems.push(obligation
-      ? `line ${m.line} is marked TS${m.code}, but rule.txt cites it under obligation ${obligation.number}, TS${obligation.code}`
-      : `line ${m.line} is marked TS${m.code}, which isn't one of ${c.rule.name}'s mechanisms`);
+  const citing = c.rule.mechanisms.filter((o) => o.cites.some((x) => x.file === base));
+  if (citing.length === 0) problems.push('rule.txt doesn\'t cite this case under any obligation');
+  for (const o of citing) {
+    const role = o.cites.find((x) => x.file === base).role;
+    if (c.kind !== undefined && role !== c.kind) problems.push(`rule.txt cites it as ${ROLE_NAME[role]} under obligation ${o.number}, but its first line says ${ROLE_NAME[c.kind]}`);
+    if (role !== 'control' && !marks.some((m) => m.code === o.code)) problems.push(`rule.txt cites it under obligation ${o.number}, TS${o.code}, but no line is marked TS${o.code}`);
+  }
+  for (const m of citing.length ? marks.filter((m) => m.code !== undefined && !citing.some((o) => o.code === m.code)) : []) {
+    problems.push(`line ${m.line} is marked TS${m.code}, but rule.txt cites it only under ${citing.map((o) => `obligation ${o.number}, TS${o.code}`).join(' and ')}`);
   }
   let status;
   if (problems.length) status = 'broken';
@@ -154,6 +154,10 @@ for (const r of rules) {
 for (const kind of KINDS) {
   if (wanted.length === 0 && !rules.some((r) => r.kind === kind)) out.push(`| ${kind} | (no rules filed yet) | | | | | | | | |`);
 }
+// debt.txt files each item under a rule's name, lab or L-hooks, so a heading that names no rule is stale.
+const debt = existsSync(join(lab, 'debt.txt')) ? readFileSync(join(lab, 'debt.txt'), 'utf8').split('\n') : [];
+const staleDebt = debt.filter((l) => /^[A-Za-z][A-Za-z-]*$/.test(l) && l !== 'lab' && l !== 'L-hooks' && !readRules(lab).some((r) => r.name === l));
+for (const heading of staleDebt) out.push(`debt.txt files items under ${heading}, which isn't a rule`, '');
 const broken = rules.filter((r) => r.problems.length);
 if (broken.length) {
   out.push('', '## Rules with a broken rule.txt', '');
@@ -171,5 +175,5 @@ section('Holes still open', 'open', (c) => `: ${c.about}`);
 section('Witnesses closed', 'closed', (c) => ` (${c.mechanism}): ${c.about}`);
 section('Rejected as designed', 'rejected as designed', (c) => ` (${c.mechanism}): ${c.about}`);
 console.log(out.join('\n'));
-const fails = release.global.length || built.global.length || broken.length || judged.some((c) => c.status === 'broken' || c.status === 'failing');
+const fails = release.global.length || built.global.length || broken.length || staleDebt.length || judged.some((c) => c.status === 'broken' || c.status === 'failing');
 process.exit(fails ? 1 : 0);

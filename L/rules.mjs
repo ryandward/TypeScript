@@ -1,17 +1,16 @@
 // Reads every rule's L/<rule>/rule.txt: the rule's name, its kind, and its mechanisms, each with the code it reports.
 // The tracker and compare.mjs both read the lab through this.
 //
-// A rule written as a proof states each mechanism as an obligation, `Obligation 1, assignability: TS2898`, and cites
-// every case under the obligation it supports, one per line beneath `Witnesses:`, `Controls:` or `Rejected sound code,
-// ...:`. A rule not yet written as a proof lists its mechanisms in its header instead.
+// rule.txt is the rule's proof. It states each mechanism as an obligation, `Obligation 1, assignability: TS2898`, and
+// cites every case under each obligation it supports, one per line beneath `Witnesses:`, `Controls:` or `Rejected
+// sound code, because ...:`. A rule with no obligations is a specification that isn't built yet.
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 export const KINDS = ['soundness', 'policy', 'information', 'project'];
 
-// `TS2898 assignability: isSimpleTypeRelatedTo`. A mechanism that L has no code for yet is proved by TypeScript's own
-// code, and says so: `TS2339 accessor not narrowed: getFlowTypeOfAccessExpression (TypeScript's code)`.
-const MECHANISM = /^TS(\d+) ([^:]+): (.+?)( \(TypeScript's code\))?$/;
+// A mechanism that L has no code for yet is proved by TypeScript's own code, and says so:
+// `Obligation 2, accessor not narrowed: TS2339 (TypeScript's code)`.
 const OBLIGATION = /^Obligation (\d+), ([^:]+): TS(\d+)( \(TypeScript's code\))?$/;
 const CITATION = /^  (Witnesses|Controls|Rejected sound code[^:]*):$/;
 const CITED = /^    (\S+\.ts)(?:\s|$)/;
@@ -27,15 +26,8 @@ export function readRules(lab) {
     if (header[0] !== name) problems.push(`rule.txt doesn't open with the rule's name, ${name}`);
     const kind = /^kind: (\S+)$/.exec(header[1] ?? '')?.[1];
     if (!KINDS.includes(kind)) problems.push(`rule.txt's second line isn't one of the kinds: ${KINDS.join(', ')}`);
-    const proof = text.split('\n').some((line) => OBLIGATION.test(line));
-    if (proof) return { name, dir, kind, proof, mechanisms: obligations(text, dir, problems), problems };
-    const mechanisms = header.slice(2).flatMap((line) => {
-      const m = MECHANISM.exec(line);
-      if (m) return [{ code: Number(m[1]), name: m[2], own: m[4] === undefined, cites: [] }];
-      problems.push(`rule.txt's header has a line that isn't a mechanism: ${line}`);
-      return [];
-    });
-    return { name, dir, kind, proof, mechanisms, problems };
+    if (header.length > 2) problems.push('rule.txt\'s header holds more than the rule\'s name and kind');
+    return { name, dir, kind, mechanisms: obligations(text, dir, problems), problems };
   });
   // A mechanism that closes holes in more than one rule is the same mechanism in each, under the same name.
   const named = new Map();
@@ -47,8 +39,8 @@ export function readRules(lab) {
   return rules;
 }
 
-// A proof's obligations, each with the cases it cites and the role it cites them in. Every case is cited once, and
-// every citation names a case in the folder.
+// A proof's obligations, each with the cases it cites and the role it cites them in. A case that supports two
+// obligations is cited under both, and every citation names a case in the folder.
 function obligations(text, dir, problems) {
   const found = [];
   let role;
@@ -64,11 +56,13 @@ function obligations(text, dir, problems) {
     else if (cited && role && found.length) found[found.length - 1].cites.push({ file: cited[1], role });
     else if (!CONTINUED.test(line)) role = undefined;
   }
-  const seen = new Set();
-  for (const { file } of found.flatMap((o) => o.cites)) {
-    if (seen.has(file)) problems.push(`rule.txt cites ${file} more than once`);
-    if (!existsSync(join(dir, file))) problems.push(`rule.txt cites ${file}, which isn't in the folder`);
-    seen.add(file);
+  for (const o of found) {
+    const seen = new Set();
+    for (const { file } of o.cites) {
+      if (seen.has(file)) problems.push(`rule.txt cites ${file} twice under obligation ${o.number}`);
+      if (!existsSync(join(dir, file))) problems.push(`rule.txt cites ${file}, which isn't in the folder`);
+      seen.add(file);
+    }
   }
   return found;
 }

@@ -1,16 +1,59 @@
 mutable-array-or-tuple
 kind: soundness
-TS2890 writable position: relatedBack
-TS2891 write-induced invariance: relateVariances
 
-TypeScript treats every array and tuple as covariant in its element type, so string[] passes as
-(string | number)[] and the wider name can push a number into it. The lab keeps readonly arrays and
-tuples covariant, and makes mutable ones invariant wherever a value flows into a slot.
+Claim. If the lab accepts a program, no name can store an element into an array or tuple that another name
+holds at a narrower element type.
 
-Where it's enforced, in src/compiler/checker.ts:
-- valueAssignableRelation is used only where a value flows. Type-level questions keep assignableRelation.
-- getVariances measures Array under the value relation, where its writable index signature makes it
-  invariant. relateVariances reports that as TS2891.
-- A mutable tuple's writable index signature goes through relatedBack, which reports TS2890.
-- Array literals and a rest parameter's argument list are held by nothing else, so they stay covariant.
-- src/lib declares the built-in entries() tuples readonly.
+Counterexample in plain TypeScript. getVariances hard-codes Array<T> and tuples as covariant (arrayVariances),
+so string[] passes as (string | number)[] and [string] as [string | number]. The wider name can push or store
+a number into what the original still calls strings.
+
+Obligation 1, writable position: TS2890
+  Statement. A mutable tuple's elements are writable positions, so a value may flow into a slot holding a
+  tuple only if each element relates both ways, unless nothing else holds the source. A readonly tuple stays
+  covariant.
+  Mechanism. Under valueAssignableRelation, a mutable tuple's writable index signature goes through
+  relatedBack, which relates the target's element back to the source's and reports TS2890.
+  Why it suffices. Every value flow is judged under valueAssignableRelation, and a tuple's elements are
+  reached for writing only through its index signature, which relatedBack relates both ways.
+  Witnesses:
+    rel-tuple-element.ts               [string] widened to [string | number], and a number stored
+  Controls:
+    readonly-tuple.ts                  a readonly tuple widened
+    fresh-tuple-literal.ts             a fresh tuple literal given a wider element type
+    rest-parameter-tuple.ts            a function value whose rest parameter is a tuple
+    call-site-rest-arguments.ts        arguments matched against a tuple rest parameter
+    type-level-tuple-wrapper.ts        a type-level question about tuples, where no value exists
+
+Obligation 2, write-induced invariance: TS2891
+  Statement. A mutable array's element type is invariant wherever a value flows into a slot, unless nothing
+  else holds the source. A readonly array stays covariant.
+  Mechanism. Under valueAssignableRelation, getVariances measures Array instead of using arrayVariances. Its
+  writable index signature makes T invariant there, and relateVariances reports the failure as TS2891, naming
+  the type argument. An array literal, or a rest parameter's argument list, relates with the type-level
+  variances, since nothing else holds it. src/lib declares the built-in entries() tuples readonly.
+  Why it suffices. Every value flow relates an array's type argument through the variance measured for that
+  relation, so an element type can't widen in a slot that can be written through.
+  Witnesses:
+    rel-array-covariance.ts            string[] widened to (string | number)[], and a number pushed
+    rel-array-aliased-literal.ts       the same, with the literal bound to a name first
+    rel-array-argument.ts              the same through an argument
+    rel-array-generic-call.ts          the same through a generic call's wider type argument
+    rel-array-nested-property.ts       the same one level down, inside a writable property
+    rel-array-return.ts                the same through a wider return type
+  Controls:
+    mutable-as-readonly.ts             a mutable array viewed as readonly
+    readonly-widened.ts                a readonly array widened
+    same-element-type.ts               nothing widened
+    fresh-literal.ts                   a fresh array literal given a wider type
+    fresh-literal-union-expected-type.ts  a fresh array literal whose expected type is a union
+    nested-fresh-literals.ts           literals inside a literal
+    library-list-named-exactly.ts      a library's list, named with exactly the type it was given
+    match-all-callback.ts              a library callback whose parameter is a mutable array
+    type-level-array-extends.ts        a type-level question about arrays
+  Rejected sound code, because the type grants the write, whatever the code does:
+    parameter-typed-mutable-only-reads.ts  the parameter only reads, but its type is a mutable array
+  Rejected sound code, because nothing in a function result's type says no other name holds it:
+    function-result-copy.ts            slice() returns a new array
+  Rejected sound code, because the library's declaration grants a write it never makes:
+    concat-library-declaration.ts      ConcatArray.slice() is declared to return a mutable array

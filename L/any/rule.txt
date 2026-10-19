@@ -82,11 +82,7 @@ Obligation 2, structure: TS2900
     optional-read.ts                   null?.length doesn't throw, but L's records are closed, so a read
                                        needs a label the type has
 
-Open.
-- After a TS2900, the operation's result is errorType, which carries any's flag, so isSimpleTypeRelatedTo
-  reports TS2898 for it as well: one fault, reported twice.
-- When the target is a type parameter, TypeScript's TS5082 elaboration replaces the chain, and TS2898 drops
-  out of it.
+Open. The known defects are in ../debt.txt, under any.
 
 In src/compiler/checker.ts, this rule's change is found by searching for uncheckedType, errorOrUnchecked and
 the TS2898 message, A_value_of_type_any_was_never_checked. Every L change carries a `// L:` comment.

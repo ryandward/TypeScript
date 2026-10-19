@@ -1,13 +1,30 @@
 delete
 kind: soundness
-TS2894 deletable required property: isPropertySymbolTypeRelated, membersRelatedToIndexInfo
 
-Deleting a property through a wider name leaves the original holding a type that says the property is
-there. The lab keeps delete legal on a value's own optional properties, and rejects the widening that would
-let another name delete a required one.
+Claim. If the lab accepts a program, no name can delete a property that another name's type says is there.
 
-Where it's enforced, in src/compiler/checker.ts:
-- isPropertySymbolTypeRelated: a required source property can't widen into a writable optional property
-  (TS2894).
-- membersRelatedToIndexInfo: a required source property can't widen into a writable index signature, which
-  can delete any key (TS2894).
+Counterexample in plain TypeScript. delete needs its operand to be optional, but a required property relates
+to an optional one and to an index signature. A wider name whose type makes the property optional, or a key
+of an index signature, can delete it, and the original name still says it's there.
+
+Obligation 1, deletable required property: TS2894
+  Statement. A required property may flow into a position the target can delete through only if nothing else
+  holds the source. A readonly position can't be deleted through.
+  Mechanism. Under valueAssignableRelation, isPropertySymbolTypeRelated relates a required source property to
+  a writable optional one, and membersRelatedToIndexInfo relates it to a writable index signature, only
+  through mayBeDeleted, which reports TS2894. A fresh object or array literal, or JSX attributes, is exempt,
+  since nothing else holds it.
+  Why it suffices. delete only removes a property whose type allows it to be missing: an optional property, or
+  a key of an index signature. Those are the only two positions a required property can widen into that
+  allow it, and every value flow relates them in these two functions.
+  Witnesses:
+    rule-delete.ts                     a required property widened into a writable optional one
+    rel-index-signature-delete.ts      a required property widened into a writable index signature
+  Controls:
+    delete-own-optional.ts             delete on the value's own optional property
+    optional-into-optional.ts          an optional property widened into an optional one
+  Rejected sound code, because the parameter's type grants the delete, whatever the code does:
+    callback-parameter-wider-writable.ts  a comparer whose parameter has a writable optional field, handed
+                                       values whose field is required; the subtype pass picks it
+    handler-past-three-overloads.ts    the same through four failed overloads, as connect's handlers in
+                                       Express; the report names the overload the release would pick

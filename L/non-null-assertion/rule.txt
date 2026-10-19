@@ -1,9 +1,22 @@
 non-null-assertion
 kind: soundness
-TS2895 non-null assertion: checkNonNullAssertion
 
-A non-null assertion claims a value is present without checking it, and the checker takes its word. The lab
-rejects every non-null assertion.
+Claim. If the lab accepts a program, no value is treated as present unless a check the checker read showed it
+is.
 
-Where it's enforced, in src/compiler/checker.ts:
-- checkNonNullAssertion reports TS2895 for every x! expression.
+Counterexample in plain TypeScript. x! removes null and undefined from x's type without a check:
+checkNonNullAssertion takes the assertion's word.
+
+Obligation 1, non-null assertion: TS2895
+  Statement. A value's type may lose null and undefined only through a check the checker reads, such as a
+  comparison or a typeof test.
+  Mechanism. checkNonNullAssertion reports TS2895 for every x! expression.
+  Why it suffices. x! is the only expression that removes null and undefined without a check; as and the
+  definite assignment ! are their own rules, type-assertion and definite-assignment.
+  Witnesses:
+    rule-nonnull.ts                    an element the array doesn't have, asserted present
+  Controls:
+    checked-presence.ts                presence checked, and the checker narrows after the check
+    logical-not.ts                     a prefix ! is a logical not
+  Rejected sound code, because Map.get's type can't say the key is there:
+    map-get-after-set.ts               the key was just set

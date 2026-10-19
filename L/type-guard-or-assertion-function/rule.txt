@@ -1,13 +1,28 @@
 type-guard-or-assertion-function
 kind: soundness
-TS2899 type predicate on a function: checkTypePredicate
 
-A predicate written on a function, x is T or asserts x is T, claims what the function's body proves, and the
-checker takes its word without reading the body. The lab rejects every predicate written on a function,
-including an overload's, whose body is the implementation's. With no predicate written, the checker infers one
-from the body and checks it. A predicate in a function type, an interface or an abstract method is a
-requirement: assignment checks that the function put there proves it.
+Claim. If the lab accepts a program, every narrowing a call performs was proved by the called function's body.
 
-Where it's enforced, in src/compiler/checker.ts:
-- checkTypePredicate reports TS2899 for a predicate on a function, method, arrow function or function
-  expression that isn't abstract.
+Counterexample in plain TypeScript. A predicate written on a function, x is T or asserts x is T, narrows the
+caller's argument on the predicate's word. checkTypePredicate checks that T is assignable to the parameter's
+type, and never reads the body.
+
+Obligation 1, type predicate on a function: TS2899
+  Statement. A call may narrow its argument only by a predicate the checker derived from the function's body,
+  or by one that a type requires of the function put there.
+  Mechanism. checkTypePredicate reports TS2899 for a predicate written on a function, method, arrow function or
+  function expression that isn't abstract, an overload's included.
+  Why it suffices. With no predicate written, the checker infers one from a body that returns a narrowing
+  test, and that predicate is checked. A predicate in a function type, an interface or an abstract method is a
+  requirement: assignment checks the function put there against it. Assertion functions are never inferred,
+  so under L there are none.
+  Witnesses:
+    rule-predicate.ts                  the body tests something other than what the predicate says
+    rule-assertion-function.ts         the signature asserts x is a string, and the body checks nothing
+    rule-predicate-overload.ts         an overload's predicate, over an implementation that tests nothing
+  Controls:
+    inferred-predicate.ts              no predicate written, so the checker infers it and checks it
+    guard-parameter.ts                 a predicate in a parameter's type, met by an inferred predicate
+    abstract-predicate.ts              an abstract method's predicate, met by the subclass's inferred one
+  Rejected sound code, because L forbids writing the claim even when it is true:
+    true-predicate.ts                  the written predicate is what the checker would infer
