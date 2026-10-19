@@ -1,0 +1,18 @@
+optional-field
+
+Not built into the checker yet. This file is the rule's specification.
+
+A function never hands absence to its caller. A value that may be missing is decided once, by the parser
+where it enters the program, and everything after that holds a type with the value in it.
+
+Not allowed:
+- a function whose result may be missing: T | undefined, T | null, an optional field, or a case that only
+  stands in for one of them;
+- taking the same absence apart again past the parser, with ?., ?? or a check.
+
+Allowed:
+- inside a parser, deciding absence once: a required field, a default, a split into branches that each have
+  the value, or ?? in the parser's own transform;
+- a key a branch requires to be absent, which TypeScript writes as ?: never and zod as z.never().optional().
+  It has one state, absent, so it holds nothing for a reader to decide. It says the record lacks that key;
+  it isn't an optional field.

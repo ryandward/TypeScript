@@ -114,12 +114,12 @@ function judge(c) {
 }
 
 const judged = cases.map(judge);
-const rules = [...new Set(judged.map((c) => `${c.type}/${c.label}`))].map((key) => {
-  const r = judged.filter((c) => `${c.type}/${c.label}` === key);
-  return { type: r[0].type, label: r[0].label, cases: r };
-});
+const rules = TYPES.flatMap((type) => dirs(join(lab, type)).map((label) => ({
+  type, label, cases: judged.filter((c) => c.type === type && c.label === label),
+})));
 const count = (r, kind, status) => r.cases.filter((c) => c.kind === kind && (status === undefined || c.status === status)).length;
 const standing = (r) => {
+  if (r.cases.length === 0) return 'spec only';
   if (r.cases.some((c) => c.status === 'broken')) return 'broken';
   if (r.cases.some((c) => c.status === 'failing')) return 'false positives';
   if (r.cases.some((c) => c.status === 'open')) return 'holes open';

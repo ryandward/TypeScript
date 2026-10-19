@@ -14,6 +14,8 @@ L/
     rejected-sound-code/<case>.ts   a safe program the lab rejects on purpose, with a comment saying why
 ```
 
+A rule that is specified but not built yet has only its rule.txt, and the tracker shows it as spec only.
+
 The kind says why L has the rule:
 
 - soundness: TypeScript accepts a program whose types are false, and a witness crashes to prove it.
