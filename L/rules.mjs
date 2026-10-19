@@ -9,6 +9,9 @@ import { join } from 'node:path';
 
 export const KINDS = ['soundness', 'policy', 'information', 'project'];
 
+// L/lean holds the machine-checked calculi that the proofs cite. Every other folder is a rule.
+const LEAN = 'lean';
+
 // A mechanism that L has no code for yet is proved by TypeScript's own code, and says so:
 // `Obligation 2, accessor not narrowed: TS2339 (TypeScript's code)`.
 const OBLIGATION = /^Obligation (\d+), ([^:]+): TS(\d+)( \(TypeScript's code\))?$/;
@@ -17,7 +20,7 @@ const CITED = /^    (\S+\.ts)(?:\s|$)/;
 const CONTINUED = /^     /;
 
 export function readRules(lab) {
-  const rules = readdirSync(lab).filter((n) => statSync(join(lab, n)).isDirectory()).sort().map((name) => {
+  const rules = readdirSync(lab).filter((n) => n !== LEAN && statSync(join(lab, n)).isDirectory()).sort().map((name) => {
     const dir = join(lab, name);
     const file = join(dir, 'rule.txt');
     const text = existsSync(file) ? readFileSync(file, 'utf8') : '';

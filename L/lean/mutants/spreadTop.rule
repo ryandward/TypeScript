@@ -1,0 +1,1 @@
+  | spreadTop {Γ e} : HasType Γ e .top → HasType Γ (.spread e) (.arr .top)

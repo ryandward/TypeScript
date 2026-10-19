@@ -1,0 +1,1 @@
+  | projTop {Γ e l} : HasType Γ e .top → HasType Γ (.proj e l) .top

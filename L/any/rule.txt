@@ -25,6 +25,10 @@ Obligation 1, assignability: TS2898
   Why it suffices. Every flow of a value into a slot is judged under valueAssignableRelation: an initializer,
   an assignment, a return, an argument. An any nested in a type argument reaches the same branch, because type
   arguments are related through their variances under the same relation.
+  In Lean. ../lean/Top.lean refutes the direct flow: with subDown, any assignable to every type, a well-typed
+  program reads a field off null. It doesn't prove the nested flows. Its calculus has no variance, so subArr,
+  any[] assignable to T[], is a rule of its own there rather than a consequence of subDown, and the argument
+  above, that a nested any reaches the same branch, is untested.
   Witnesses:
     rel-any-nested-array.ts            Array.isArray's any[] returned as readonly string[]
     rel-any-nested-promise.ts          Response.json's Promise<any>, awaited into an interface
@@ -65,6 +69,10 @@ Obligation 2, structure: TS2900
   Why it suffices. Every one of these operations takes its operand's type from checkExpression: directly,
   through checkNonNullExpression, or through checkExpressionCached for the initializer that destructuring
   takes apart. So no operand of type any reaches an operation's own shortcut; it arrives as unknown.
+  In Lean. ../lean/Top.lean proves that a Top with no structural operations, which is unknown, can't crash, in
+  a calculus with records, arrays and functions. Each of any's permissions added back to Top is refuted by a
+  well-typed program that crashes: projTop for a property read and destructuring, elemTop, appTop for a call
+  and a tagged template, iterTop, spreadTop, inTop and instOfTop. new isn't in the calculus.
   Witnesses:
     chk-property-off-any.ts            a property read off null
     chk-element-off-any.ts             an element read off null

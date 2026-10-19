@@ -10,6 +10,7 @@ L/
   tracker.mjs        runs every case, checks it against its proof, and prints where each rule stands
   compare.mjs        lists what the lab rejects in a project that plain TypeScript accepts
   debt.txt           what is known to be wrong or unproven, by rule
+  lean/              machine-checked calculi that the proofs cite, with their own README
   <rule>/
     rule.txt         the rule's proof
     <case>.ts        one program, whose first line says what it is for
@@ -20,6 +21,8 @@ plain TypeScript, and one obligation per mechanism, as in `Obligation 1, assigna
 obligation gives its statement, its mechanism in the checker, and why the mechanism suffices, then cites
 every case it rests on, one per line, beneath `Witnesses:`, `Controls:` or `Rejected sound code, because ...:`.
 A rule with no obligations is a specification that isn't built yet, and the tracker shows it as spec only.
+An obligation can also say what lean/ proves for it, under `In Lean.`: a theorem about a small calculus, not
+about checker.ts.
 
 The kind says why L has the rule:
 

@@ -1,0 +1,1 @@
+⟨.forEach (.num 42) (.lam .top (.var 0)), .undef, .iterTop (.sub .num) (.lam (.var rfl)), rfl⟩
