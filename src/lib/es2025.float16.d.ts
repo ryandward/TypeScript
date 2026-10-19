@@ -336,7 +336,7 @@ interface Float16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     /**
      * Returns an array of key, value pairs for every entry in the array
      */
-    entries(): ArrayIterator<[number, number]>;
+    entries(): ArrayIterator<readonly [number, number]>;
 
     /**
      * Returns an list of keys in the array

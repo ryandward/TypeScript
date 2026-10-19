@@ -153,7 +153,7 @@ interface BigInt64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> 
     copyWithin(target: number, start: number, end?: number): this;
 
     /** Yields index, value pairs for every entry in the array. */
-    entries(): ArrayIterator<[number, bigint]>;
+    entries(): ArrayIterator<readonly [number, bigint]>;
 
     /**
      * Determines whether all the members of an array satisfy the specified test.
@@ -444,7 +444,7 @@ interface BigUint64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike>
     copyWithin(target: number, start: number, end?: number): this;
 
     /** Yields index, value pairs for every entry in the array. */
-    entries(): ArrayIterator<[number, bigint]>;
+    entries(): ArrayIterator<readonly [number, bigint]>;
 
     /**
      * Determines whether all the members of an array satisfy the specified test.

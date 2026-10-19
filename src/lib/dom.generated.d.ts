@@ -44497,7 +44497,7 @@ interface CSSKeyframesRule {
 
 interface CSSNumericArray {
     [Symbol.iterator](): ArrayIterator<CSSNumericValue>;
-    entries(): ArrayIterator<[number, CSSNumericValue]>;
+    entries(): ArrayIterator<readonly [number, CSSNumericValue]>;
     keys(): ArrayIterator<number>;
     values(): ArrayIterator<CSSNumericValue>;
 }
@@ -44512,14 +44512,14 @@ interface CSSStyleDeclaration {
 
 interface CSSTransformValue {
     [Symbol.iterator](): ArrayIterator<CSSTransformComponent>;
-    entries(): ArrayIterator<[number, CSSTransformComponent]>;
+    entries(): ArrayIterator<readonly [number, CSSTransformComponent]>;
     keys(): ArrayIterator<number>;
     values(): ArrayIterator<CSSTransformComponent>;
 }
 
 interface CSSUnparsedValue {
     [Symbol.iterator](): ArrayIterator<CSSUnparsedSegment>;
-    entries(): ArrayIterator<[number, CSSUnparsedSegment]>;
+    entries(): ArrayIterator<readonly [number, CSSUnparsedSegment]>;
     keys(): ArrayIterator<number>;
     values(): ArrayIterator<CSSUnparsedSegment>;
 }
@@ -44571,7 +44571,7 @@ interface DOMStringList {
 
 interface DOMTokenList {
     [Symbol.iterator](): ArrayIterator<string>;
-    entries(): ArrayIterator<[number, string]>;
+    entries(): ArrayIterator<readonly [number, string]>;
     keys(): ArrayIterator<number>;
     values(): ArrayIterator<string>;
 }
@@ -44595,9 +44595,9 @@ interface FormDataIterator<T> extends IteratorObject<T, BuiltinIteratorReturn, u
 }
 
 interface FormData {
-    [Symbol.iterator](): FormDataIterator<[string, FormDataEntryValue]>;
+    [Symbol.iterator](): FormDataIterator<readonly [string, FormDataEntryValue]>;
     /** Returns an array of key, value pairs for every entry in the list. */
-    entries(): FormDataIterator<[string, FormDataEntryValue]>;
+    entries(): FormDataIterator<readonly [string, FormDataEntryValue]>;
     /** Returns a list of keys in the list. */
     keys(): FormDataIterator<string>;
     /** Returns a list of values in the list. */
@@ -44694,9 +44694,9 @@ interface HeadersIterator<T> extends IteratorObject<T, BuiltinIteratorReturn, un
 }
 
 interface Headers {
-    [Symbol.iterator](): HeadersIterator<[string, string]>;
+    [Symbol.iterator](): HeadersIterator<readonly [string, string]>;
     /** Returns an iterator allowing to go through all key/value pairs contained in this object. */
-    entries(): HeadersIterator<[string, string]>;
+    entries(): HeadersIterator<readonly [string, string]>;
     /** Returns an iterator allowing to go through all keys of the key/value pairs contained in this object. */
     keys(): HeadersIterator<string>;
     /** Returns an iterator allowing to go through all values of the key/value pairs contained in this object. */
@@ -44751,8 +44751,8 @@ interface MediaKeyStatusMapIterator<T> extends IteratorObject<T, BuiltinIterator
 }
 
 interface MediaKeyStatusMap {
-    [Symbol.iterator](): MediaKeyStatusMapIterator<[BufferSource, MediaKeyStatus]>;
-    entries(): MediaKeyStatusMapIterator<[BufferSource, MediaKeyStatus]>;
+    [Symbol.iterator](): MediaKeyStatusMapIterator<readonly [BufferSource, MediaKeyStatus]>;
+    entries(): MediaKeyStatusMapIterator<readonly [BufferSource, MediaKeyStatus]>;
     keys(): MediaKeyStatusMapIterator<BufferSource>;
     values(): MediaKeyStatusMapIterator<MediaKeyStatus>;
 }
@@ -44793,7 +44793,7 @@ interface Navigator {
 interface NodeList {
     [Symbol.iterator](): ArrayIterator<Node>;
     /** Returns an array of key, value pairs for every entry in the list. */
-    entries(): ArrayIterator<[number, Node]>;
+    entries(): ArrayIterator<readonly [number, Node]>;
     /** Returns an list of keys in the list. */
     keys(): ArrayIterator<number>;
     /** Returns an list of values in the list. */
@@ -44803,7 +44803,7 @@ interface NodeList {
 interface NodeListOf<TNode extends Node> {
     [Symbol.iterator](): ArrayIterator<TNode>;
     /** Returns an array of key, value pairs for every entry in the list. */
-    entries(): ArrayIterator<[number, TNode]>;
+    entries(): ArrayIterator<readonly [number, TNode]>;
     /** Returns an list of keys in the list. */
     keys(): ArrayIterator<number>;
     /** Returns an list of values in the list. */
@@ -44867,8 +44867,8 @@ interface StylePropertyMapReadOnlyIterator<T> extends IteratorObject<T, BuiltinI
 }
 
 interface StylePropertyMapReadOnly {
-    [Symbol.iterator](): StylePropertyMapReadOnlyIterator<[string, Iterable<CSSStyleValue>]>;
-    entries(): StylePropertyMapReadOnlyIterator<[string, Iterable<CSSStyleValue>]>;
+    [Symbol.iterator](): StylePropertyMapReadOnlyIterator<readonly [string, Iterable<CSSStyleValue>]>;
+    entries(): StylePropertyMapReadOnlyIterator<readonly [string, Iterable<CSSStyleValue>]>;
     keys(): StylePropertyMapReadOnlyIterator<string>;
     values(): StylePropertyMapReadOnlyIterator<Iterable<CSSStyleValue>>;
 }
@@ -44926,9 +44926,9 @@ interface URLSearchParamsIterator<T> extends IteratorObject<T, BuiltinIteratorRe
 }
 
 interface URLSearchParams {
-    [Symbol.iterator](): URLSearchParamsIterator<[string, string]>;
+    [Symbol.iterator](): URLSearchParamsIterator<readonly [string, string]>;
     /** Returns an array of key, value pairs for every entry in the search params. */
-    entries(): URLSearchParamsIterator<[string, string]>;
+    entries(): URLSearchParamsIterator<readonly [string, string]>;
     /** Returns a list of keys in the search params. */
     keys(): URLSearchParamsIterator<string>;
     /** Returns a list of values in the search params. */
@@ -45093,8 +45093,8 @@ interface FileSystemDirectoryHandleAsyncIterator<T> extends AsyncIteratorObject<
 }
 
 interface FileSystemDirectoryHandle {
-    [Symbol.asyncIterator](): FileSystemDirectoryHandleAsyncIterator<[string, FileSystemDirectoryHandle | FileSystemFileHandle]>;
-    entries(): FileSystemDirectoryHandleAsyncIterator<[string, FileSystemDirectoryHandle | FileSystemFileHandle]>;
+    [Symbol.asyncIterator](): FileSystemDirectoryHandleAsyncIterator<readonly [string, FileSystemDirectoryHandle | FileSystemFileHandle]>;
+    entries(): FileSystemDirectoryHandleAsyncIterator<readonly [string, FileSystemDirectoryHandle | FileSystemFileHandle]>;
     keys(): FileSystemDirectoryHandleAsyncIterator<string>;
     values(): FileSystemDirectoryHandleAsyncIterator<FileSystemDirectoryHandle | FileSystemFileHandle>;
 }

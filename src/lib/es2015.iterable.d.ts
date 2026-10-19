@@ -8,14 +8,19 @@ interface SymbolConstructor {
     readonly iterator: unique symbol;
 }
 
+// L (soundness/write-into-an-object): an iterator result is read, never written. Declared writable, its
+// value would have to relate in both directions, and Iterator<T, undefined> could not stand in for
+// Iterator<T, unknown> although every built-in iterator returns a new result object each time. For the
+// same reason, every built-in entries() iterator, here and in the other lib files, yields its entry as a
+// readonly tuple: each step makes a new array.
 interface IteratorYieldResult<TYield> {
-    done?: false;
-    value: TYield;
+    readonly done?: false;
+    readonly value: TYield;
 }
 
 interface IteratorReturnResult<TReturn> {
-    done: true;
-    value: TReturn;
+    readonly done: true;
+    readonly value: TReturn;
 }
 
 type IteratorResult<T, TReturn = any> = IteratorYieldResult<T> | IteratorReturnResult<TReturn>;
@@ -62,7 +67,7 @@ interface Array<T> {
     /**
      * Returns an iterable of key, value pairs for every entry in the array
      */
-    entries(): ArrayIterator<[number, T]>;
+    entries(): ArrayIterator<readonly [number, T]>;
 
     /**
      * Returns an iterable of keys in the array
@@ -98,7 +103,7 @@ interface ReadonlyArray<T> {
     /**
      * Returns an iterable of key, value pairs for every entry in the array
      */
-    entries(): ArrayIterator<[number, T]>;
+    entries(): ArrayIterator<readonly [number, T]>;
 
     /**
      * Returns an iterable of keys in the array
@@ -122,12 +127,12 @@ interface MapIterator<T> extends IteratorObject<T, BuiltinIteratorReturn, unknow
 
 interface Map<K, V> {
     /** Returns an iterable of entries in the map. */
-    [Symbol.iterator](): MapIterator<[K, V]>;
+    [Symbol.iterator](): MapIterator<readonly [K, V]>;
 
     /**
      * Returns an iterable of key, value pairs for every entry in the map.
      */
-    entries(): MapIterator<[K, V]>;
+    entries(): MapIterator<readonly [K, V]>;
 
     /**
      * Returns an iterable of keys in the map
@@ -142,12 +147,12 @@ interface Map<K, V> {
 
 interface ReadonlyMap<K, V> {
     /** Returns an iterable of entries in the map. */
-    [Symbol.iterator](): MapIterator<[K, V]>;
+    [Symbol.iterator](): MapIterator<readonly [K, V]>;
 
     /**
      * Returns an iterable of key, value pairs for every entry in the map.
      */
-    entries(): MapIterator<[K, V]>;
+    entries(): MapIterator<readonly [K, V]>;
 
     /**
      * Returns an iterable of keys in the map
@@ -182,7 +187,7 @@ interface Set<T> {
     /**
      * Returns an iterable of [v,v] pairs for every value `v` in the set.
      */
-    entries(): SetIterator<[T, T]>;
+    entries(): SetIterator<readonly [T, T]>;
 
     /**
      * Despite its name, returns an iterable of the values in the set.
@@ -202,7 +207,7 @@ interface ReadonlySet<T> {
     /**
      * Returns an iterable of [v,v] pairs for every value `v` in the set.
      */
-    entries(): SetIterator<[T, T]>;
+    entries(): SetIterator<readonly [T, T]>;
 
     /**
      * Despite its name, returns an iterable of the values in the set.
@@ -260,7 +265,7 @@ interface Int8Array<TArrayBuffer extends ArrayBufferLike> {
     /**
      * Returns an array of key, value pairs for every entry in the array
      */
-    entries(): ArrayIterator<[number, number]>;
+    entries(): ArrayIterator<readonly [number, number]>;
 
     /**
      * Returns an list of keys in the array
@@ -297,7 +302,7 @@ interface Uint8Array<TArrayBuffer extends ArrayBufferLike> {
     /**
      * Returns an array of key, value pairs for every entry in the array
      */
-    entries(): ArrayIterator<[number, number]>;
+    entries(): ArrayIterator<readonly [number, number]>;
 
     /**
      * Returns an list of keys in the array
@@ -334,7 +339,7 @@ interface Uint8ClampedArray<TArrayBuffer extends ArrayBufferLike> {
     /**
      * Returns an array of key, value pairs for every entry in the array
      */
-    entries(): ArrayIterator<[number, number]>;
+    entries(): ArrayIterator<readonly [number, number]>;
 
     /**
      * Returns an list of keys in the array
@@ -370,7 +375,7 @@ interface Int16Array<TArrayBuffer extends ArrayBufferLike> {
     /**
      * Returns an array of key, value pairs for every entry in the array
      */
-    entries(): ArrayIterator<[number, number]>;
+    entries(): ArrayIterator<readonly [number, number]>;
 
     /**
      * Returns an list of keys in the array
@@ -407,7 +412,7 @@ interface Uint16Array<TArrayBuffer extends ArrayBufferLike> {
     /**
      * Returns an array of key, value pairs for every entry in the array
      */
-    entries(): ArrayIterator<[number, number]>;
+    entries(): ArrayIterator<readonly [number, number]>;
 
     /**
      * Returns an list of keys in the array
@@ -444,7 +449,7 @@ interface Int32Array<TArrayBuffer extends ArrayBufferLike> {
     /**
      * Returns an array of key, value pairs for every entry in the array
      */
-    entries(): ArrayIterator<[number, number]>;
+    entries(): ArrayIterator<readonly [number, number]>;
 
     /**
      * Returns an list of keys in the array
@@ -481,7 +486,7 @@ interface Uint32Array<TArrayBuffer extends ArrayBufferLike> {
     /**
      * Returns an array of key, value pairs for every entry in the array
      */
-    entries(): ArrayIterator<[number, number]>;
+    entries(): ArrayIterator<readonly [number, number]>;
 
     /**
      * Returns an list of keys in the array
@@ -518,7 +523,7 @@ interface Float32Array<TArrayBuffer extends ArrayBufferLike> {
     /**
      * Returns an array of key, value pairs for every entry in the array
      */
-    entries(): ArrayIterator<[number, number]>;
+    entries(): ArrayIterator<readonly [number, number]>;
 
     /**
      * Returns an list of keys in the array
@@ -555,7 +560,7 @@ interface Float64Array<TArrayBuffer extends ArrayBufferLike> {
     /**
      * Returns an array of key, value pairs for every entry in the array
      */
-    entries(): ArrayIterator<[number, number]>;
+    entries(): ArrayIterator<readonly [number, number]>;
 
     /**
      * Returns an list of keys in the array
