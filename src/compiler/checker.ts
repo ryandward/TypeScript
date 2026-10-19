@@ -42557,6 +42557,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         // Grammar checking
         if (!checkGrammarModifiers(node) && !checkGrammarProperty(node)) checkGrammarComputedPropertyName(node.name);
         checkVariableLikeDeclaration(node);
+        // L: a definite assignment assertion claims a property is assigned without checking it.
+        if (node.kind === SyntaxKind.PropertyDeclaration && node.exclamationToken) {
+            error(node.name, Diagnostics._0_is_asserted_to_be_assigned_without_being_checked_L_has_no_definite_assignment_assertions, declarationNameToString(node.name));
+        }
 
         setNodeLinksForPrivateIdentifierScope(node);
 

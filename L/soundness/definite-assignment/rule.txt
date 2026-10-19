@@ -1,0 +1,10 @@
+definite-assignment
+
+A definite assignment assertion claims a property is assigned without checking it, and the checker takes
+its word. The lab rejects every property declared with !. A let or var declared with ! has no initializer,
+so single assignment already rejects it (TS2892).
+
+Where it's enforced, in src/compiler/checker.ts:
+- checkPropertyDeclaration reports TS2897 for a property declaration with !.
+
+Library declarations that collide with the rule: TypeORM entity columns, which TypeORM assigns.

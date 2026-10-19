@@ -20,6 +20,7 @@ const MECHANISMS = new Map([
   [2894, 'deletable required property'],
   [2895, 'non-null assertion'],
   [2896, 'type assertion'],
+  [2897, 'definite assignment assertion'],
 ]);
 const configs = process.argv.slice(2);
 if (!configs.length) {

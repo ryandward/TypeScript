@@ -4054,6 +4054,10 @@
         "category": "Error",
         "code": 2896
     },
+    "'{0}' is asserted to be assigned without being checked. L has no definite assignment assertions.": {
+        "category": "Error",
+        "code": 2897
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",
