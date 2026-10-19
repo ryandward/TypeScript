@@ -42179,6 +42179,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             error(node, Diagnostics.A_type_predicate_is_only_allowed_in_return_type_position_for_functions_and_methods);
             return;
         }
+        // L: on a function, a predicate claims what its body proves, unchecked. In a type or an abstract method it's a requirement, which assignment checks.
+        if (isFunctionLikeDeclaration(parent) && !hasSyntacticModifier(parent, ModifierFlags.Abstract)) {
+            error(node, Diagnostics.Nothing_checks_that_the_function_s_body_proves_0_L_has_no_hand_written_type_predicates_or_assertion_functions, getTextOfNode(node));
+        }
 
         const signature = getSignatureFromDeclaration(parent);
         const typePredicate = getTypePredicateOfSignature(signature);

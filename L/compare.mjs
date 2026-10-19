@@ -22,6 +22,7 @@ const MECHANISMS = new Map([
   [2896, 'type assertion'],
   [2897, 'definite assignment assertion'],
   [2898, 'any'],
+  [2899, 'type predicate on a function'],
 ]);
 const configs = process.argv.slice(2);
 if (!configs.length) {

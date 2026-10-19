@@ -4062,6 +4062,10 @@
         "category": "Error",
         "code": 2898
     },
+    "Nothing checks that the function's body proves '{0}'. L has no hand-written type predicates or assertion functions.": {
+        "category": "Error",
+        "code": 2899
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",
