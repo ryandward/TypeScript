@@ -9,7 +9,9 @@ ported to typescript-go. Everything L-specific lives in this folder. The patches
 
 Each rule has a folder at `<type>/<rule-label>/`, named with L's rule label. The type says what kind of
 rule it is: `soundness/`, `policy/`, `information/` or `project/` (each folder's README describes its
-type). Inside a rule's folder, a case's place says what the case must do:
+type). Each rule's own README.md says what L's hook rejects, the hole if there is one, what the lab
+decided and where in the checker it's enforced, what it rejects on purpose, what's still open, and the
+commits behind it. Inside a rule's folder, a case's place says what the case must do:
 
 - `<witness>.ts` is a hole: the 6.0.3 release accepts it, and Node throws when it runs. Witnesses are
   named as L names them: `rel-` for the type relation, `flow-` for narrowing, `chk-` for other checks,
