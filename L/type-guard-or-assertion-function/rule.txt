@@ -1,0 +1,13 @@
+type-guard-or-assertion-function
+kind: soundness
+TS2899 type predicate on a function: checkTypePredicate
+
+A predicate written on a function, x is T or asserts x is T, claims what the function's body proves, and the
+checker takes its word without reading the body. The lab rejects every predicate written on a function,
+including an overload's, whose body is the implementation's. With no predicate written, the checker infers one
+from the body and checks it. A predicate in a function type, an interface or an abstract method is a
+requirement: assignment checks that the function put there proves it.
+
+Where it's enforced, in src/compiler/checker.ts:
+- checkTypePredicate reports TS2899 for a predicate on a function, method, arrow function or function
+  expression that isn't abstract.

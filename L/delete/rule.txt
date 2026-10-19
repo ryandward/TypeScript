@@ -1,0 +1,13 @@
+delete
+kind: soundness
+TS2894 deletable required property: isPropertySymbolTypeRelated, membersRelatedToIndexInfo
+
+Deleting a property through a wider name leaves the original holding a type that says the property is
+there. The lab keeps delete legal on a value's own optional properties, and rejects the widening that would
+let another name delete a required one.
+
+Where it's enforced, in src/compiler/checker.ts:
+- isPropertySymbolTypeRelated: a required source property can't widen into a writable optional property
+  (TS2894).
+- membersRelatedToIndexInfo: a required source property can't widen into a writable index signature, which
+  can delete any key (TS2894).

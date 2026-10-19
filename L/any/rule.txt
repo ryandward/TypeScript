@@ -1,0 +1,37 @@
+any
+kind: soundness
+TS2898 assignability: isSimpleTypeRelatedTo
+TS2900 structure: checkExpression
+
+The runtime is the oracle: if the checker accepts a node, running that node must not throw a TypeError. A
+value of type any can be every value there is, null, undefined and 42 among them. So for the checker's
+prediction to match the runtime, any has to act as a top type at the value level, the way unknown does: the
+checker may accept only what every value allows. Plain TypeScript instead lets any stand in for every type at
+once, which reaches the runtime in two ways. Each is a mechanism with its own L code.
+
+TS2898 assignability (closed)
+  Obligation: a value of type S may flow into a slot of type T only if every value of S is a T. Every value
+  is a value of any, so an any source may flow only into a slot that accepts every value: unknown, any, or a
+  union such as {} | null | undefined. This holds for an any nested in a type too, as in any[] or Promise<any>.
+  Plain TypeScript: isSimpleTypeRelatedTo relates an any source to every target.
+  The lab: under valueAssignableRelation, isSimpleTypeRelatedTo reports TS2898 instead, for an any source and
+  for an any that checkExpression read as unknown.
+
+TS2900 structure (closed)
+  Obligation: an operation that needs its operand to have a structure may be accepted only if every value of
+  the operand's type has it. The structures are a property or an element to read, a call or construct
+  signature, an iterator, an object that destructuring or `in` can look into, and a callable right side for
+  instanceof. null and 42 are values of any and have none of them, so each such operation on an any value
+  must be rejected. TypeScript already rejects every one of them on unknown; the obligation is for any to get
+  unknown's answer.
+  Plain TypeScript: each operation has its own any shortcut, such as the isAnyLike branch of
+  checkPropertyAccessExpressionOrQualifiedName, isUntypedFunctionCall for calls and new, and the isTypeAny
+  return in checkIteratedTypeOrElementType. checker.ts calls isTypeAny 51 times.
+  The lab: every one of these operations takes its operand's type from checkExpression, which gives a value
+  of type any the type uncheckedType instead: an unknown with its own identity. Each operation then rejects
+  it as unknown, and where TypeScript reports that, TS2900 heads the chain: checkNonNullTypeWithReporter,
+  reportTypeNotIterableError, the destructured property in getPropertyTypeForIndexType, invocationError for a
+  tagged template, and resolveInstanceofExpression. A flow into a slot still reports TS2898. The mark
+  survives getNonNullableType, as in an optional chain or ??, and getUnionType, through IncludesUnchecked.
+  Node runs three of these operations on null or 42 without a TypeError: an optional read, an object spread,
+  and destructuring a number. The lab rejects all three, as TypeScript does for unknown.

@@ -1,0 +1,16 @@
+mutable-array-or-tuple
+kind: soundness
+TS2890 writable position: relatedBack
+TS2891 write-induced invariance: relateVariances
+
+TypeScript treats every array and tuple as covariant in its element type, so string[] passes as
+(string | number)[] and the wider name can push a number into it. The lab keeps readonly arrays and
+tuples covariant, and makes mutable ones invariant wherever a value flows into a slot.
+
+Where it's enforced, in src/compiler/checker.ts:
+- valueAssignableRelation is used only where a value flows. Type-level questions keep assignableRelation.
+- getVariances measures Array under the value relation, where its writable index signature makes it
+  invariant. relateVariances reports that as TS2891.
+- A mutable tuple's writable index signature goes through relatedBack, which reports TS2890.
+- Array literals and a rest parameter's argument list are held by nothing else, so they stay covariant.
+- src/lib declares the built-in entries() tuples readonly.

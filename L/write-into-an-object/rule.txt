@@ -1,0 +1,23 @@
+write-into-an-object
+kind: soundness
+TS2890 writable position: relatedBack
+TS2894 deletable required property: isPropertySymbolTypeRelated, membersRelatedToIndexInfo
+TS2339 accessor not narrowed: getFlowTypeOfAccessExpression (TypeScript's code)
+
+TypeScript relates a property or index signature in one direction only, so { value: string } passes as
+{ value: string | number } and the wider name can store a number. The lab relates a writable position
+both ways wherever a value flows into a slot.
+
+Where it's enforced, in src/compiler/checker.ts:
+- relatedBack checks every writable property and index signature, and reports TS2890. Methods and
+  readonly positions are left out, and so is a source nothing else holds: a fresh object or array
+  literal, or JSX attributes.
+- chooseOverload checks the subtype pass's pick as a value, and uses plain assignability while
+  arguments are skipped. Past three failed overloads, resolveCall reports the one type-level
+  assignability accepts.
+- getFlowTypeOfAccessExpression doesn't narrow an accessor, since its getter needn't return what was
+  checked or assigned. The witness is rejected with TS2339 on the getter's declared type.
+- src/lib declares iterator results readonly.
+
+Library declarations that collide with the rule: zod's phantom input and output fields, TypeORM's mapped
+partial, connect's IncomingMessage.originalUrl against Express's Request, and the AWS SDK's httpAgent.

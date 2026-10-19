@@ -1,7 +1,0 @@
-non-null-assertion
-
-A non-null assertion claims a value is present without checking it, and the checker takes its word. The lab
-rejects every non-null assertion.
-
-Where it's enforced, in src/compiler/checker.ts:
-- checkNonNullAssertion reports TS2895 for every x! expression.

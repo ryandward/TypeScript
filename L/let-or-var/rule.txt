@@ -1,0 +1,13 @@
+let-or-var
+kind: policy
+TS2892 binding without an initializer: checkGrammarVariableDeclaration
+TS2893 assignment to a binding: checkIdentifier
+
+Every binding is assigned once, where it is declared. The keywords themselves are allowed, so a let that's
+initialized and never reassigned compiles.
+
+Where it's enforced, in src/compiler/checker.ts:
+- checkGrammarVariableDeclaration reports TS2892 for a let or var declared without an initializer. Loop,
+  catch and ambient bindings aren't held to it, since the program doesn't assign them.
+- checkIdentifier reports TS2893 for any assignment to a variable after its declaration, including
+  parameters.

@@ -8,23 +8,17 @@
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { dirname, join, relative } from 'node:path';
+import { readRules } from './rules.mjs';
 
 const repo = join(import.meta.dirname, '..');
 const RELEASE = join(repo, 'lib/typescript.js');
 const LAB = join(repo, 'built/local/typescript.js');
-const MECHANISMS = new Map([
-  [2890, 'writable position'],
-  [2891, 'write-induced invariance'],
-  [2892, 'binding without an initializer'],
-  [2893, 'assignment to a binding'],
-  [2894, 'deletable required property'],
-  [2895, 'non-null assertion'],
-  [2896, 'type assertion'],
-  [2897, 'definite assignment assertion'],
-  [2898, 'any as a value'],
-  [2899, 'type predicate on a function'],
-  [2900, 'any read as unknown'],
-]);
+// Each L code, labeled with the rules it closes holes in and its mechanism, from the rules' headers.
+const owners = new Map();
+for (const r of readRules(import.meta.dirname)) {
+  for (const m of r.mechanisms.filter((m) => m.own)) owners.set(m.code, { name: m.name, rules: [...(owners.get(m.code)?.rules ?? []), r.name] });
+}
+const MECHANISMS = new Map([...owners].map(([code, { name, rules }]) => [code, `${rules.join(', ')}: ${name}`]));
 const configs = process.argv.slice(2);
 if (!configs.length) {
   console.error('usage: node L/compare.mjs <tsconfig.json> [<tsconfig.json> ...]');

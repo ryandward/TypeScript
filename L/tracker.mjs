@@ -1,48 +1,43 @@
 // The lab's source of truth: runs every L case through the 6.0.3 release, the lab build and Node, and prints a
 // markdown matrix of where each rule stands. Exits 1 if any case is broken or any control fails.
 //
-//   node L/tracker.mjs [type ...]          default: soundness policy information project
+//   node L/tracker.mjs [rule ...]          default: every rule
 //
-// The hierarchy is L/<type>/<rule-label>/..., and a case's place in it says what it must do. A
-// marked line names the diagnostic its mechanism emits, `// rejected here: TS2890`, optionally followed by text that
-// diagnostic's chain must contain. A rejection only counts when a diagnostic on that line carries both, so a case
-// rejected for some other reason is broken, not closed.
+// Each rule is a folder, L/<rule>/, holding its rule.txt and its cases. rule.txt's header names the rule's kind and
+// its mechanisms, each with the L code it reports (see rules.mjs). A case's first line says what it is for:
+// `// witness:`, `// control:` or `// rejected sound code:`. A marked line names the diagnostic its mechanism emits,
+// `// rejected here: TS2890`, optionally followed by text that diagnostic's chain must contain. A rejection only counts
+// when a diagnostic on that line carries both, and the code must be one of the rule's mechanisms.
 //
 // Cases are judged under L's catalog options: strict, noUncheckedIndexedAccess and exactOptionalPropertyTypes.
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join, relative, sep } from 'node:path';
+import { KINDS, readRules } from './rules.mjs';
 
 const lab = import.meta.dirname;
 const repo = join(lab, '..');
 const RELEASE = join(repo, 'lib/typescript.js');
 const LAB = join(repo, 'built/local/typescript.js');
 const MARK = /\/\/ rejected here(?:: TS(\d+)(?: (.*\S))?)?\s*$/;
-const TYPES = process.argv.length > 2 ? process.argv.slice(2) : ['soundness', 'policy', 'information', 'project'];
+const ROLE = /^\/\/ (witness|control|rejected sound code): /;
+const KIND_OF_ROLE = { witness: 'witness', control: 'control', 'rejected sound code': 'sound' };
+const wanted = process.argv.slice(2);
 
 if (!existsSync(LAB)) {
   console.error('No lab build at built/local/typescript.js: run `npx hereby local` first.');
   process.exit(2);
 }
 
-const dirs = (dir) => (existsSync(dir) ? readdirSync(dir).filter((n) => statSync(join(dir, n)).isDirectory()).sort() : []);
-const tsFiles = (dir) => (existsSync(dir) ? readdirSync(dir).filter((n) => n.endsWith('.ts')).sort().map((n) => join(dir, n)) : []);
+const rules = readRules(lab).filter((r) => wanted.length === 0 || wanted.includes(r.name))
+  .sort((a, b) => KINDS.indexOf(a.kind) - KINDS.indexOf(b.kind) || a.name.localeCompare(b.name));
 
-// A rule's cases sit in its folder or, for a rule enforced at more than one kind of node, in a folder per mechanism.
-const units = (type) => dirs(join(lab, type)).flatMap((rule) => {
-  const mechanisms = dirs(join(lab, type, rule)).filter((n) => n !== 'controls' && n !== 'rejected-sound-code');
-  return mechanisms.length ? mechanisms.map((m) => `${rule}/${m}`) : [rule];
-});
-
-// Every case, with the kind its folder gives it.
-const cases = TYPES.flatMap((type) => units(type).flatMap((label) => {
-  const dir = join(lab, type, label);
-  return [
-    ...tsFiles(dir).map((file) => ({ type, label, file, kind: 'witness' })),
-    ...tsFiles(join(dir, 'controls')).map((file) => ({ type, label, file, kind: 'control' })),
-    ...tsFiles(join(dir, 'rejected-sound-code')).map((file) => ({ type, label, file, kind: 'sound' })),
-  ];
+// Every case, with the role its first line gives it.
+const cases = rules.flatMap((rule) => readdirSync(rule.dir).filter((n) => n.endsWith('.ts')).sort().map((n) => {
+  const file = join(rule.dir, n);
+  const role = ROLE.exec(readFileSync(file, 'utf8'))?.[1];
+  return { rule, file, kind: role === undefined ? undefined : KIND_OF_ROLE[role] };
 }));
 
 // The diagnostics one compiler gives every case, by file: each with its line and its whole chain, flattened. Each case
@@ -71,7 +66,7 @@ const built = diagnose(LAB);
 const lines = (ds) => [...new Set(ds.map((d) => d.line))].sort((a, b) => a - b);
 const head = (d) => `TS${d.chain[0].code}: ${d.chain[0].text}`;
 const same = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
-const description = (text) => text.split('\n').filter((l) => l.startsWith('//')).map((l) => l.replace(/^\/\/ ?/, '')).join(' ').replace(/\s+/g, ' ');
+const description = (text) => text.split('\n').filter((l) => l.startsWith('//')).map((l) => l.replace(ROLE, '').replace(/^\/\/ ?/, '')).join(' ').replace(/\s+/g, ' ');
 
 // One case: where it stands, and why when it is broken.
 function judge(c) {
@@ -85,15 +80,14 @@ function judge(c) {
   const run = spawnSync(process.execPath, [c.file], { encoding: 'utf8', timeout: 10_000 });
   const threw = run.status !== 0;
   const problems = [];
+  if (c.kind === undefined) problems.push('the first line doesn\'t say whether it is a witness, a control or rejected sound code');
   if (accepted.length) problems.push(`the release rejects line ${lines(accepted).join(', ')}: ${head(accepted[0])}`);
   if (c.kind === 'witness' && !(threw && /TypeError|ReferenceError/.test(run.stderr))) problems.push('Node does not throw a TypeError or ReferenceError');
   if (c.kind !== 'witness' && threw) problems.push(`Node throws: ${run.stderr.split('\n').find((l) => /Error/.test(l)) ?? run.stderr.trim()}`);
   if (c.kind === 'control' && marks.length) problems.push('a control marks a line to reject');
   for (const m of marks.filter((m) => m.code === undefined)) problems.push(`line ${m.line} is marked without the diagnostic its mechanism emits`);
-  // A mechanism's folder is named for the L code it reports, so every marker in it names that code.
-  const owned = /(?:^|\/)TS(\d+)-[^/]+$/.exec(c.label);
-  for (const m of owned ? marks.filter((m) => m.code !== undefined && m.code !== Number(owned[1])) : []) {
-    problems.push(`line ${m.line} is marked TS${m.code}, but this folder is TS${owned[1]}'s mechanism`);
+  for (const m of marks.filter((m) => m.code !== undefined && !c.rule.mechanisms.some((x) => x.code === m.code))) {
+    problems.push(`line ${m.line} is marked TS${m.code}, which isn't one of ${c.rule.name}'s mechanisms`);
   }
   let status;
   if (problems.length) status = 'broken';
@@ -125,29 +119,33 @@ function judge(c) {
 }
 
 const judged = cases.map(judge);
-const rules = TYPES.flatMap((type) => units(type).map((label) => ({
-  type, label, cases: judged.filter((c) => c.type === type && c.label === label),
-})));
-const count = (r, kind, status) => r.cases.filter((c) => c.kind === kind && (status === undefined || c.status === status)).length;
+const of = (r) => judged.filter((c) => c.rule === r);
+const count = (r, kind, status) => of(r).filter((c) => c.kind === kind && (status === undefined || c.status === status)).length;
 const standing = (r) => {
-  if (r.cases.length === 0) return 'spec only';
-  if (r.cases.some((c) => c.status === 'broken')) return 'broken';
-  if (r.cases.some((c) => c.status === 'failing')) return 'false positives';
-  if (r.cases.some((c) => c.status === 'open')) return 'holes open';
+  if (r.problems.length) return 'broken';
+  if (of(r).length === 0) return 'spec only';
+  if (of(r).some((c) => c.status === 'broken')) return 'broken';
+  if (of(r).some((c) => c.status === 'failing')) return 'false positives';
+  if (of(r).some((c) => c.status === 'open')) return 'holes open';
   return 'sound';
 };
 
 const out = ['# L lab: where each rule stands', ''];
 for (const g of [...release.global.map((d) => `the release: ${d}`), ...built.global.map((d) => `the lab: ${d}`)]) out.push(`Program diagnostic from ${g}`, '');
-out.push('| Type | Rule | Standing | Witnesses closed | Witnesses open | Controls passing | Controls failing | Rejected as designed | Broken |');
-out.push('|---|---|---|---|---|---|---|---|---|');
+out.push('| Kind | Rule | Mechanisms | Standing | Witnesses closed | Witnesses open | Controls passing | Controls failing | Rejected as designed | Broken |');
+out.push('|---|---|---|---|---|---|---|---|---|---|');
 for (const r of rules) {
-  out.push(`| ${r.type} | ${r.label} | ${standing(r)} | ${count(r, 'witness', 'closed')}/${count(r, 'witness')} | ${count(r, 'witness', 'open')} | ` +
-    `${count(r, 'control', 'passing')}/${count(r, 'control')} | ${count(r, 'control', 'failing')} | ${count(r, 'sound', 'rejected as designed')} | ` +
-    `${r.cases.filter((c) => c.status === 'broken').length} |`);
+  out.push(`| ${r.kind} | ${r.name} | ${r.mechanisms.map((m) => `TS${m.code}`).join(', ')} | ${standing(r)} | ${count(r, 'witness', 'closed')}/${count(r, 'witness')} | ` +
+    `${count(r, 'witness', 'open')} | ${count(r, 'control', 'passing')}/${count(r, 'control')} | ${count(r, 'control', 'failing')} | ` +
+    `${count(r, 'sound', 'rejected as designed')} | ${of(r).filter((c) => c.status === 'broken').length} |`);
 }
-for (const type of TYPES) {
-  if (!rules.some((r) => r.type === type)) out.push(`| ${type} | (no rules filed yet) | | | | | | | |`);
+for (const kind of KINDS) {
+  if (wanted.length === 0 && !rules.some((r) => r.kind === kind)) out.push(`| ${kind} | (no rules filed yet) | | | | | | | | |`);
+}
+const broken = rules.filter((r) => r.problems.length);
+if (broken.length) {
+  out.push('', '## Rules with a broken rule.txt', '');
+  for (const r of broken) out.push(`- \`${r.name}/rule.txt\`: ${r.problems.join('; ')}`);
 }
 const section = (title, status, detail) => {
   const listed = judged.filter((c) => c.status === status);
@@ -161,5 +159,5 @@ section('Holes still open', 'open', (c) => `: ${c.about}`);
 section('Witnesses closed', 'closed', (c) => ` (${c.mechanism}): ${c.about}`);
 section('Rejected as designed', 'rejected as designed', (c) => ` (${c.mechanism}): ${c.about}`);
 console.log(out.join('\n'));
-const fails = release.global.length || built.global.length || judged.some((c) => c.status === 'broken' || c.status === 'failing');
+const fails = release.global.length || built.global.length || broken.length || judged.some((c) => c.status === 'broken' || c.status === 'failing');
 process.exit(fails ? 1 : 0);
