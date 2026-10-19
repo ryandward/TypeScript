@@ -1,9 +1,9 @@
 any
 
 A type written any accepts every value and allows every use of it, so the checker checks nothing about the
-value. The lab rejects the keyword wherever the project writes it, in a type annotation, a type argument or a
-constraint.
+value. The lab rejects the keyword wherever it's written: in a type annotation, a type argument, a constraint,
+or a declaration file. Keeping a library's declarations out of the check is the project's choice, made with
+skipLibCheck, a declare module override or an adapter.
 
 Where it's enforced, in src/compiler/checker.ts:
-- checkAnyKeyword reports TS2898 for the any keyword in the project's own files. TypeScript's lib files and
-  node_modules aren't judged: a library's any is met where the project reads the value it types.
+- checkAnyKeyword reports TS2898 for every any keyword.

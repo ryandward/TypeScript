@@ -38292,11 +38292,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function checkAnyKeyword(node: Node) {
-        // L: 'any' turns off checking for whatever it types. Only the project's own files are judged; a library's 'any' is met where it's read.
-        const sourceFile = getSourceFileOfNode(node);
-        if (!host.isSourceFileDefaultLibrary(sourceFile) && !host.isSourceFileFromExternalLibrary(sourceFile)) {
-            error(node, Diagnostics.any_lets_a_value_be_used_in_any_way_without_checking_it_L_has_no_any);
-        }
+        // L: 'any' turns off checking for whatever it types.
+        error(node, Diagnostics.any_lets_a_value_be_used_in_any_way_without_checking_it_L_has_no_any);
     }
 
     function checkNonNullAssertion(node: NonNullExpression) {
