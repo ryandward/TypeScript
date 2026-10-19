@@ -18,6 +18,7 @@ const MECHANISMS = new Map([
   [2892, 'binding without an initializer'],
   [2893, 'assignment to a binding'],
   [2894, 'deletable required property'],
+  [2895, 'non-null assertion'],
 ]);
 const configs = process.argv.slice(2);
 if (!configs.length) {

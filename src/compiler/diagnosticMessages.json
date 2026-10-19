@@ -4046,6 +4046,10 @@
         "category": "Error",
         "code": 2894
     },
+    "This asserts the value is present without checking it. L has no non-null assertions.": {
+        "category": "Error",
+        "code": 2895
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

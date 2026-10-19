@@ -38288,6 +38288,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function checkNonNullAssertion(node: NonNullExpression) {
+        // L: a non-null assertion claims a value is present without checking it.
+        error(node, Diagnostics.This_asserts_the_value_is_present_without_checking_it_L_has_no_non_null_assertions);
         return node.flags & NodeFlags.OptionalChain ? checkNonNullChain(node as NonNullChain) :
             getNonNullableType(checkExpression(node.expression));
     }
