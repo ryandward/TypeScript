@@ -36,6 +36,8 @@ into it.
   because every call makes a new list.
 - TypeScript's lib declares every built-in `entries()` tuple readonly in the lab, since each step makes a new
   array that nothing writes.
+- When more than three overloads fail, only one is reported. The lab reports the one type-level
+  assignability accepts, which is the overload the release would have chosen, so its TS2891 shows.
 
 ## What it rejects on purpose
 
@@ -50,9 +52,8 @@ consumer takes.
 
 ## Open
 
-When more than three overloads fail, TypeScript reports only the last one, so a TS2891 in an earlier overload
-never shows. The lab still has to make an overload failure carry the L failure behind it.
+Nothing.
 
 ## Commits
 
-931689677, 89beff3af, fadc61c80, e5795182f
+931689677, 89beff3af, fadc61c80, e5795182f, 3b5956834

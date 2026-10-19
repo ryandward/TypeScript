@@ -8,6 +8,9 @@ WHERE THE LAB STANDS
 
 Every commit on l-lab is pushed, and there's no uncommitted work. Newest first:
 
+  3b5956834  past three failed overloads, report the one the write rule rejected
+  8b02c5f1b  each rule's folder says what the rule is and what the lab decided
+  bf3601c00  the rules for checker edits in the README, and today's status beside it
   dbe09f6e5  every binding is assigned once, where it is declared
   cbc662b51  everything L-specific under L/, and the tracker requires each rejection's mechanism
   e5795182f  a fresh literal is unaliased in the relation, and rejections name the writable position
@@ -20,7 +23,7 @@ Every commit on l-lab is pushed, and there's no uncommitted work. Newest first:
 
   Type       Rule                    Standing  Witnesses closed  Controls passing  Rejected as designed
   soundness  mutable-array-or-tuple  sound     7/7               14/14             3
-  soundness  write-into-an-object    sound     6/6               9/9               6
+  soundness  write-into-an-object    sound     6/6               9/9               7
   policy     let-or-var              sound     1/1               4/4               1
 
 Every witness in the lab is closed, and there are no open holes, no failing controls and no broken cases. The
@@ -60,6 +63,11 @@ narrowing reads constness and treating variables as constants there would reach 
 The tracker now requires each rejection to carry its mechanism's code, and all L material lives under L/
 (cbc662b51).
 
+When more than three overloads fail, resolveCall reports only one, and it had always been the last. A call
+the release resolves would then show the last overload's unrelated mismatch instead of the write rule's
+failure. The lab now reports the overload that type-level assignability accepts, which is the one the release
+would have chosen, so its TS2890 or TS2891 shows (3b5956834).
+
 
 GENOMEHUB
 
@@ -67,24 +75,24 @@ GenomeHub is only a source of diagnostics here. I compared the lab with the rele
 its merge base with main (570af7906), with GenomeHub at 17863bb8 plus its agent's uncommitted edits. The lab
 rejects 76 lines there that the release accepts:
 
-  33  TS2890  writable position
+  37  TS2890  writable position
   12  TS2891  write-induced invariance
    9  TS2892  binding without an initializer
   18  TS2893  assignment to a binding
-   4  no L mechanism in the chain
 
-The four with no L mechanism are all `app.use(express.json())` in integration tests:
+Every one of them traces to an L mechanism. Four had traced to none before 3b5956834, all
+`app.use(express.json())` in integration tests:
 
   packages/server/src/__tests__/lib/egress.integration.test.ts:132
   packages/server/src/__tests__/routes/host_key_pinning.integration.test.ts:53
   packages/server/src/__tests__/routes/parquet_url_retry_budget.integration.test.ts:28
   packages/server/src/__tests__/routes/write_gates.integration.test.ts:101
 
-I traced the first one through overload resolution, and the overload report is masking an L failure. It's not
-a relation bug. The release picks use(...handlers: RequestHandler[]). The lab rejects that overload with TS2890
+I traced the first one through overload resolution, and the overload report had been masking an L failure.
+It wasn't a relation bug. The release picks use(...handlers: RequestHandler[]). The lab rejects that overload with TS2890
 on req.originalUrl: connect's IncomingMessage declares `originalUrl?: string | undefined`, optional and
 writable, while Express's Request declares `originalUrl: string`. Every candidate fails, and when more than
-three do, TypeScript reports only the last one, which complains about PathParams. The relation is right by the
+three did, the report showed only the last one, which complains about PathParams. The relation is right by the
 rule: through connect's type, a handler could store undefined in a field Express promises is a string. That's
 two libraries' contracts colliding, so by the boundary rule it gets stopped and reported.
 
@@ -112,10 +120,8 @@ OPEN DECISIONS
 
 NEXT
 
-  1. When more than three overloads fail, make the reported error carry the L failure behind it, so the
-     tracker's proof of mechanism can see rejections like the four above.
-  2. Port the next rule from L's hooks into the lab.
-  3. Eventually, port the lab's proven decisions to typescript-go in l-proofs.
+  1. Port the next rule from L's hooks into the lab.
+  2. Eventually, port the lab's proven decisions to typescript-go in l-proofs.
 
 
 HOUSEKEEPING

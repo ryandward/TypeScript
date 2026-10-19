@@ -32,6 +32,9 @@ accept the target's, because the target can store a value of its own type into i
 - Overload resolution checks the subtype pass's winner as a value before accepting it. While
   context-sensitive arguments are skipped, the provisional pass uses plain assignability, because it judges
   stand-ins, not values.
+- When more than three overloads fail, only one is reported. The lab reports the one type-level
+  assignability accepts, which is the overload the release would have chosen, so its TS2890 shows instead
+  of the last overload's unrelated mismatch.
 - An accessor read isn't narrowed (`getFlowTypeOfAccessExpression`). This is a flow patch, kept in flow
   analysis. The witness is rejected with whatever its use produces on the getter's declared type, TS2339 on
   `'string | number'` here.
@@ -45,6 +48,7 @@ These are in `rejected-sound-code/`, each with its reason:
 - a readonly object passed where its field is writable, even when the receiver only reads;
 - a subclass narrowing a field its base declares writable, like `Error.name`;
 - a comparer whose parameter has a writable optional field, handed values whose field is required;
+- a handler whose request's writable field is optional, passed where it's required, through four overloads;
 - a getter that does return stored state, since nothing in its type says two reads agree;
 - a library's phantom fields declared writable, as zod's `input` and `output` are;
 - a library's mapped copy of an entity, as TypeORM's update argument is.
@@ -62,10 +66,8 @@ forces the relation.
 
 ## Open
 
-When more than three overloads fail, TypeScript reports only the last one, so a TS2890 in an earlier overload
-never shows. That's how the Express rejection above looked unexplained. The lab still has to make an overload
-failure carry the L failure behind it.
+Nothing.
 
 ## Commits
 
-931689677, 8b384c9e3, 89beff3af, fadc61c80, e5795182f
+931689677, 8b384c9e3, 89beff3af, fadc61c80, e5795182f, 3b5956834
