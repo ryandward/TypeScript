@@ -36798,21 +36798,31 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (candidatesForArgumentError) {
                 if (candidatesForArgumentError.length === 1 || candidatesForArgumentError.length > 3) {
                     const last = candidatesForArgumentError[candidatesForArgumentError.length - 1];
+                    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): past three failed overloads only one
+                    // is reported. When type-level assignability accepts one, that's the overload the call would have resolved
+                    // to without the write rule, and its failure is the value relation's, so it's the one reported. Otherwise
+                    // the last is reported, as in the release.
+                    const writeRejected = candidatesForArgumentError.length > 3
+                        ? find(candidatesForArgumentError, c => !getSignatureApplicabilityError(node, args, c, assignableRelation, CheckMode.Normal, /*reportErrors*/ false, /*containingMessageChain*/ undefined))
+                        : undefined;
+                    const reported = writeRejected ?? last;
                     let chain: DiagnosticMessageChain | undefined;
                     if (candidatesForArgumentError.length > 3) {
-                        chain = chainDiagnosticMessages(chain, Diagnostics.The_last_overload_gave_the_following_error);
+                        chain = writeRejected
+                            ? chainDiagnosticMessages(chain, Diagnostics.Overload_0_of_1_2_gave_the_following_error, candidatesForArgumentError.indexOf(writeRejected) + 1, candidates.length, signatureToString(writeRejected))
+                            : chainDiagnosticMessages(chain, Diagnostics.The_last_overload_gave_the_following_error);
                         chain = chainDiagnosticMessages(chain, Diagnostics.No_overload_matches_this_call);
                     }
                     if (headMessage) {
                         chain = chainDiagnosticMessages(chain, headMessage);
                     }
-                    const diags = getSignatureApplicabilityError(node, args, last, valueAssignableRelation, CheckMode.Normal, /*reportErrors*/ true, () => chain);
+                    const diags = getSignatureApplicabilityError(node, args, reported, valueAssignableRelation, CheckMode.Normal, /*reportErrors*/ true, () => chain);
                     if (diags) {
                         for (const d of diags) {
-                            if (last.declaration && candidatesForArgumentError.length > 3) {
+                            if (last.declaration && candidatesForArgumentError.length > 3 && !writeRejected) {
                                 addRelatedInfo(d, createDiagnosticForNode(last.declaration, Diagnostics.The_last_overload_is_declared_here));
                             }
-                            addImplementationSuccessElaboration(last, d);
+                            addImplementationSuccessElaboration(reported, d);
                             diagnostics.add(d);
                         }
                     }
