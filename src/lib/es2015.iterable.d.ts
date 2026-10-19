@@ -8,11 +8,7 @@ interface SymbolConstructor {
     readonly iterator: unique symbol;
 }
 
-// L (soundness/write-into-an-object): an iterator result is read, never written. Declared writable, its
-// value would have to relate in both directions, and Iterator<T, undefined> could not stand in for
-// Iterator<T, unknown> although every built-in iterator returns a new result object each time. For the
-// same reason, every built-in entries() iterator, here and in the other lib files, yields its entry as a
-// readonly tuple: each step makes a new array.
+// L: iterator results and built-in entries() tuples are readonly, since each is new and nothing writes it.
 interface IteratorYieldResult<TYield> {
     readonly done?: false;
     readonly value: TYield;

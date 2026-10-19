@@ -2386,10 +2386,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     var subtypeRelation = new Map<string, RelationComparisonResult>();
     var strictSubtypeRelation = new Map<string, RelationComparisonResult>();
     var assignableRelation = new Map<string, RelationComparisonResult>();
-    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): assignability for a value flowing into a slot.
-    // It is assignableRelation, except that a position the target can write through relates in both
-    // directions, since the value can then be written through the wider name. Type-level questions
-    // (conditional types, constraints, inference) keep assignableRelation: no value is aliased there.
+    // L: assignability for a value flowing into a slot, where a writable position relates both ways. Type-level questions keep assignableRelation.
     var valueAssignableRelation = new Map<string, RelationComparisonResult>();
     var valueVariances = new Map<Symbol, VarianceFlags[]>();
     var comparableRelation = new Map<string, RelationComparisonResult>();
@@ -21928,9 +21925,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     /**
      * See signatureRelatedTo, compareSignaturesIdentical
      */
-    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): an argument list is a new array on every call, so
-    // no other name holds it. Where writes matter, a rest parameter's list is compared as readonly; its
-    // elements still relate as values.
+    // L: an argument list is new on every call, so a rest parameter's list relates as readonly.
     function argumentList(type: Type, checkMode: SignatureCheckMode): Type {
         if (!(checkMode & SignatureCheckMode.FreshArguments)) {
             return type;
@@ -23109,8 +23104,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     eachTypeRelatedToType(source as UnionType, target, reportErrors && !(source.flags & TypeFlags.Primitive), intersectionState);
             }
             if (target.flags & TypeFlags.Union) {
-                // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): keep a fresh literal fresh, so each union member's writable positions see that the
-                // source has no alias. Baseline regularizes here only to avoid repeating the excess property check.
+                // L: keep a fresh literal fresh, so each union member sees that nothing else holds it.
                 const unionSource = relationGrantsWrites() && getObjectFlags(source) & ObjectFlags.FreshLiteral ? source : getRegularTypeOfObjectLiteral(source);
                 return typeRelatedToSomeType(unionSource, target as UnionType, reportErrors && !(source.flags & TypeFlags.Primitive) && !(target.flags & TypeFlags.Primitive), intersectionState);
             }
@@ -24003,8 +23997,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                         sourceExtends = instantiateType(sourceExtends, ctx.mapper);
                         mapper = ctx.mapper;
                     }
-                    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the check types are type
-                    // operands, not values, so they relate as types even when a value is flowing into the result.
+                    // L: check types are type operands, not values, so they relate as types.
                     const checkTypesRelated = (s: Type, t: Type) => relationGrantsWrites() ? isTypeRelatedTo(s, t, assignableRelation) : !!isRelatedTo(s, t, RecursionFlags.Both);
                     if (
                         isTypeIdenticalTo(sourceExtends, (target as ConditionalType).extendsType) &&
@@ -24069,8 +24062,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     // We have type references to the same generic type, and the type references are not marker
                     // type references (which are intended by be compared structurally). Obtain the variance
                     // information for the type parameters and relate the type arguments accordingly.
-                    // L (soundness/mutable-array-or-tuple): an array literal is held by nothing else, so it relates with the
-                    // variances a type-level question uses.
+                    // L: an array literal is held by nothing else, so it relates with type-level variances.
                     const variances = getVariances((source as TypeReference).target, relationGrantsWrites() && isUnaliasedLiteral(source) ? assignableRelation : relation);
                     // We return Ternary.Maybe for a recursive invocation of getVariances (signalled by emptyArray). This
                     // effectively means we measure variance only from type parameter occurrences that aren't nested in
@@ -24128,8 +24120,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     else if (result) {
                         return result;
                     }
-                    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): name the writable type argument above the
-                    // structural elaboration, which reports the first member that fails and not why the type is invariant.
+                    // L: name the type argument a writable position made invariant, above the structural elaboration.
                     if (writableTypeArgument && reportErrors) {
                         reportError(Diagnostics._0_can_be_written_through_so_its_type_argument_1_cannot_be_widened_to_2, typeToString(source), typeToString(writableTypeArgument[0]), typeToString(writableTypeArgument[1]));
                     }
@@ -24155,8 +24146,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 return reduceLeft(info, (value, chain) => value + 1 + countMessageChainBreadth(chain.next), 0);
             }
 
-            // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the variances a type-level question uses, needed only
-            // to name a failure, so only when the value relation is reporting one.
+            // L: type-level variances, needed only to name a failure.
             function typeLevelVariances(get: () => VarianceFlags[]) {
                 return relationGrantsWrites() && reportErrors ? get() : undefined;
             }
@@ -24165,8 +24155,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 if (result = typeArgumentsRelatedTo(sourceTypeArguments, targetTypeArguments, variances, reportErrors, intersectionState)) {
                     return result;
                 }
-                // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a type argument that widens at the type level
-                // but not into a value was made invariant by a writable position. Remember it, to name it above the elaboration.
+                // L: a type argument that widens at the type level but not as a value was made invariant by a writable position.
                 const i = typeLevel ? findIndex(variances, (v, i) =>
                     (v & VarianceFlags.VarianceMask) === VarianceFlags.Invariant && (typeLevel[i] & VarianceFlags.VarianceMask) === VarianceFlags.Covariant &&
                     !!sourceTypeArguments?.[i] && !!targetTypeArguments?.[i] &&
@@ -24346,13 +24335,12 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             return result || properties;
         }
 
-        // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): only a value flowing into a slot can be written through the wider name.
+        // L: only a value flowing into a slot can be written through the wider name.
         function relationGrantsWrites() {
             return relation === valueAssignableRelation;
         }
 
-        // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a fresh object or array literal, or JSX
-        // attributes, is held by nothing else, so widening it gives no second name to write through.
+        // L: a fresh object or array literal, or JSX attributes, is held by nothing else.
         function isUnaliasedLiteral(type: Type) {
             return !!(getObjectFlags(type) & (ObjectFlags.FreshLiteral | ObjectFlags.ArrayLiteral | ObjectFlags.JsxAttributes));
         }
@@ -24360,8 +24348,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         function isPropertySymbolTypeRelated(sourceProp: Symbol, targetProp: Symbol, getTypeOfSourceProperty: (sym: Symbol) => Type, reportErrors: boolean, intersectionState: IntersectionState, unaliasedSource: boolean): Ternary {
             const targetIsOptional = strictNullChecks && !!(getCheckFlags(targetProp) & CheckFlags.Partial);
             const effectiveTarget = addOptionality(getNonMissingTypeOfSymbol(targetProp), /*isProperty*/ false, targetIsOptional);
-            // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a writable target position is read and
-            // written through the target, so its type must relate both ways, unless nothing else holds the source.
+            // L: a writable position relates both ways, unless nothing else holds the source.
             const writable = relationGrantsWrites() && isWritablePosition(targetProp) && !unaliasedSource;
             // source could resolve to `any` and that's not related to `unknown` target under strict subtype relation
             if (!writable && effectiveTarget.flags & (relation === strictSubtypeRelation ? TypeFlags.Any : TypeFlags.AnyOrUnknown)) {
@@ -24372,9 +24359,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             return related && writable ? relatedBack(effectiveSource, effectiveTarget, related, reportErrors, intersectionState) : related;
         }
 
-        // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the target can store a value of its own type into
-        // a writable position, so the source's type there must accept the target's. Every writable position is checked here,
-        // and a failure names the position that could be written through.
+        // L: a writable position must also accept the target's type, since the target can store it there.
         function relatedBack(source: Type, target: Type, forward: Ternary, reportErrors: boolean, intersectionState: IntersectionState): Ternary {
             const back = isRelatedTo(target, source, RecursionFlags.Both, /*reportErrors*/ false, /*headMessage*/ undefined, intersectionState);
             if (!back && reportErrors) {
@@ -24859,8 +24844,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                         ? propType
                         : getTypeWithFacts(propType, TypeFacts.NEUndefined);
                     const forward = isRelatedTo(type, targetInfo.type, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
-                    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the target's writable index signature can
-                    // store into this source property, unless nothing else holds the source.
+                    // L: a writable index signature can store into this property, unless nothing else holds the source.
                     const related = forward && relationGrantsWrites() && !targetInfo.isReadonly && isWritablePosition(prop) && !isUnaliasedLiteral(source)
                         ? relatedBack(type, targetInfo.type, forward, reportErrors, intersectionState)
                         : forward;
@@ -24887,8 +24871,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
 
         function indexInfoRelatedTo(sourceInfo: IndexInfo, targetInfo: IndexInfo, reportErrors: boolean, intersectionState: IntersectionState, unaliasedSource: boolean) {
             const forward = isRelatedTo(sourceInfo.type, targetInfo.type, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
-            // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a writable index signature on the target is a
-            // store position, unless nothing else holds the source.
+            // L: a writable index signature relates both ways, unless nothing else holds the source.
             const related = forward && relationGrantsWrites() && !targetInfo.isReadonly && !unaliasedSource
                 ? relatedBack(sourceInfo.type, targetInfo.type, forward, reportErrors, intersectionState)
                 : forward;
@@ -25091,10 +25074,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
 
     function getVariances(type: GenericType, relation = assignableRelation): VarianceFlags[] {
         if (relation === valueAssignableRelation) {
-            // L (soundness/mutable-array-or-tuple): for a value, only ReadonlyArray and readonly tuples are
-            // known to be covariant. Array<T>'s `[n: number]: T` is writable, so it is measured like any
-            // generic and comes out invariant (see isPropertySymbolTypeRelated), and a mutable tuple's
-            // elements are writable, so it is invariant per element.
+            // L: for a value, only ReadonlyArray and readonly tuples are covariant. Array is measured, and a mutable tuple is invariant.
             if (type === globalReadonlyArrayType) {
                 return arrayVariances;
             }
@@ -25118,9 +25098,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     // generic type are structurally compared. We infer the variance information by comparing
     // instantiations of the generic type for type arguments with known relations. The function
     // returns the emptyArray singleton when invoked recursively for the given generic type.
-    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): variances are measured, and cached, per relation, so a
-    // value's write-aware variance never answers a type-level question. For a value, a declared `in` or
-    // `out` is measured rather than trusted.
+    // L: variances are measured and cached per relation. For a value, `in` and `out` are measured, not trusted.
     function getVariancesWorker(symbol: Symbol, typeParameters: readonly TypeParameter[] = emptyArray, relation = assignableRelation): VarianceFlags[] {
         const links = getSymbolLinks(symbol);
         const forValues = relation === valueAssignableRelation;
@@ -31246,8 +31224,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 }
                 return errorType;
             }
-            // L (policy/let-or-var): every binding is assigned once, where it is declared, so nothing assigns to a variable
-            // afterwards. A parameter, a catch variable and a loop variable are bindings too.
+            // L: every binding is assigned once, where it is declared.
             if (localOrExportSymbol.flags & SymbolFlags.Variable) {
                 error(node, Diagnostics.Cannot_assign_to_0_because_all_bindings_are_constant_in_L, symbolToString(symbol));
                 return errorType;
@@ -35144,9 +35121,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         // Only compute control flow type if this is a property access expression that isn't an
         // assignment target, and the referenced property was declared as a variable, property,
         // or optional method.
-        // L (soundness/write-into-an-object): not an accessor. Reading one calls its getter, which can
-        // return something else each time, and assigning to one calls its setter, which need not store
-        // what it was given, so neither a check nor an assignment says what the next read returns.
+        // L: not an accessor, since its getter needn't return what was checked or assigned.
         const assignmentKind = getAssignmentTargetKind(node);
         if (assignmentKind === AssignmentKind.Definite) {
             return removeMissingType(propType, !!(prop && prop.flags & SymbolFlags.Optional));
@@ -36321,8 +36296,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 restArgCount === 0 ? node :
                 restArgCount === 1 ? getEffectiveCheckNode(args[argCount]) :
                 setTextRangePosEnd(createSyntheticExpression(node, spreadType), args[argCount].pos, args[args.length - 1].end);
-            // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the arguments form a new list
-            // that no other name holds, so where writes matter it relates to the rest type as readonly.
+            // L: the arguments form a new list, so where writes matter it relates as readonly.
             const restTarget = relation === valueAssignableRelation ? argumentList(restType, SignatureCheckMode.FreshArguments) : restType;
             if (!checkTypeRelatedTo(spreadType, restTarget, relation, errorNode, headMessage, /*containingMessageChain*/ undefined, errorOutputContainer)) {
                 Debug.assert(!reportErrors || !!errorOutputContainer.errors, "rest parameter should have errors when reporting errors");
@@ -36798,10 +36772,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (candidatesForArgumentError) {
                 if (candidatesForArgumentError.length === 1 || candidatesForArgumentError.length > 3) {
                     const last = candidatesForArgumentError[candidatesForArgumentError.length - 1];
-                    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): past three failed overloads only one
-                    // is reported. When type-level assignability accepts one, that's the overload the call would have resolved
-                    // to without the write rule, and its failure is the value relation's, so it's the one reported. Otherwise
-                    // the last is reported, as in the release.
+                    // L: report the overload that type-level assignability accepts, since only the write rule rejected it. Otherwise, the last.
                     const writeRejected = candidatesForArgumentError.length > 3
                         ? find(candidatesForArgumentError, c => !getSignatureApplicabilityError(node, args, c, assignableRelation, CheckMode.Normal, /*reportErrors*/ false, /*containingMessageChain*/ undefined))
                         : undefined;
@@ -36968,10 +36939,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 else {
                     checkCandidate = candidate;
                 }
-                // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): while arguments are skipped, this check
-                // judges stand-ins (a placeholder for each skipped function, object literals stripped of freshness), not the
-                // values that will flow. The value relation judges those in the normal pass below, which every candidate accepted
-                // here goes through.
+                // L: while arguments are skipped this pass judges stand-ins, so the value relation waits for the normal pass.
                 const provisionalRelation = argCheckMode && relation === valueAssignableRelation ? assignableRelation : relation;
                 if (getSignatureApplicabilityError(node, args, checkCandidate, provisionalRelation, argCheckMode, /*reportErrors*/ false, /*containingMessageChain*/ undefined)) {
                     // Give preference to error candidates that have no rest parameters (as they are more specific)
@@ -36999,9 +36967,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                         continue;
                     }
                 }
-                // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the subtype pass picks the best overload
-                // but doesn't know about writes, so the one it picks must also accept its arguments as values. Checked before
-                // the candidate is accepted, so a rejected one is recorded like any other and the list stays as it was.
+                // L: the subtype pass's pick must also accept its arguments as values.
                 if (relation === subtypeRelation && getSignatureApplicabilityError(node, args, checkCandidate, valueAssignableRelation, CheckMode.Normal, /*reportErrors*/ false, /*containingMessageChain*/ undefined)) {
                     (candidatesForArgumentError || (candidatesForArgumentError = [])).push(checkCandidate);
                     continue;
@@ -39909,8 +39875,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         return !setProp;
     }
 
-    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a target position through which a value can be stored: a property or accessor that is not
-    // readonly. Methods are excluded; their variance is a separate decision (method bivariance).
+    // L: a property or accessor that isn't readonly. Methods are left out (method bivariance).
     function isWritablePosition(targetProp: Symbol): boolean {
         return !!(targetProp.flags & (SymbolFlags.Property | SymbolFlags.Accessor)) && !isReadonlySymbol(targetProp);
     }
@@ -53317,8 +53282,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                         return grammarErrorOnNode(node, Diagnostics._0_declarations_must_be_initialized, "const");
                     case NodeFlags.Let:
                     case NodeFlags.None:
-                        // L (policy/let-or-var): every binding is assigned once, where it is declared. A catch variable is
-                        // bound by the throw, so only a declaration list is held to it.
+                        // L: every binding is initialized where it is declared. A catch variable is bound by the throw.
                         if (isVariableDeclarationList(node.parent)) {
                             return grammarErrorOnNode(node, Diagnostics._0_must_be_initialized_where_it_is_declared_In_L_every_binding_is_assigned_once, declarationNameToString(node.name));
                         }
