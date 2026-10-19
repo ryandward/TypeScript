@@ -4058,7 +4058,7 @@
         "category": "Error",
         "code": 2897
     },
-    "'any' lets a value be used in any way without checking it. L has no 'any'.": {
+    "A value of type 'any' was never checked, so it can't flow into '{0}'. Only 'unknown' accepts it.": {
         "category": "Error",
         "code": 2898
     },

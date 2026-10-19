@@ -1,9 +1,14 @@
 any
 
-A type written any accepts every value and allows every use of it, so the checker checks nothing about the
-value. The lab rejects the keyword wherever it's written: in a type annotation, a type argument, a constraint,
-or a declaration file. Keeping a library's declarations out of the check is the project's choice, made with
-skipLibCheck, a declare module override or an adapter.
+The relation treats a value of type any as assignable to every type, so a value nothing has checked can flow
+into any slot. Most any never appears in the code at all: it comes from a library's declarations, like
+JSON.parse, Response.json and Array.isArray, or from inference that settles on any. The lab cuts the short
+circuit: as a value, any flows only into a target that accepts every value, unknown or any. Writing the keyword
+is allowed, since a type can hold any without any value of type any flowing anywhere.
 
 Where it's enforced, in src/compiler/checker.ts:
-- checkAnyKeyword reports TS2898 for every any keyword.
+- isSimpleTypeRelatedTo reports TS2898 when, under valueAssignableRelation, an any source meets a target other
+  than unknown, any or a union that accepts everything, such as {} | null | undefined.
+
+Still open: reading a property off any or calling it (rule-any). Those go through
+checkPropertyAccessExpressionOrQualifiedName and resolveUntypedCall, not through a relation.

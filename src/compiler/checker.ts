@@ -22278,7 +22278,12 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         if (s & TypeFlags.Null && (!strictNullChecks && !(t & TypeFlags.UnionOrIntersection) || t & TypeFlags.Null)) return true;
         if (s & TypeFlags.Object && t & TypeFlags.NonPrimitive && !(relation === strictSubtypeRelation && isEmptyAnonymousObjectType(source) && !(getObjectFlags(source) & ObjectFlags.FreshLiteral))) return true;
         if (relation === assignableRelation || relation === valueAssignableRelation || relation === comparableRelation) {
-            if (s & TypeFlags.Any) return true;
+            if (s & TypeFlags.Any) {
+                // L: a value of type 'any' was never checked, so it flows only into a target that accepts every value.
+                if (relation !== valueAssignableRelation || isUnknownLikeUnionType(target)) return true;
+                errorReporter?.(Diagnostics.A_value_of_type_any_was_never_checked_so_it_can_t_flow_into_0_Only_unknown_accepts_it, typeToString(target));
+                return false;
+            }
             // Type number is assignable to any computed numeric enum type or any numeric enum literal type, and
             // a numeric literal type is assignable any computed numeric enum type or any numeric enum literal type
             // with a matching value. These rules exist such that enums can be used for bit-flag purposes.
@@ -38291,11 +38296,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         return propagateOptionalTypeMarker(getNonNullableType(nonOptionalType), node, nonOptionalType !== leftType);
     }
 
-    function checkAnyKeyword(node: Node) {
-        // L: 'any' turns off checking for whatever it types.
-        error(node, Diagnostics.any_lets_a_value_be_used_in_any_way_without_checking_it_L_has_no_any);
-    }
-
     function checkNonNullAssertion(node: NonNullExpression) {
         // L: a non-null assertion claims a value is present without checking it.
         error(node, Diagnostics.This_asserts_the_value_is_present_without_checking_it_L_has_no_non_null_assertions);
@@ -49272,8 +49272,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 return checkAccessorDeclaration(node as AccessorDeclaration);
             case SyntaxKind.TypeReference:
                 return checkTypeReferenceNode(node as TypeReferenceNode);
-            case SyntaxKind.AnyKeyword:
-                return checkAnyKeyword(node);
             case SyntaxKind.TypePredicate:
                 return checkTypePredicate(node as TypePredicateNode);
             case SyntaxKind.TypeQuery:
