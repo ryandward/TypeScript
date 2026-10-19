@@ -24356,7 +24356,23 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             }
             const effectiveSource = getTypeOfSourceProperty(sourceProp);
             const related = isRelatedTo(effectiveSource, effectiveTarget, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
-            return related && writable ? relatedBack(effectiveSource, effectiveTarget, related, reportErrors, intersectionState) : related;
+            if (!related || !writable) {
+                return related;
+            }
+            const back = relatedBack(effectiveSource, effectiveTarget, related, reportErrors, intersectionState);
+            // L: a writable optional property can be deleted through the target.
+            return back && targetProp.flags & SymbolFlags.Optional ? back & mayBeDeleted(sourceProp, reportErrors) : back;
+        }
+
+        // L: a source property the target can delete must be optional in the source too.
+        function mayBeDeleted(sourceProp: Symbol, reportErrors: boolean): Ternary {
+            if (sourceProp.flags & SymbolFlags.Optional) {
+                return Ternary.True;
+            }
+            if (reportErrors) {
+                reportError(Diagnostics.Property_0_is_required_and_the_target_could_delete_it, symbolToString(sourceProp));
+            }
+            return Ternary.False;
         }
 
         // L: a writable position must also accept the target's type, since the target can store it there.
@@ -24844,10 +24860,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                         ? propType
                         : getTypeWithFacts(propType, TypeFacts.NEUndefined);
                     const forward = isRelatedTo(type, targetInfo.type, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
-                    // L: a writable index signature can store into this property, unless nothing else holds the source.
-                    const related = forward && relationGrantsWrites() && !targetInfo.isReadonly && isWritablePosition(prop) && !isUnaliasedLiteral(source)
-                        ? relatedBack(type, targetInfo.type, forward, reportErrors, intersectionState)
-                        : forward;
+                    // L: a writable index signature can store into this property or delete it, unless nothing else holds the source.
+                    const writable = forward && relationGrantsWrites() && !targetInfo.isReadonly && !isUnaliasedLiteral(source);
+                    const back = writable ? relatedBack(type, targetInfo.type, forward, reportErrors, intersectionState) : forward;
+                    const related = writable && back ? back & mayBeDeleted(prop, reportErrors) : back;
                     if (!related) {
                         if (reportErrors) {
                             reportError(Diagnostics.Property_0_is_incompatible_with_index_signature, symbolToString(prop));

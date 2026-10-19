@@ -7,6 +7,8 @@
 // marked line names the diagnostic its mechanism emits, `// rejected here: TS2890`, optionally followed by text that
 // diagnostic's chain must contain. A rejection only counts when a diagnostic on that line carries both, so a case
 // rejected for some other reason is broken, not closed.
+//
+// Cases are judged under L's catalog options: strict, noUncheckedIndexedAccess and exactOptionalPropertyTypes.
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -42,8 +44,9 @@ const cases = TYPES.flatMap((type) => dirs(join(lab, type)).flatMap((label) => {
 function diagnose(path) {
   const ts = createRequire(import.meta.url)(path);
   const program = ts.createProgram(cases.map((c) => c.file), {
-    strict: true, noEmit: true, skipLibCheck: true, types: [],
+    strict: true, noUncheckedIndexedAccess: true, exactOptionalPropertyTypes: true, noEmit: true, skipLibCheck: true, types: [],
     target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, moduleDetection: ts.ModuleDetectionKind.Force,
+    lib: ['lib.es2022.d.ts', 'lib.dom.d.ts'],
   });
   const flatten = (m) => [{ code: m.code, text: m.messageText }, ...(m.next ?? []).flatMap(flatten)];
   const byFile = new Map(cases.map((c) => [c.file, []]));

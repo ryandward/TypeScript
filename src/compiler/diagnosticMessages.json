@@ -4042,6 +4042,10 @@
         "category": "Error",
         "code": 2893
     },
+    "Property '{0}' is required, and the target could delete it.": {
+        "category": "Error",
+        "code": 2894
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

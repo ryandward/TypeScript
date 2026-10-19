@@ -17,6 +17,7 @@ const MECHANISMS = new Map([
   [2891, 'write-induced invariance'],
   [2892, 'binding without an initializer'],
   [2893, 'assignment to a binding'],
+  [2894, 'deletable required property'],
 ]);
 const configs = process.argv.slice(2);
 if (!configs.length) {

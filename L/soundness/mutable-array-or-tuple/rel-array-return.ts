@@ -4,4 +4,4 @@ function widen(strings: string[]): (string | number)[] {
 }
 const strings: string[] = ['a'];
 widen(strings).push(1);
-console.log(strings[1].toUpperCase());
+console.log(strings.map((s) => s.toUpperCase()).join(','));

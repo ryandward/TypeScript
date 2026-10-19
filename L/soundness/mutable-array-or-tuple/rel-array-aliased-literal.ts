@@ -3,4 +3,4 @@
 const a = ['a'];
 const wide: (string | number)[] = a; // rejected here: TS2891
 wide.push(1);
-console.log(a[1].toUpperCase());
+console.log(a.map((s) => s.toUpperCase()).join(','));

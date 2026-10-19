@@ -2,4 +2,4 @@
 function pushOne(xs: (string | number)[]): void { xs.push(1); }
 const strings: string[] = ['a'];
 pushOne(strings); // rejected here: TS2891
-console.log(strings[1].toUpperCase());
+console.log(strings.map((s) => s.toUpperCase()).join(','));

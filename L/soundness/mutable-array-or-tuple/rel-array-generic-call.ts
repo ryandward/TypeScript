@@ -3,4 +3,4 @@ function same<T>(xs: T[]): T[] { return xs; }
 const strings: string[] = ['a'];
 const wide: (string | number)[] = same<string | number>(strings); // rejected here: TS2891
 wide.push(1);
-console.log(strings[1].toUpperCase());
+console.log(strings.map((s) => s.toUpperCase()).join(','));

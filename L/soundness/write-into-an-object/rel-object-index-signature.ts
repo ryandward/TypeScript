@@ -3,4 +3,4 @@
 const dict: { [k: string]: string } = { a: 'a' };
 const wide: { [k: string]: string | number } = dict; // rejected here: TS2890
 wide.b = 1;
-console.log(dict.b.toUpperCase());
+console.log(Object.values(dict).map((s) => s.toUpperCase()).join(','));
