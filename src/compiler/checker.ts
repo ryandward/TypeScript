@@ -38291,6 +38291,14 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         return propagateOptionalTypeMarker(getNonNullableType(nonOptionalType), node, nonOptionalType !== leftType);
     }
 
+    function checkAnyKeyword(node: Node) {
+        // L: 'any' turns off checking for whatever it types. Only the project's own files are judged; a library's 'any' is met where it's read.
+        const sourceFile = getSourceFileOfNode(node);
+        if (!host.isSourceFileDefaultLibrary(sourceFile) && !host.isSourceFileFromExternalLibrary(sourceFile)) {
+            error(node, Diagnostics.any_lets_a_value_be_used_in_any_way_without_checking_it_L_has_no_any);
+        }
+    }
+
     function checkNonNullAssertion(node: NonNullExpression) {
         // L: a non-null assertion claims a value is present without checking it.
         error(node, Diagnostics.This_asserts_the_value_is_present_without_checking_it_L_has_no_non_null_assertions);
@@ -49263,6 +49271,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 return checkAccessorDeclaration(node as AccessorDeclaration);
             case SyntaxKind.TypeReference:
                 return checkTypeReferenceNode(node as TypeReferenceNode);
+            case SyntaxKind.AnyKeyword:
+                return checkAnyKeyword(node);
             case SyntaxKind.TypePredicate:
                 return checkTypePredicate(node as TypePredicateNode);
             case SyntaxKind.TypeQuery:

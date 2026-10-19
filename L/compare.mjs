@@ -21,6 +21,7 @@ const MECHANISMS = new Map([
   [2895, 'non-null assertion'],
   [2896, 'type assertion'],
   [2897, 'definite assignment assertion'],
+  [2898, 'any'],
 ]);
 const configs = process.argv.slice(2);
 if (!configs.length) {

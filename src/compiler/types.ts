@@ -5061,6 +5061,7 @@ export interface TypeCheckerHost extends ModuleSpecifierResolutionHost, SourceFi
     packageBundlesTypes(packageName: string): boolean;
 
     isSourceFileDefaultLibrary(file: SourceFile): boolean;
+    isSourceFileFromExternalLibrary(file: SourceFile): boolean;
 }
 
 /** @internal */

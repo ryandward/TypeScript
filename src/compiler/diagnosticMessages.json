@@ -4058,6 +4058,10 @@
         "category": "Error",
         "code": 2897
     },
+    "'any' lets a value be used in any way without checking it. L has no 'any'.": {
+        "category": "Error",
+        "code": 2898
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",
