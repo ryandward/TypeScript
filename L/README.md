@@ -42,11 +42,31 @@ flow where, flow analysis decides what a reference holds at a point, and node ch
 - `node L/tracker.mjs` runs every case against the release (`lib/typescript.js`), the lab build
   (`built/local/typescript.js`, from `npx hereby local`) and Node. It prints a matrix of where each
   rule stands and exits 1 if any case is broken or any control fails.
+- `node L/compare.mjs <tsconfig.json> ...` lists what the lab rejects in a project that the release
+  accepts, on lines changed since the merge base with main, each with the L mechanism in its chain.
+  Rejections with none are listed first. The project is only type-checked; nothing in it runs. We use
+  other projects this way to find diagnostics, never to work on them, and we never hold TypeScript's own
+  codebase to L.
 
-## Before a checker edit
+Where the lab stands today, what got decided and what comes next is in `status.txt`.
 
-Every edit to `checker.ts` states three things, in its commit message:
+## How every checker edit is held
 
-1. Which subsystem is responsible for the behavior: relation, flow or node checks.
-2. Why the fix belongs in that function and nowhere else.
-3. Why it doesn't change how unrelated constructs are handled.
+- Locality. Each patch stays in one subsystem. Soundness and variance belong in the type relation and
+  never touch flow analysis or narrowing. Flow and narrowing belong in flow analysis and never change
+  declared types. Policy rejections belong in node checks and never touch the relation. An edit for
+  mutability that lands in flow-narrowing or null-checking code is wrong.
+- Proof of mechanism. A witness only counts as closed if the lab rejects it for the reason the rule
+  exists, with that rule's own diagnostic, traced to the code that was changed. The tracker enforces this
+  through the code in each marker.
+- Before the edit. Every edit to `checker.ts` states three things in its commit message: which subsystem
+  is responsible for the behavior, why the fix belongs in that function and nowhere else, and why it
+  doesn't change how unrelated constructs are handled.
+
+## Standing rules
+
+- No exemptions. When a library contract collides with a rule, we fix our own model, or stop and report
+  it when the library's contract forces the relation. TypeScript's own lib can be patched where it
+  declares writable something nothing writes.
+- Known false positives never stay in the compiler, and nothing gets built on top of one.
+- No spreads, no acronyms in names, and one case per file.
