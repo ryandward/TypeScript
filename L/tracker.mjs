@@ -3,8 +3,9 @@
 //
 //   node L/tracker.mjs [rule ...]          default: every rule
 //
-// Each rule is a folder, L/<rule>/, holding its rule.txt and its cases. rule.txt's header names the rule's kind and
-// its mechanisms, each with the L code it reports (see rules.mjs). A case's first line says what it is for:
+// Each rule is a folder, L/<rule>/, holding its rule.txt and its cases. rule.txt names the rule's kind and its
+// mechanisms, each with the L code it reports; written as a proof, it cites every case under the obligation the case
+// supports, and the tracker holds the folder to it (see rules.mjs). A case's first line says what it is for:
 // `// witness:`, `// control:` or `// rejected sound code:`. A marked line names the diagnostic its mechanism emits,
 // `// rejected here: TS2890`, optionally followed by text that diagnostic's chain must contain. A rejection only counts
 // when a diagnostic on that line carries both, and the code must be one of the rule's mechanisms.
@@ -23,6 +24,7 @@ const LAB = join(repo, 'built/local/typescript.js');
 const MARK = /\/\/ rejected here(?:: TS(\d+)(?: (.*\S))?)?\s*$/;
 const ROLE = /^\/\/ (witness|control|rejected sound code): /;
 const KIND_OF_ROLE = { witness: 'witness', control: 'control', 'rejected sound code': 'sound' };
+const ROLE_NAME = { witness: 'a witness', control: 'a control', sound: 'rejected sound code' };
 const wanted = process.argv.slice(2);
 
 if (!existsSync(LAB)) {
@@ -86,8 +88,18 @@ function judge(c) {
   if (c.kind !== 'witness' && threw) problems.push(`Node throws: ${run.stderr.split('\n').find((l) => /Error/.test(l)) ?? run.stderr.trim()}`);
   if (c.kind === 'control' && marks.length) problems.push('a control marks a line to reject');
   for (const m of marks.filter((m) => m.code === undefined)) problems.push(`line ${m.line} is marked without the diagnostic its mechanism emits`);
-  for (const m of marks.filter((m) => m.code !== undefined && !c.rule.mechanisms.some((x) => x.code === m.code))) {
-    problems.push(`line ${m.line} is marked TS${m.code}, which isn't one of ${c.rule.name}'s mechanisms`);
+  // A rule written as a proof cites the case under one obligation, in the role the case's first line claims, and
+  // the case's markers name that obligation's code. Otherwise a marker names one of the rule's mechanisms.
+  const base = c.file.split(sep).pop();
+  const obligation = c.rule.mechanisms.find((o) => o.cites.some((x) => x.file === base));
+  const cited = obligation?.cites.find((x) => x.file === base);
+  if (c.rule.proof && cited === undefined) problems.push('rule.txt doesn\'t cite this case under any obligation');
+  if (cited && c.kind !== undefined && cited.role !== c.kind) problems.push(`rule.txt cites it as ${ROLE_NAME[cited.role]}, but its first line says ${ROLE_NAME[c.kind]}`);
+  const allowed = c.rule.proof ? (obligation ? [obligation] : undefined) : c.rule.mechanisms;
+  for (const m of allowed ? marks.filter((m) => m.code !== undefined && !allowed.some((x) => x.code === m.code)) : []) {
+    problems.push(obligation
+      ? `line ${m.line} is marked TS${m.code}, but rule.txt cites it under obligation ${obligation.number}, TS${obligation.code}`
+      : `line ${m.line} is marked TS${m.code}, which isn't one of ${c.rule.name}'s mechanisms`);
   }
   let status;
   if (problems.length) status = 'broken';

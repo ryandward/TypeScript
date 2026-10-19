@@ -1,37 +1,92 @@
 any
 kind: soundness
-TS2898 assignability: isSimpleTypeRelatedTo
-TS2900 structure: checkExpression
 
-The runtime is the oracle: if the checker accepts a node, running that node must not throw a TypeError. A
-value of type any can be every value there is, null, undefined and 42 among them. So for the checker's
-prediction to match the runtime, any has to act as a top type at the value level, the way unknown does: the
-checker may accept only what every value allows. Plain TypeScript instead lets any stand in for every type at
-once, which reaches the runtime in two ways. Each is a mechanism with its own L code.
+Claim. If the lab accepts a program, no value of type any is used as more than unknown: it flows only into a
+slot that accepts every value, and no operation that needs a structure is applied to it.
 
-TS2898 assignability (closed)
-  Obligation: a value of type S may flow into a slot of type T only if every value of S is a T. Every value
-  is a value of any, so an any source may flow only into a slot that accepts every value: unknown, any, or a
-  union such as {} | null | undefined. This holds for an any nested in a type too, as in any[] or Promise<any>.
-  Plain TypeScript: isSimpleTypeRelatedTo relates an any source to every target.
-  The lab: under valueAssignableRelation, isSimpleTypeRelatedTo reports TS2898 instead, for an any source and
-  for an any that checkExpression read as unknown.
+The oracle. A value of type any can be every value there is, null, undefined and 42 among them. If the checker
+accepts a node, running that node must not throw a TypeError, so the checker may accept only what every value
+allows. That is unknown's answer, and TypeScript already gives it for unknown at every node below.
 
-TS2900 structure (closed)
-  Obligation: an operation that needs its operand to have a structure may be accepted only if every value of
-  the operand's type has it. The structures are a property or an element to read, a call or construct
-  signature, an iterator, an object that destructuring or `in` can look into, and a callable right side for
-  instanceof. null and 42 are values of any and have none of them, so each such operation on an any value
-  must be rejected. TypeScript already rejects every one of them on unknown; the obligation is for any to get
-  unknown's answer.
-  Plain TypeScript: each operation has its own any shortcut, such as the isAnyLike branch of
-  checkPropertyAccessExpressionOrQualifiedName, isUntypedFunctionCall for calls and new, and the isTypeAny
-  return in checkIteratedTypeOrElementType. checker.ts calls isTypeAny 51 times.
-  The lab: every one of these operations takes its operand's type from checkExpression, which gives a value
-  of type any the type uncheckedType instead: an unknown with its own identity. Each operation then rejects
-  it as unknown, and where TypeScript reports that, TS2900 heads the chain: checkNonNullTypeWithReporter,
-  reportTypeNotIterableError, the destructured property in getPropertyTypeForIndexType, invocationError for a
-  tagged template, and resolveInstanceofExpression. A flow into a slot still reports TS2898. The mark
-  survives getNonNullableType, as in an optional chain or ??, and getUnionType, through IncludesUnchecked.
-  Node runs three of these operations on null or 42 without a TypeError: an optional read, an object spread,
-  and destructuring a number. The lab rejects all three, as TypeScript does for unknown.
+Counterexample in plain TypeScript. any is both top and bottom. It relates to every type, in
+isSimpleTypeRelatedTo, and every operation on it is accepted by a shortcut of its own; checker.ts calls
+isTypeAny 51 times. A property read returns any at the isAnyLike branch of
+checkPropertyAccessExpressionOrQualifiedName, without looking the property up. A call takes
+isUntypedFunctionCall to resolveUntypedCall, whose anySignature takes any arguments and returns any. for-of and
+spread get any back from checkIteratedTypeOrElementType. The release accepts every witness below, and Node
+crashes on each.
+
+Obligation 1, assignability: TS2898
+  Statement. A value of type S may flow into a slot of type T only if every value of S is a T. Every value is
+  a value of any, so an any source may flow only into a slot that accepts every value: unknown, any, or a union
+  such as {} | null | undefined. The same holds for an any inside a type, as in any[] or Promise<any>.
+  Mechanism. Under valueAssignableRelation, isSimpleTypeRelatedTo relates an any source, and an any that
+  checkExpression read as unknown, only to those targets, and reports TS2898 for any other.
+  Why it suffices. Every flow of a value into a slot is judged under valueAssignableRelation: an initializer,
+  an assignment, a return, an argument. An any nested in a type argument reaches the same branch, because type
+  arguments are related through their variances under the same relation.
+  Witnesses:
+    rel-any-nested-array.ts            Array.isArray's any[] returned as readonly string[]
+    rel-any-nested-promise.ts          Response.json's Promise<any>, awaited into an interface
+    lib-array-isarray-any.ts           the same any[], through a ternary
+    lib-response-json-await.ts         the same Promise<any>, through a Response held in a const
+    lib-then-json-parse.ts             then(JSON.parse) infers Promise<any>
+    lib-map-no-typeargs.ts             new Map() is Map<any, any>, so values() yields any
+    lib-new-array-any.ts               new Array(3) is any[]
+    lib-object-values-interface.ts     Object.values on an interface returns any[]
+    lib-promise-any-errors.ts          AggregateError.errors is any[]
+    lib-generator-tnext-any.ts         yield is any when Generator's TNext is left to its default
+    lib-promise-catch-annotated.ts     catch hands its callback reason: any
+    lib-message-event-default-any.ts   the message listener is handed MessageEvent<any>
+    lib-json-stringify-replacer.ts     stringify hands its replacer value: any
+    lib-string-replace-callback.ts     replace hands its callback ...args: any[]
+  Controls:
+    unknown-checked.ts                 an any flowing into unknown, decided by typeof before it is read
+    function-constraint.ts             any written in a constraint, where no value of type any flows
+  Rejected sound code, because soundness forces it:
+    json-parse-number.ts               the text is a number, but only a parser could say so
+
+Obligation 2, structure: TS2900
+  Statement. An operation that needs its operand to have a structure may be accepted only if every value of
+  the operand's type has it: a property or an element to read, a call or construct signature, an iterator, an
+  object for destructuring or `in` to look into, a callable right side for instanceof. null and 42 are values
+  of any, and they have none of these.
+  Mechanism. checkExpression gives a value of type any the type uncheckedType: an intrinsic with unknown's
+  flags and its own identity, the way errorType and wildcardType are any with theirs. Each operation then meets
+  an unknown and rejects it the way TypeScript rejects unknown. Where TypeScript reports that, TS2900 heads the
+  chain, with TypeScript's own diagnostic beneath it:
+    checkNonNullTypeWithReporter       TS18046   property read, element read, call, new, for-of, in
+    getPropertyTypeForIndexType        TS2339    object destructuring
+    reportTypeNotIterableError         TS2488    array spread, call spread, array destructuring
+    invocationError                    TS2349    tagged template
+    resolveInstanceofExpression        TS2359    instanceof
+  The mark survives the two operations that would otherwise drop it: getNonNullableType keeps it through an
+  optional chain or ??, and getUnionType keeps it in a union through IncludesUnchecked.
+  Why it suffices. Every one of these operations takes its operand's type from checkExpression: directly,
+  through checkNonNullExpression, or through checkExpressionCached for the initializer that destructuring
+  takes apart. So no operand of type any reaches an operation's own shortcut; it arrives as unknown.
+  Witnesses:
+    chk-property-off-any.ts            a property read off null
+    chk-element-off-any.ts             an element read off null
+    chk-call-any.ts                    a call on 42
+    chk-new-any.ts                     new on 42
+    chk-tagged-template-any.ts         42 as a template tag
+    chk-iterate-any.ts                 for-of over 42
+    chk-spread-any.ts                  an array spread of 42
+    chk-destructure-any.ts             destructuring null
+    chk-in-any.ts                      in with 42 on the right
+    chk-instanceof-any.ts              instanceof with 42 on the right
+  Controls:
+    narrowed-before-use.ts             typeof decides the value before it is read
+  Rejected sound code, because L's record model chooses it:
+    optional-read.ts                   null?.length doesn't throw, but L's records are closed, so a read
+                                       needs a label the type has
+
+Open.
+- After a TS2900, the operation's result is errorType, which carries any's flag, so isSimpleTypeRelatedTo
+  reports TS2898 for it as well: one fault, reported twice.
+- When the target is a type parameter, TypeScript's TS5082 elaboration replaces the chain, and TS2898 drops
+  out of it.
+
+In src/compiler/checker.ts, this rule's change is found by searching for uncheckedType, errorOrUnchecked and
+the TS2898 message, A_value_of_type_any_was_never_checked. Every L change carries a `// L:` comment.

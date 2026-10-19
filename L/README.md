@@ -16,10 +16,10 @@ L/
 rule.txt opens with a header, ended by a blank line:
 
 ```
-any
-kind: soundness
-TS2898 assignability: isSimpleTypeRelatedTo
-TS2900 structure: checkExpression
+let-or-var
+kind: policy
+TS2892 binding without an initializer: checkGrammarVariableDeclaration
+TS2893 assignment to a binding: checkIdentifier
 ```
 
 The first line is the rule's name, and the kind says why L has the rule:
@@ -32,6 +32,12 @@ The first line is the rule's name, and the kind says why L has the rule:
 Each mechanism line gives the L code the mechanism reports, its name, and the checker functions that enforce
 it. A mechanism that closes holes in two rules appears in both under the same name. A rule with no mechanism
 lines is specified but not built yet, and the tracker shows it as spec only.
+
+A rule written as a proof, as any is, follows its kind with a claim, the counterexample in plain TypeScript, and
+one obligation per mechanism, `Obligation 1, assignability: TS2898`. Each obligation gives its statement, its
+mechanism and why the mechanism suffices, and cites every case that supports it beneath `Witnesses:`,
+`Controls:` or `Rejected sound code, ...:`. The tracker holds the folder to the proof: every case is cited once,
+in the role its first line claims, and its markers name its obligation's code.
 
 A case's first line says what it is for:
 
