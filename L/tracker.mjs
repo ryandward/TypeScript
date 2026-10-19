@@ -3,7 +3,7 @@
 //
 //   node L/tracker.mjs [type ...]          default: soundness policy information project
 //
-// The hierarchy is L/<type>/<rule-label>/..., and a case's place in it says what it must do (see L/README.md). A
+// The hierarchy is L/<type>/<rule-label>/..., and a case's place in it says what it must do. A
 // marked line names the diagnostic its mechanism emits, `// rejected here: TS2890`, optionally followed by text that
 // diagnostic's chain must contain. A rejection only counts when a diagnostic on that line carries both, so a case
 // rejected for some other reason is broken, not closed.
