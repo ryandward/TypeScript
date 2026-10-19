@@ -36723,11 +36723,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         // signature, the subtype pass is useless. So skipping it is an optimization.
         if (candidates.length > 1) {
             result = chooseOverload(candidates, subtypeRelation, isSingleNonGenericCandidate, signatureHelpTrailingComma);
-            // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the subtype pass doesn't know about writes, so the
-            // overload it picks must also accept its arguments as values.
-            if (result && getSignatureApplicabilityError(node, args, result, valueAssignableRelation, CheckMode.Normal, /*reportErrors*/ false, /*containingMessageChain*/ undefined)) {
-                result = undefined;
-            }
         }
         if (!result) {
             result = chooseOverload(candidates, valueAssignableRelation, isSingleNonGenericCandidate, signatureHelpTrailingComma);
@@ -36938,7 +36933,12 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 else {
                     checkCandidate = candidate;
                 }
-                if (getSignatureApplicabilityError(node, args, checkCandidate, relation, argCheckMode, /*reportErrors*/ false, /*containingMessageChain*/ undefined)) {
+                // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): while arguments are skipped, this check
+                // judges stand-ins (a placeholder for each skipped function, object literals stripped of freshness), not the
+                // values that will flow. The value relation judges those in the normal pass below, which every candidate accepted
+                // here goes through.
+                const provisionalRelation = argCheckMode && relation === valueAssignableRelation ? assignableRelation : relation;
+                if (getSignatureApplicabilityError(node, args, checkCandidate, provisionalRelation, argCheckMode, /*reportErrors*/ false, /*containingMessageChain*/ undefined)) {
                     // Give preference to error candidates that have no rest parameters (as they are more specific)
                     (candidatesForArgumentError || (candidatesForArgumentError = [])).push(checkCandidate);
                     continue;
@@ -36963,6 +36963,13 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                         (candidatesForArgumentError || (candidatesForArgumentError = [])).push(checkCandidate);
                         continue;
                     }
+                }
+                // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the subtype pass picks the best overload
+                // but doesn't know about writes, so the one it picks must also accept its arguments as values. Checked before
+                // the candidate is accepted, so a rejected one is recorded like any other and the list stays as it was.
+                if (relation === subtypeRelation && getSignatureApplicabilityError(node, args, checkCandidate, valueAssignableRelation, CheckMode.Normal, /*reportErrors*/ false, /*containingMessageChain*/ undefined)) {
+                    (candidatesForArgumentError || (candidatesForArgumentError = [])).push(checkCandidate);
+                    continue;
                 }
                 candidates[candidateIndex] = checkCandidate;
                 return checkCandidate;
