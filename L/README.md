@@ -1,7 +1,8 @@
 # L
 
-Each of L's rules has a folder here, named with L-hooks' label for the rule. The folder holds the rule's proof
-and every program the proof cites, side by side.
+Each of L's rules has a folder here, named for what the rule enforces, which is sometimes not what L-hooks
+calls it: immutable-bindings is the hooks' ban on let and var, built on what the binding does instead of on
+the keyword. The folder holds the rule's proof and every program the proof cites, side by side.
 
 ```
 L/

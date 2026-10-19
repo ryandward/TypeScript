@@ -12,7 +12,7 @@ Obligation 1, definite assignment assertion: TS2897
   or on every path through the constructor.
   Mechanism. checkPropertyDeclaration reports TS2897 for every property declaration written with !.
   Why it suffices. Without !, strictPropertyInitialization already holds every property to that rule. A let or
-  var written with ! has no initializer, so single assignment rejects it first, with TS2892 in let-or-var.
+  var written with ! has no initializer, so single assignment rejects it first, with TS2892 in immutable-bindings.
   Witnesses:
     rule-definite.ts                   a property asserted to be assigned that nothing assigns
   Controls:
