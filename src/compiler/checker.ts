@@ -38199,6 +38199,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 diagnostics.add(createFileDiagnostic(file, start, end - start, Diagnostics.This_syntax_is_not_allowed_when_erasableSyntaxOnly_is_enabled));
             }
         }
+        // L: an assertion claims a type without checking it. 'as const' claims nothing the literal doesn't show.
+        if (!isConstTypeReference(node.type)) {
+            error(node, Diagnostics.This_asserts_0_without_checking_it_L_has_no_type_assertions_other_than_as_const, getTextOfNode(node.type));
+        }
         return checkAssertionWorker(node, checkMode);
     }
 

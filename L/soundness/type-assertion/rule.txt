@@ -1,0 +1,7 @@
+type-assertion
+
+A type assertion claims a value has a type without checking it, and the checker takes its word. The lab
+rejects every as T and <T>x except as const, which claims nothing the literal doesn't show.
+
+Where it's enforced, in src/compiler/checker.ts:
+- checkAssertion reports TS2896 for every assertion whose type isn't const.

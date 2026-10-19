@@ -4050,6 +4050,10 @@
         "category": "Error",
         "code": 2895
     },
+    "This asserts '{0}' without checking it. L has no type assertions other than 'as const'.": {
+        "category": "Error",
+        "code": 2896
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",
