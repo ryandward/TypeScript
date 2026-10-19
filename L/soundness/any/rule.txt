@@ -1,14 +1,31 @@
 any
 
-The relation treats a value of type any as assignable to every type, so a value nothing has checked can flow
-into any slot. Most any never appears in the code at all: it comes from a library's declarations, like
-JSON.parse, Response.json and Array.isArray, or from inference that settles on any. The lab cuts the short
-circuit: as a value, any flows only into a target that accepts every value, unknown or any. Writing the keyword
-is allowed, since a type can hold any without any value of type any flowing anywhere.
+The runtime is the oracle: if the checker accepts a node, running that node must not throw a TypeError. A
+value of type any can be every value there is, null, undefined and 42 among them. So for the checker's
+prediction to match the runtime, any has to act as a top type, the way unknown does: at each node, the checker
+may accept only what every value allows. Plain TypeScript instead lets any pass as every type at once, at three
+kinds of node. Each one has its own folder and its own proof obligation, and each witness is a program the
+checker accepts and Node rejects with a TypeError at that one node.
 
-Where it's enforced, in src/compiler/checker.ts:
-- isSimpleTypeRelatedTo reports TS2898 when, under valueAssignableRelation, an any source meets a target other
-  than unknown, any or a union that accepts everything, such as {} | null | undefined.
+assignability/ (closed: TS2898)
+  Obligation: a value of type S may flow into a slot of type T only if every value of S is a T. Every value
+  is a value of any, so an any source may flow only into a slot that accepts every value: unknown, any, or a
+  union such as {} | null | undefined.
+  Plain TypeScript: isSimpleTypeRelatedTo relates an any source to every target.
+  The lab: under valueAssignableRelation, isSimpleTypeRelatedTo reports TS2898 instead.
 
-Still open: reading a property off any or calling it (rule-any). Those go through
-checkPropertyAccessExpressionOrQualifiedName and resolveUntypedCall, not through a relation.
+property-access/ (open)
+  Obligation: e.p may be accepted only if every value of e's type has a property p to read, and so is never
+  null or undefined. null and undefined are values of any, so e.p must be rejected when e is any, as it already
+  is when e is unknown (TS18046).
+  Plain TypeScript: checkNonNullTypeWithReporter rejects unknown but passes any, because getTypeFactsWorker
+  answers that any is never null or undefined. Then the isAnyLike branch of
+  checkPropertyAccessExpressionOrQualifiedName gives e.p the type any without looking p up.
+
+callability/ (open)
+  Obligation: e(args) may be accepted only if every value of e's type is a function with a signature that takes
+  args. 42 is a value of any, so e(args) must be rejected when e is any, as it already is when e is unknown
+  (TS18046).
+  Plain TypeScript: checkNonNullTypeWithReporter passes any the same way. Then isUntypedFunctionCall is true
+  for any, and resolveCallExpression returns resolveUntypedCall, whose anySignature takes any arguments and
+  returns any.

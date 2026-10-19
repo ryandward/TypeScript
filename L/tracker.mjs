@@ -29,8 +29,14 @@ if (!existsSync(LAB)) {
 const dirs = (dir) => (existsSync(dir) ? readdirSync(dir).filter((n) => statSync(join(dir, n)).isDirectory()).sort() : []);
 const tsFiles = (dir) => (existsSync(dir) ? readdirSync(dir).filter((n) => n.endsWith('.ts')).sort().map((n) => join(dir, n)) : []);
 
+// A rule's cases sit in its folder or, for a rule enforced at more than one kind of node, in a folder per mechanism.
+const units = (type) => dirs(join(lab, type)).flatMap((rule) => {
+  const mechanisms = dirs(join(lab, type, rule)).filter((n) => n !== 'controls' && n !== 'rejected-sound-code');
+  return mechanisms.length ? mechanisms.map((m) => `${rule}/${m}`) : [rule];
+});
+
 // Every case, with the kind its folder gives it.
-const cases = TYPES.flatMap((type) => dirs(join(lab, type)).flatMap((label) => {
+const cases = TYPES.flatMap((type) => units(type).flatMap((label) => {
   const dir = join(lab, type, label);
   return [
     ...tsFiles(dir).map((file) => ({ type, label, file, kind: 'witness' })),
@@ -114,7 +120,7 @@ function judge(c) {
 }
 
 const judged = cases.map(judge);
-const rules = TYPES.flatMap((type) => dirs(join(lab, type)).map((label) => ({
+const rules = TYPES.flatMap((type) => units(type).map((label) => ({
   type, label, cases: judged.filter((c) => c.type === type && c.label === label),
 })));
 const count = (r, kind, status) => r.cases.filter((c) => c.kind === kind && (status === undefined || c.status === status)).length;

@@ -14,6 +14,10 @@ L/
     rejected-sound-code/<case>.ts   a safe program the lab rejects on purpose, with a comment saying why
 ```
 
+A rule the checker has to enforce at more than one kind of node gets a folder per mechanism,
+`<kind>/<rule>/<mechanism>/`, each laid out like a rule folder, and its rule.txt states each mechanism's proof
+obligation. The tracker shows each mechanism as its own row.
+
 A rule that is specified but not built yet has only its rule.txt, and the tracker shows it as spec only.
 
 The kind says why L has the rule:
