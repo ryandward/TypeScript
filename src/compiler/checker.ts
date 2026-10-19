@@ -23089,7 +23089,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     eachTypeRelatedToType(source as UnionType, target, reportErrors && !(source.flags & TypeFlags.Primitive), intersectionState);
             }
             if (target.flags & TypeFlags.Union) {
-                return typeRelatedToSomeType(getRegularTypeOfObjectLiteral(source), target as UnionType, reportErrors && !(source.flags & TypeFlags.Primitive) && !(target.flags & TypeFlags.Primitive), intersectionState);
+                // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): keep a fresh literal fresh, so each union member's writable positions see that the
+                // source has no alias. Baseline regularizes here only to avoid repeating the excess property check.
+                const unionSource = getObjectFlags(source) & ObjectFlags.FreshLiteral ? source : getRegularTypeOfObjectLiteral(source);
+                return typeRelatedToSomeType(unionSource, target as UnionType, reportErrors && !(source.flags & TypeFlags.Primitive) && !(target.flags & TypeFlags.Primitive), intersectionState);
             }
             if (target.flags & TypeFlags.Intersection) {
                 return typeRelatedToEachType(source, target as IntersectionType, reportErrors, IntersectionState.Target);
@@ -24296,15 +24299,35 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             return result || properties;
         }
 
-        function isPropertySymbolTypeRelated(sourceProp: Symbol, targetProp: Symbol, getTypeOfSourceProperty: (sym: Symbol) => Type, reportErrors: boolean, intersectionState: IntersectionState): Ternary {
+        // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the relations that grant write capability. Comparability (narrowing, equality) and identity do not.
+        function relationGrantsWrites() {
+            return relation !== comparableRelation && relation !== identityRelation;
+        }
+
+        function isPropertySymbolTypeRelated(sourceProp: Symbol, targetProp: Symbol, getTypeOfSourceProperty: (sym: Symbol) => Type, reportErrors: boolean, intersectionState: IntersectionState, freshSource = false): Ternary {
             const targetIsOptional = strictNullChecks && !!(getCheckFlags(targetProp) & CheckFlags.Partial);
             const effectiveTarget = addOptionality(getNonMissingTypeOfSymbol(targetProp), /*isProperty*/ false, targetIsOptional);
+            // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a writable target position is read and written through the target, so its type must
+            // relate both ways. A fresh object literal has no other alias, so widening it creates no second
+            // name through which it could be written (the array-literal case is in checkArrayLiteral).
+            const writable = relationGrantsWrites() && isWritablePosition(targetProp) && !freshSource;
             // source could resolve to `any` and that's not related to `unknown` target under strict subtype relation
-            if (effectiveTarget.flags & (relation === strictSubtypeRelation ? TypeFlags.Any : TypeFlags.AnyOrUnknown)) {
+            if (!writable && effectiveTarget.flags & (relation === strictSubtypeRelation ? TypeFlags.Any : TypeFlags.AnyOrUnknown)) {
                 return Ternary.True;
             }
             const effectiveSource = getTypeOfSourceProperty(sourceProp);
-            return isRelatedTo(effectiveSource, effectiveTarget, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
+            const related = isRelatedTo(effectiveSource, effectiveTarget, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
+            if (!related || !writable) {
+                return related;
+            }
+            const back = isRelatedTo(effectiveTarget, effectiveSource, RecursionFlags.Both, /*reportErrors*/ false, /*headMessage*/ undefined, intersectionState);
+            if (!back) {
+                if (reportErrors) {
+                    reportError(Diagnostics.Type_0_is_not_assignable_to_type_1, typeToString(effectiveSource), typeToString(effectiveTarget));
+                }
+                return Ternary.False;
+            }
+            return related & back;
         }
 
         function propertyRelatedTo(source: Type, target: Type, sourceProp: Symbol, targetProp: Symbol, getTypeOfSourceProperty: (sym: Symbol) => Type, reportErrors: boolean, intersectionState: IntersectionState, skipOptional: boolean): Ternary {
@@ -24351,7 +24374,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 return Ternary.False;
             }
             // If the target comes from a partial union prop, allow `undefined` in the target type
-            const related = isPropertySymbolTypeRelated(sourceProp, targetProp, getTypeOfSourceProperty, reportErrors, intersectionState);
+            const related = isPropertySymbolTypeRelated(sourceProp, targetProp, getTypeOfSourceProperty, reportErrors, intersectionState, !!(getObjectFlags(source) & (ObjectFlags.FreshLiteral | ObjectFlags.JsxAttributes)));
             if (!related) {
                 if (reportErrors) {
                     reportIncompatibleError(Diagnostics.Types_of_property_0_are_incompatible, symbolToString(targetProp));
@@ -24782,7 +24805,12 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     const type = exactOptionalPropertyTypes || propType.flags & TypeFlags.Undefined || keyType === numberType || !(prop.flags & SymbolFlags.Optional)
                         ? propType
                         : getTypeWithFacts(propType, TypeFacts.NEUndefined);
-                    const related = isRelatedTo(type, targetInfo.type, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
+                    const forward = isRelatedTo(type, targetInfo.type, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
+                    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): the target's writable index signature can store into this source property.
+                    const related = forward && relationGrantsWrites() && !targetInfo.isReadonly && isWritablePosition(prop) &&
+                            !isRelatedTo(targetInfo.type, type, RecursionFlags.Both, /*reportErrors*/ false, /*headMessage*/ undefined, intersectionState)
+                        ? Ternary.False
+                        : forward;
                     if (!related) {
                         if (reportErrors) {
                             reportError(Diagnostics.Property_0_is_incompatible_with_index_signature, symbolToString(prop));
@@ -24805,7 +24833,12 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         }
 
         function indexInfoRelatedTo(sourceInfo: IndexInfo, targetInfo: IndexInfo, reportErrors: boolean, intersectionState: IntersectionState) {
-            const related = isRelatedTo(sourceInfo.type, targetInfo.type, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
+            const forward = isRelatedTo(sourceInfo.type, targetInfo.type, RecursionFlags.Both, reportErrors, /*headMessage*/ undefined, intersectionState);
+            // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a writable index signature on the target is a store position; see isPropertySymbolTypeRelated.
+            const back = forward && relationGrantsWrites() && !targetInfo.isReadonly
+                ? isRelatedTo(targetInfo.type, sourceInfo.type, RecursionFlags.Both, /*reportErrors*/ false, /*headMessage*/ undefined, intersectionState)
+                : Ternary.True;
+            const related = forward & back;
             if (!related && reportErrors) {
                 if (sourceInfo.keyType === targetInfo.keyType) {
                     reportError(Diagnostics._0_index_signatures_are_incompatible, typeToString(sourceInfo.keyType));
@@ -25004,10 +25037,16 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function getVariances(type: GenericType): VarianceFlags[] {
-        // Arrays and tuples are known to be covariant, no need to spend time computing this.
-        return type === globalArrayType || type === globalReadonlyArrayType || type.objectFlags & ObjectFlags.Tuple ?
-            arrayVariances :
-            getVariancesWorker(type.symbol, type.typeParameters);
+        // L (soundness/mutable-array-or-tuple): only ReadonlyArray and readonly tuples are known to be covariant. Array<T>'s
+        // `[n: number]: T` is writable, so it is measured like any generic and comes out invariant
+        // (see isPropertySymbolTypeRelated), and a mutable tuple is invariant per element.
+        if (type === globalReadonlyArrayType) {
+            return arrayVariances;
+        }
+        if (type.objectFlags & ObjectFlags.Tuple) {
+            return (type as TupleType).readonly ? arrayVariances : map(type.typeParameters || emptyArray, () => VarianceFlags.Invariant);
+        }
+        return getVariancesWorker(type.symbol, type.typeParameters);
     }
 
     function getAliasVariances(symbol: Symbol) {
@@ -33396,10 +33435,19 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         if (forceTuple || inConstContext || inTupleContext) {
             return createArrayLiteralType(createTupleType(elementTypes, elementFlags, /*readonly*/ inConstContext && !(contextualType && someType(contextualType, isMutableArrayLikeType))));
         }
+        const elementType = elementTypes.length ?
+            getUnionType(sameMap(elementTypes, (t, i) => elementFlags[i] & ElementFlags.Variadic ? getIndexedAccessTypeOrUndefined(t, numberType) || anyType : t), UnionReduction.Subtype) :
+            strictNullChecks ? implicitNeverType : undefinedWideningType;
+        // L (soundness/mutable-array-or-tuple): a fresh array literal has no other alias, so widening it to the contextual element type
+        // creates no second name through which the original could be written. Give it that type directly,
+        // so the invariant relation is between identical types. Only for a single concrete mutable Array<E>
+        // contextual type with no type variables in E, and not while inferring.
+        const contextualElement = !(checkMode && checkMode & CheckMode.Inferential) && contextualType && elementTypes.length &&
+                isArrayType(contextualType) && !isReadonlyArrayType(contextualType)
+            ? getTypeArguments(contextualType)[0]
+            : undefined;
         return createArrayLiteralType(createArrayType(
-            elementTypes.length ?
-                getUnionType(sameMap(elementTypes, (t, i) => elementFlags[i] & ElementFlags.Variadic ? getIndexedAccessTypeOrUndefined(t, numberType) || anyType : t), UnionReduction.Subtype) :
-                strictNullChecks ? implicitNeverType : undefinedWideningType,
+            contextualElement && !couldContainTypeVariables(contextualElement) && isTypeAssignableTo(elementType, contextualElement) ? contextualElement : elementType,
             inConstContext,
         ));
     }
@@ -39766,6 +39814,12 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         }
         const setProp = getPropertyOfType(objectLitType, "set" as __String);
         return !setProp;
+    }
+
+    // L (soundness/write-into-an-object, soundness/mutable-array-or-tuple): a target position through which a value can be stored: a property or accessor that is not
+    // readonly. Methods are excluded; their variance is a separate decision (method bivariance).
+    function isWritablePosition(targetProp: Symbol): boolean {
+        return !!(targetProp.flags & (SymbolFlags.Property | SymbolFlags.Accessor)) && !isReadonlySymbol(targetProp);
     }
 
     function isReadonlySymbol(symbol: Symbol): boolean {
