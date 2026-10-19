@@ -31246,6 +31246,12 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 }
                 return errorType;
             }
+            // L (policy/let-or-var): every binding is assigned once, where it is declared, so nothing assigns to a variable
+            // afterwards. A parameter, a catch variable and a loop variable are bindings too.
+            if (localOrExportSymbol.flags & SymbolFlags.Variable) {
+                error(node, Diagnostics.Cannot_assign_to_0_because_all_bindings_are_constant_in_L, symbolToString(symbol));
+                return errorType;
+            }
         }
 
         const isAlias = localOrExportSymbol.flags & SymbolFlags.Alias;
@@ -53299,6 +53305,13 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                         return grammarErrorOnNode(node, Diagnostics._0_declarations_must_be_initialized, "using");
                     case NodeFlags.Const:
                         return grammarErrorOnNode(node, Diagnostics._0_declarations_must_be_initialized, "const");
+                    case NodeFlags.Let:
+                    case NodeFlags.None:
+                        // L (policy/let-or-var): every binding is assigned once, where it is declared. A catch variable is
+                        // bound by the throw, so only a declaration list is held to it.
+                        if (isVariableDeclarationList(node.parent)) {
+                            return grammarErrorOnNode(node, Diagnostics._0_must_be_initialized_where_it_is_declared_In_L_every_binding_is_assigned_once, declarationNameToString(node.name));
+                        }
                 }
             }
         }

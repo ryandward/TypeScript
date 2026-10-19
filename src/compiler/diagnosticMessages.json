@@ -4034,6 +4034,14 @@
         "category": "Error",
         "code": 2891
     },
+    "'{0}' must be initialized where it is declared. In L, every binding is assigned once.": {
+        "category": "Error",
+        "code": 2892
+    },
+    "Cannot assign to '{0}' because all bindings are constant in L.": {
+        "category": "Error",
+        "code": 2893
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

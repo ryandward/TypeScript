@@ -34,6 +34,8 @@ flow where, flow analysis decides what a reference holds at a point, and node ch
 | TS2890 | `relatedBack`: a writable property or index signature whose source type doesn't accept the target's | relation |
 | TS2891 | `relateVariances`: a type argument made invariant by a writable position | relation (variance) |
 | TS2339 on the getter's declared type | `getFlowTypeOfAccessExpression`: an accessor read isn't narrowed | flow |
+| TS2892 | `checkGrammarVariableDeclaration`: a `let` or `var` declared without an initializer | node checks (policy) |
+| TS2893 | `checkIdentifier`'s assignment target check: an assignment to any variable after its declaration | node checks (policy) |
 
 ## Tools
 
