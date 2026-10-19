@@ -4,16 +4,17 @@ The runtime is the oracle: if the checker accepts a node, running that node must
 value of type any can be every value there is, null, undefined and 42 among them. So for the checker's
 prediction to match the runtime, any has to act as a top type at the value level, the way unknown does: the
 checker may accept only what every value allows. Plain TypeScript instead lets any stand in for every type at
-once, which reaches the runtime in two ways, each with its own folder.
+once, which reaches the runtime in two ways, each with its own folder, named for the L code its mechanism
+reports.
 
-assignability/ (closed: TS2898)
+TS2898-assignability/ (closed)
   Obligation: a value of type S may flow into a slot of type T only if every value of S is a T. Every value
   is a value of any, so an any source may flow only into a slot that accepts every value: unknown, any, or a
   union such as {} | null | undefined. This holds for an any nested in a type too, as in any[] or Promise<any>.
   Plain TypeScript: isSimpleTypeRelatedTo relates an any source to every target.
   The lab: under valueAssignableRelation, isSimpleTypeRelatedTo reports TS2898 instead.
 
-structure/ (open)
+TS2900-structure/ (open; TS2900 is reserved for it)
   Obligation: an operation that needs its operand to have a structure may be accepted only if every value of
   the operand's type has it. The structures are a property or an element to read, a call or construct
   signature, an iterator, an object that destructuring or `in` can look into, and a callable right side for

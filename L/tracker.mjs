@@ -90,6 +90,11 @@ function judge(c) {
   if (c.kind !== 'witness' && threw) problems.push(`Node throws: ${run.stderr.split('\n').find((l) => /Error/.test(l)) ?? run.stderr.trim()}`);
   if (c.kind === 'control' && marks.length) problems.push('a control marks a line to reject');
   for (const m of marks.filter((m) => m.code === undefined)) problems.push(`line ${m.line} is marked without the diagnostic its mechanism emits`);
+  // A mechanism's folder is named for the L code it reports, so every marker in it names that code.
+  const owned = /(?:^|\/)TS(\d+)-[^/]+$/.exec(c.label);
+  for (const m of owned ? marks.filter((m) => m.code !== undefined && m.code !== Number(owned[1])) : []) {
+    problems.push(`line ${m.line} is marked TS${m.code}, but this folder is TS${owned[1]}'s mechanism`);
+  }
   let status;
   if (problems.length) status = 'broken';
   else if (c.kind === 'control') status = got.length ? 'failing' : 'passing';
