@@ -1,4 +1,4 @@
-# TypeScript with L's rules
+# TypeScript-L
 
 This fork is TypeScript 6.0.3, the last release of the compiler written in TypeScript, with L's rules built
 into its checker. L is a strict dialect of TypeScript, and its Claude Code hooks are in
