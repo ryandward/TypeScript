@@ -7,4 +7,4 @@ class Celsius {
 }
 const c = new Celsius();
 c.reading = 'warm';
-console.log(c.reading.toUpperCase());
+console.log(c.reading.toUpperCase()); // rejected here

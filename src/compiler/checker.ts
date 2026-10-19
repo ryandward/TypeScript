@@ -35078,14 +35078,17 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     function getFlowTypeOfAccessExpression(node: ElementAccessExpression | PropertyAccessExpression | QualifiedName, prop: Symbol | undefined, propType: Type, errorNode: Node, checkMode: CheckMode | undefined) {
         // Only compute control flow type if this is a property access expression that isn't an
         // assignment target, and the referenced property was declared as a variable, property,
-        // accessor, or optional method.
+        // or optional method.
+        // L (soundness/write-into-an-object): not an accessor. Reading one calls its getter, which can
+        // return something else each time, and assigning to one calls its setter, which need not store
+        // what it was given, so neither a check nor an assignment says what the next read returns.
         const assignmentKind = getAssignmentTargetKind(node);
         if (assignmentKind === AssignmentKind.Definite) {
             return removeMissingType(propType, !!(prop && prop.flags & SymbolFlags.Optional));
         }
         if (
             prop &&
-            !(prop.flags & (SymbolFlags.Variable | SymbolFlags.Property | SymbolFlags.Accessor))
+            !(prop.flags & (SymbolFlags.Variable | SymbolFlags.Property))
             && !(prop.flags & SymbolFlags.Method && propType.flags & TypeFlags.Union)
             && !isDuplicatedCommonJSExport(prop.declarations)
         ) {
