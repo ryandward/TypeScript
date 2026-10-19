@@ -32,7 +32,7 @@ A witness's name says what it gets past, as in L-hooks' catalog: rel- the type r
 chk- other checks, lib- library declarations, and rule- a program that crashes only when its rule is
 bypassed.
 
-A line the lab must reject ends with a marker naming the code the rule's check reports, as in
+A line the lab must reject ends with a marker naming the L code of the mechanism that rejects it, as in
 `// rejected here: TS2894`. The tracker counts a rejection only when it carries that code, so a case
 rejected for some other reason shows as broken. Cases are compiled under L's options: strict,
 noUncheckedIndexedAccess and exactOptionalPropertyTypes.

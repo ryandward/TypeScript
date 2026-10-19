@@ -2085,6 +2085,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     var nonInferrableAnyType = createIntrinsicType(TypeFlags.Any, "any", ObjectFlags.ContainsWideningType, "non-inferrable");
     var intrinsicMarkerType = createIntrinsicType(TypeFlags.Any, "intrinsic");
     var unknownType = createIntrinsicType(TypeFlags.Unknown, "unknown");
+    // L: a value of type 'any', read as 'unknown' (see checkExpression), kept apart so a rejection can say where it came from.
+    var uncheckedType = createIntrinsicType(TypeFlags.Unknown, "unknown", /*objectFlags*/ undefined, "unchecked");
     var undefinedType = createIntrinsicType(TypeFlags.Undefined, "undefined");
     var undefinedWideningType = strictNullChecks ? undefinedType : createIntrinsicType(TypeFlags.Undefined, "undefined", ObjectFlags.ContainsWideningType, "widening");
     var missingType = createIntrinsicType(TypeFlags.Undefined, "undefined", /*objectFlags*/ undefined, "missing");
@@ -2580,6 +2582,18 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             return;
         }
         addErrorOrSuggestion(isError, "message" in message ? createDiagnosticForNode(location, message, ...args) : createDiagnosticForNodeFromMessageChain(getSourceFileOfNode(location), location, message)); // eslint-disable-line local/no-in-operator
+    }
+
+    // L: where 'unknown' is rejected, an 'any' read as 'unknown' says so at the head of the chain.
+    function errorOrUnchecked(type: Type, location: Node, message: DiagnosticMessage, ...args: DiagnosticArguments): Diagnostic {
+        if (type !== uncheckedType) return error(location, message, ...args);
+        const diagnostic = createDiagnosticForNodeFromMessageChain(getSourceFileOfNode(location), location, headedIfUnchecked(type, chainDiagnosticMessages(/*details*/ undefined, message, ...args)));
+        diagnostics.add(diagnostic);
+        return diagnostic;
+    }
+
+    function headedIfUnchecked(type: Type, chain: DiagnosticMessageChain): DiagnosticMessageChain {
+        return type === uncheckedType ? chainDiagnosticMessages(chain, Diagnostics.This_value_is_any_which_nothing_has_checked_so_L_reads_it_as_unknown) : chain;
     }
 
     function errorAndMaybeSuggestAwait(
@@ -18091,6 +18105,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (flags & TypeFlags.Intersection && getObjectFlags(type) & ObjectFlags.IsConstrainedTypeVariable) includes |= TypeFlags.IncludesConstrainedTypeVariable;
             if (type === wildcardType) includes |= TypeFlags.IncludesWildcard;
             if (isErrorType(type)) includes |= TypeFlags.IncludesError;
+            if (type === uncheckedType) includes |= TypeFlags.IncludesUnchecked;
             if (!strictNullChecks && flags & TypeFlags.Nullable) {
                 if (!(getObjectFlags(type) & ObjectFlags.ContainsWideningType)) includes |= TypeFlags.IncludesNonWideningType;
             }
@@ -18341,10 +18356,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         const includes = addTypesToUnion(typeSet, 0 as TypeFlags, types);
         if (unionReduction !== UnionReduction.None) {
             if (includes & TypeFlags.AnyOrUnknown) {
+                // L: a union with an 'any' read as 'unknown' in it stays marked, so its rejections say where they came from.
                 return includes & TypeFlags.Any ?
                     includes & TypeFlags.IncludesWildcard ? wildcardType :
                         includes & TypeFlags.IncludesError ? errorType : anyType :
-                    unknownType;
+                    includes & TypeFlags.IncludesUnchecked ? uncheckedType : unknownType;
             }
             if (includes & TypeFlags.Undefined) {
                 // If type set contains both undefinedType and missingType, remove missingType
@@ -19409,7 +19425,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         if (accessNode) {
             const indexNode = getIndexNodeForAccessExpression(accessNode);
             if (indexNode.kind !== SyntaxKind.BigIntLiteral && indexType.flags & (TypeFlags.StringLiteral | TypeFlags.NumberLiteral)) {
-                error(indexNode, Diagnostics.Property_0_does_not_exist_on_type_1, "" + (indexType as StringLiteralType | NumberLiteralType).value, typeToString(objectType));
+                errorOrUnchecked(objectType, indexNode, Diagnostics.Property_0_does_not_exist_on_type_1, "" + (indexType as StringLiteralType | NumberLiteralType).value, typeToString(objectType));
             }
             else if (indexType.flags & (TypeFlags.String | TypeFlags.Number)) {
                 error(indexNode, Diagnostics.Type_0_has_no_matching_index_signature_for_type_1, typeToString(objectType), typeToString(indexType));
@@ -22295,6 +22311,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             ) return true;
             // Anything is assignable to a union containing undefined, null, and {}
             if (isUnknownLikeUnionType(target)) return true;
+            // L: an 'any' read as 'unknown' (see checkExpression) flows no further than it did as 'any'.
+            if (source === uncheckedType && relation === valueAssignableRelation) errorReporter?.(Diagnostics.A_value_of_type_any_was_never_checked_so_it_can_t_flow_into_0_Only_unknown_accepts_it, typeToString(target));
         }
         return false;
     }
@@ -25918,7 +25936,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function getNonNullableType(type: Type): Type {
-        return strictNullChecks ? getAdjustedTypeWithFacts(type, TypeFacts.NEUndefinedOrNull) : type;
+        // L: taking null and undefined out of an 'any' read as 'unknown' checks nothing else about it, so it stays marked.
+        return strictNullChecks && type !== uncheckedType ? getAdjustedTypeWithFacts(type, TypeFacts.NEUndefinedOrNull) : type;
     }
 
     function addOptionalTypeMarker(type: Type) {
@@ -34809,11 +34828,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (isEntityNameExpression(node)) {
                 const nodeText = entityNameToString(node);
                 if (nodeText.length < 100) {
-                    error(node, Diagnostics._0_is_of_type_unknown, nodeText);
+                    errorOrUnchecked(type, node, Diagnostics._0_is_of_type_unknown, nodeText);
                     return errorType;
                 }
             }
-            error(node, Diagnostics.Object_is_of_type_unknown);
+            errorOrUnchecked(type, node, Diagnostics.Object_is_of_type_unknown);
             return errorType;
         }
         const facts = getTypeFacts(type, TypeFacts.IsUndefinedOrNull);
@@ -37494,7 +37513,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
     function invocationError(errorTarget: Node, apparentType: Type, kind: SignatureKind, relatedInformation?: DiagnosticRelatedInformation) {
         const { messageChain, relatedMessage: relatedInfo } = invocationErrorDetails(errorTarget, apparentType, kind);
-        const diagnostic = createDiagnosticForNodeFromMessageChain(getSourceFileOfNode(errorTarget), errorTarget, messageChain);
+        const diagnostic = createDiagnosticForNodeFromMessageChain(getSourceFileOfNode(errorTarget), errorTarget, headedIfUnchecked(apparentType, messageChain));
         if (relatedInfo) {
             addRelatedInfo(diagnostic, createDiagnosticForNode(errorTarget, relatedInfo));
         }
@@ -37736,7 +37755,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             }
             // NOTE: do not raise error if right is unknown as related error was already reported
             else if (!(typeHasCallOrConstructSignatures(rightType) || isTypeSubtypeOf(rightType, globalFunctionType))) {
-                error(node.right, Diagnostics.The_right_hand_side_of_an_instanceof_expression_must_be_either_of_type_any_a_class_function_or_other_type_assignable_to_the_Function_interface_type_or_an_object_type_with_a_Symbol_hasInstance_method);
+                errorOrUnchecked(rightType, node.right, Diagnostics.The_right_hand_side_of_an_instanceof_expression_must_be_either_of_type_any_a_class_function_or_other_type_assignable_to_the_Function_interface_type_or_an_object_type_with_a_Symbol_hasInstance_method);
                 return resolveErrorCall(node);
             }
         }
@@ -41901,7 +41920,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         }
         currentNode = saveCurrentNode;
         tracing?.pop();
-        return type;
+        // L: a value of type 'any' was never checked, so it reads as 'unknown': every operation that needs a structure rejects it.
+        return type === anyType ? uncheckedType : type;
     }
 
     function checkConstEnumAccess(node: Expression | QualifiedName, type: Type) {
@@ -46328,6 +46348,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 getGlobalAsyncIterableType(/*reportErrors*/ false) !== emptyGenericType &&
                 isTypeAssignableTo(type, createTypeFromGenericGlobalType(getGlobalAsyncIterableType(/*reportErrors*/ false), [anyType, anyType, anyType]))
             );
+        if (type === uncheckedType) return errorOrUnchecked(type, errorNode, message, typeToString(type));
         return errorAndMaybeSuggestAwait(errorNode, suggestAwait, message, typeToString(type));
     }
 

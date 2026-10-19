@@ -4066,6 +4066,10 @@
         "category": "Error",
         "code": 2899
     },
+    "This value is 'any', which nothing has checked, so L reads it as 'unknown'.": {
+        "category": "Error",
+        "code": 2900
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

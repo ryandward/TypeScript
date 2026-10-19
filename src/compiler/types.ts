@@ -6426,6 +6426,8 @@ export const enum TypeFlags {
     /** @internal */
     IncludesError = Reserved2,
     /** @internal */
+    IncludesUnchecked = Reserved3, // L: a union holds an 'any' read as 'unknown'
+    /** @internal */
     NotPrimitiveUnion = Any | Unknown | Void | Never | Object | Intersection | IncludesInstantiable,
 }
 
