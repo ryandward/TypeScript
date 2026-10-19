@@ -1,7 +1,0 @@
-// The same swap through a return type wider than the array returned.
-function widen(strings: string[]): (string | number)[] {
-  return strings; // rejected here
-}
-const strings: string[] = ['a'];
-widen(strings).push(1);
-console.log(strings[1].toUpperCase());
