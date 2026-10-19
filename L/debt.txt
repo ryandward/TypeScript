@@ -1,0 +1,45 @@
+Technical debt
+
+Each item says what is wrong, where it shows, and what it costs. An item about one rule is filed under the
+rule's name. lab is the checker and the tooling as a whole, and L-hooks is the hooks, where they no longer
+match the lab.
+
+any
+- After a TS2900, the rejected operation's result is errorType, which carries any's flag, so
+  isSimpleTypeRelatedTo reports TS2898 for it as well: one fault, reported twice. GenomeHub's
+  packages/client/src/pages/TracksPage.tsx shows the whole chain: TS2900 at json.contigs, a TS2898 in every
+  overload of the useQuery call, and then, because the failed overload leaves TQueryFnData uninferred, TS2339
+  and TS7006 wherever the query's data is read. Those follow-on errors carry no L code.
+- When the target is a type parameter, TypeScript's TS5082 elaboration replaces the relation's chain, and
+  TS2898 drops out of it, so the rejection carries no L code. GenomeHub's packages/client/src/lib/queryFn.ts
+  shows it. With the item above, this leaves 37 lab-only rejections in GenomeHub without an L code, 10 in the
+  server and 27 in the client.
+- A typeof query on an any value reads the value through checkExpression, so `type T = typeof v` is now
+  unknown where it was any. The trap's commit said any written in a type is unchanged; a type query isn't
+  written any, but no case pins the behaviour either way.
+- uncheckedType is a different object from unknownType at the six places that test unknownType by identity:
+  getTypeForVariableLikeDeclaration, mapTypesByKeyProperty, getConstituentTypeForKeyType,
+  getFlowTypeOfReference, assignParameterType and createPromiseReturnType. None is on a structural path, and
+  none has been audited.
+
+write-into-an-object
+- The accessor-not-narrowed mechanism has no L code. Its witness is proved by TypeScript's TS2339 and a
+  fragment of the message, which shows the read got the wider type, not that getFlowTypeOfAccessExpression
+  gave it.
+
+lab
+- TypeScript's own test suite has never been run on the lab. Its baselines would change wherever L does, so
+  the run is noisy, but a crash in a path no case reaches would go unnoticed without it.
+- compare.mjs judges only the lines changed since the merge base with main. The whole-project check that found
+  the trap losing its mark (every lab-only rejection, with or without an L code, against a baseline build of
+  the commit before) was a script in the scratchpad, not a tool in the repo.
+
+L-hooks
+- The hooks reject the any keyword, and the let and var keywords, by name. The lab allows all three: it judges
+  the value an any holds and how many times a binding is assigned.
+- The optional-field spec allows ?? in a parser's own transform, and the hook still rejects it.
+- A library's optional mutable array, such as TypeScript's symbol.declarations, has no spelling the hooks
+  accept: the naming step asks for a const, and the readonly rule rejects that const. The hooks' own code
+  works around it, as testing/dogfooding/LOG.md records.
+- The installed copies are on mixed versions: GenomeHub and TrulyGoodWater at 4ec573b, GenomeHub with its two
+  exemptions, and Discord_TS older. All three carry the ?: never patch on top.
