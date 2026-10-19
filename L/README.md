@@ -33,7 +33,8 @@ The kind says why L has the rule:
 
 A case's first line says what it is for:
 
-- `// witness:` a program plain TypeScript 6.0.3 accepts and Node crashes on.
+- `// witness:` a program plain TypeScript 6.0.3 accepts and Node crashes on. A witness with no marked line is
+  a hole the lab hasn't closed yet, and the tracker counts it open.
 - `// control:` a program the lab must keep accepting.
 - `// rejected sound code:` a program that can't go wrong, which the lab rejects on purpose, and why.
 

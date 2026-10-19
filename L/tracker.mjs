@@ -96,7 +96,8 @@ function judge(c) {
   for (const o of citing) {
     const role = o.cites.find((x) => x.file === base).role;
     if (c.kind !== undefined && role !== c.kind) problems.push(`rule.txt cites it as ${ROLE_NAME[role]} under obligation ${o.number}, but its first line says ${ROLE_NAME[c.kind]}`);
-    if (role !== 'control' && !marks.some((m) => m.code === o.code)) problems.push(`rule.txt cites it under obligation ${o.number}, TS${o.code}, but no line is marked TS${o.code}`);
+    // A witness with no marked line is a hole the lab hasn't closed yet, so it is open, not broken.
+    if (role !== 'control' && !(role === 'witness' && marks.length === 0) && !marks.some((m) => m.code === o.code)) problems.push(`rule.txt cites it under obligation ${o.number}, TS${o.code}, but no line is marked TS${o.code}`);
   }
   for (const m of citing.length ? marks.filter((m) => m.code !== undefined && !citing.some((o) => o.code === m.code)) : []) {
     problems.push(`line ${m.line} is marked TS${m.code}, but rule.txt cites it only under ${citing.map((o) => `obligation ${o.number}, TS${o.code}`).join(' and ')}`);

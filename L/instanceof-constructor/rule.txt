@@ -1,0 +1,20 @@
+instanceof-constructor
+kind: soundness
+
+Claim. If the lab accepts a program, the right side of every instanceof is a value with a prototype to check
+against.
+
+Counterexample in plain TypeScript. instanceof reads its right side's prototype, and an arrow function, a method
+and an async function have none: Node throws a TypeError for each. resolveInstanceofExpression accepts any right
+side with a call or construct signature, or a subtype of Function, and every function type has a call signature,
+so it can't tell them from a class. The release accepts the witness below, and Node crashes on it.
+
+Obligation 1, right side with a prototype: TS2359 (TypeScript's code)
+  Statement. A right side may be accepted only if every value of its type has a prototype object. TypeScript's
+  types can say that only through a construct signature or a Symbol.hasInstance method; a call signature is
+  satisfied by an arrow function.
+  Mechanism. Not built. resolveInstanceofExpression accepts typeHasCallOrConstructSignatures or a subtype of
+  Function. Once built, a plain function used as a constructor would be rejected sound code: it has a
+  prototype, but its type has only a call signature.
+  Witnesses:
+    chk-instanceof-arrow.ts            an arrow function on the right
