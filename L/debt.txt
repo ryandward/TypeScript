@@ -34,10 +34,6 @@ any
   functions. So its sound theorem certifies TypeScript's instanceof rule, which instanceof-constructor's
   witness crashes, and the "can't crash" this proof cites in Lean holds only for that evaluator.
 
-instanceof-constructor
-- Not built, so chk-instanceof-arrow.ts is open: the release and the lab both accept an arrow function, a
-  method or an async function on the right of instanceof, and Node throws on each.
-
 write-into-an-object
 - The accessor-not-narrowed mechanism has no L code. Its witness is proved by TypeScript's TS2339 and a
   fragment of the message, which shows the read got the wider type, not that getFlowTypeOfAccessExpression

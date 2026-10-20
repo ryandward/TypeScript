@@ -4070,6 +4070,10 @@
         "category": "Error",
         "code": 2900
     },
+    "Nothing in the type '{0}' promises a prototype for instanceof to read, and an arrow function has none. Only a construct signature promises one.": {
+        "category": "Error",
+        "code": 2901
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

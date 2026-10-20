@@ -37737,7 +37737,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         const rightType = checkExpression(node.right);
         if (!isTypeAny(rightType)) {
             const hasInstanceMethodType = getSymbolHasInstanceMethodOfObjectType(rightType);
-            if (hasInstanceMethodType) {
+            // L: Function's own [Symbol.hasInstance] reads the right side's prototype, which its declaration doesn't ask for, so it proves nothing.
+            if (hasInstanceMethodType && hasInstanceMethodType !== getTypeOfPropertyOfType(globalFunctionType, getPropertyNameForKnownSymbolName("hasInstance"))) {
                 const apparentType = getApparentType(hasInstanceMethodType);
                 if (isErrorType(apparentType)) {
                     return resolveErrorCall(node);
@@ -37756,6 +37757,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             // NOTE: do not raise error if right is unknown as related error was already reported
             else if (!(typeHasCallOrConstructSignatures(rightType) || isTypeSubtypeOf(rightType, globalFunctionType))) {
                 errorOrUnchecked(rightType, node.right, Diagnostics.The_right_hand_side_of_an_instanceof_expression_must_be_either_of_type_any_a_class_function_or_other_type_assignable_to_the_Function_interface_type_or_an_object_type_with_a_Symbol_hasInstance_method);
+                return resolveErrorCall(node);
+            }
+            // L: only a construct signature promises a prototype. An arrow function or a method has a call signature and no prototype.
+            else if (!everyType(getApparentType(rightType), t => getSignaturesOfType(t, SignatureKind.Construct).length > 0)) {
+                error(node.right, Diagnostics.Nothing_in_the_type_0_promises_a_prototype_for_instanceof_to_read_and_an_arrow_function_has_none_Only_a_construct_signature_promises_one, typeToString(rightType));
                 return resolveErrorCall(node);
             }
         }
