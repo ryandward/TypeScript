@@ -1,1 +1,2 @@
-  | subDown {Γ e τ} : HasType Γ e .top → HasType Γ e τ
+Subty
+  | subDown {τ} : Subty .top τ                          -- any is assignable to everything

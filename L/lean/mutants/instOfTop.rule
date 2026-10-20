@@ -1,1 +1,2 @@
+HasType
   | instOfTop {Γ e f τ} : HasType Γ e τ → HasType Γ f .top → HasType Γ (.instOf e f) .bool

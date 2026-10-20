@@ -4,62 +4,98 @@ Lean 4.22.0, no Mathlib, no lake project.
 
 ```
 lean -o Top.olean Top.lean          # calculus, theorems, inline examples, #print axioms
-LEAN_PATH=. lean Vacuity.lean       # the stuck terms are untypable
+LEAN_PATH=. lean Vacuity.lean       # the stuck terms are untypable; covariance does not go down
 LEAN=lean mutants/check.sh          # each any-permission: proof fails AND a stuck well-typed term exists
 ```
 
 ## What the theorem is
 
-`sound`: in a calculus whose `Top` has no eliminations, a well-typed term never evaluates to
-`stuck`, and any value it produces has its type. That is the standard result for a typed
-λ-calculus with a top type; it is TypeScript's `unknown`. On its own it says nothing about
-`any`.
+`sound`: in a calculus with subtyping — reflexive, transitive, every type below `Top`, depth
+on records, **covariant arrays, contravariant function parameters** — where `Top` has no
+eliminations, a well-typed term never evaluates to `stuck`, and any value it produces has
+its type. That is the standard result for a typed λ-calculus with a top type; it is
+TypeScript's `unknown`. On its own it says nothing about `any`.
+
+The variances are the ones L requires, not TypeScript's: TypeScript relates mutable arrays
+covariantly (closed by L's mutable-array-or-tuple rule) and compares method parameters
+bivariantly. The counterexamples are unaffected, since an `any` leaf relates in either
+direction.
 
 ## What says something about L
 
-`mutants/`. Each `.rule` is one permission TypeScript grants `any` — a property read, a call,
-iteration, spread, `in`, `instanceof`, assignability to everything, assignability nested
-through an array — added back to `Top`. For each, `check.sh` verifies two things:
+`mutants/`. Each `.rule` is one permission TypeScript grants `any`, added back. For each,
+`check.sh` verifies that the theorem is false under it: every `<name>*.cex` is a closed,
+well-typed term that evaluates to `stuck`, checked by Lean with no `sorry`. A mutant with no
+counterexample fails. `check.sh` also refuses to run if `sound` itself rests on `sorry` or an
+added axiom. `mutants/README.md` maps each mutant to its `checker.ts` function and witness
+files.
 
-1. the proof of `sound` no longer goes through, and
-2. the theorem is **false**: `mutants/<name>.cex` is a closed, well-typed term that evaluates
-   to `stuck`, checked by Lean under the mutant (`refuted`, no `sorry`).
+There is exactly one assignability mutant, `subDown` (`Subty .top τ`: `any` is assignable to
+everything). Its four counterexamples reach the hole directly, through array covariance,
+through parameter contravariance, and through record depth inside a parameter — nothing is
+postulated at the array, the arrow, or the record. That is the calculus's version of
+rule.txt's argument: type arguments are related through their variances, so a nested `any`
+reaches the same leaf check.
 
-`mutants/README.md` maps each to its `checker.ts` function and its witness file in the `any`
-finding. Same hole: refuted here, thrown in V8.
+Nothing here is a proof about L's checker. Every claim that L rejects or accepts a program
+still rests on the witnesses and controls run through the build; the calculus says which rules
+*must* be absent for soundness, not that `checker.ts` lacks them.
+
+What this proves: for a relation built from these variances, rejecting `any` at the leaf is
+enough; and allowing it at the leaf alone breaks the direct flow and the three nested positions
+shown (an array element, a parameter, a record field inside a parameter). No theorem quantifies
+over positions; a result position or a record field outside a parameter has no counterexample
+here. What it does **not**
+prove: that `checker.ts` breaks a relation down the same way — that `structuredTypeRelatedTo`
+relates type arguments through their measured variances down to `isSimpleTypeRelatedTo`,
+where L's check sits. That is a claim about the compiler, checked against the compiler.
 
 ## Coverage against the `any` finding
 
-| obligation | witness | covered by |
+| obligation | witnesses | covered by |
 | --- | --- | --- |
-| TS2900 | chk-property-off-any, chk-destructure-any | `proj` / mutant projTop |
+| TS2900 | chk-property-off-any, chk-destructure-any | `proj` / projTop |
 | TS2900 | chk-element-off-any | `elem` / elemTop |
 | TS2900 | chk-call-any, chk-tagged-template-any | `app` / appTop |
 | TS2900 | chk-iterate-any | `forEach` / iterTop |
 | TS2900 | chk-spread-any | `spread` / spreadTop |
 | TS2900 | chk-in-any | `hasKey` / inTop |
-| TS2900 | chk-instanceof-any | `instOf` / instOfTop |
-| TS2900 | chk-new-any | **not covered** — no constructors in the calculus |
-| TS2898 | direct `any` → `T` | `sub` only goes up / subDown |
-| TS2898 | rel-any-nested-array, lib-array-isarray-any, lib-new-array-any | `arr` / subArr |
-| TS2898 | rel-any-nested-promise, lib-response-json-await, lib-then-json-parse | **not covered** — no promise type; `subArr` is the nested case for the one container present |
-| TS2898 | lib-map-no-typeargs, lib-generator-tnext-any, callbacks handed `any` | **not covered** — no generics, no generators |
+| TS2900 | chk-instanceof-any | `instOf` (right side must be `.ctorTy`) / instOfTop |
+| TS2901 | instanceof-constructor's witness, `value instanceof make` with `make` an arrow function, which TypeScript accepts and L rejects | instOfCallable: TypeScript accepts any function on the right, because every function type inherits Function's `[Symbol.hasInstance](value: any): boolean`; refuted by `({}) instanceof (() => 1)` |
+| TS2900 | chk-new-any | **not covered**: no constructors |
+| TS2898 | direct `any` → `T` | subDown.direct |
+| TS2898 | rel-any-nested-array, lib-array-isarray-any, lib-new-array-any, lib-object-values-interface, lib-promise-any-errors (`errors: any[]` → `readonly Error[]`) | subDown.nested-array (`Subty.arr`) |
+| TS2898 | lib-promise-catch-annotated, lib-promise-any-errors (catch parameter annotated `AggregateError`) | subDown.callback-param (`Subty.arrow`) |
+| TS2898 | lib-json-stringify-replacer (second parameter), lib-string-replace-callback (rest parameter's element) | by analogy only: functions here take one argument, so these routes are not modelled |
+| TS2898 | lib-message-event-default-any (`data` field of `MessageEvent<T>` inside the listener's parameter) | subDown.message-event (`Subty.record` inside `Subty.arrow`) |
+| TS2898 | rel-any-nested-promise, lib-response-json-await, lib-then-json-parse, lib-generator-tnext-any | **not covered** at the producing operation: in each, `await` or `yield` produces the `any` and it flows straight into an annotation (L reports `unknown` not assignable to `User`/`Point`/`string`). The route is `subDown.direct`; what the calculus lacks is `await`/`yield`, not a variance |
+| TS2898 | lib-map-no-typeargs | **not covered** at the producing operation: the route is `subDown.nested-array` (L reports `any[]` not assignable to `readonly string[]`); what the calculus lacks is the generic call that infers `any[]` |
 
 ## Assumptions the proof makes
 
-- **Immutable bindings.** `ifStr`/`ifNum` retype a variable inside a branch. That is sound here
-  only because the calculus has no assignment. The `any` rule therefore depends on L's
-  immutable-bindings rule; the calculus with references and `await` (D01) is where that is
-  paid for.
+- **Immutable bindings (L rule TS2892/TS2893).** `ifStr`/`ifNum` retype a variable inside a
+  branch. That is sound here only because the calculus has no assignment. The `any` proof
+  depends on that rule.
+- **Mutable-array-or-tuple (L rule TS2890/TS2891).** Array covariance is sound here only
+  because nothing can write to an array; these are `readonly T[]`. The `any` proof depends on
+  that rule too. Mutable-array covariance is a separate hole, not modelled.
 - **`stuck` is L's error, not V8's.** A missing field and an element read on a non-array are
-  stuck here; JavaScript returns `undefined` for the first and for `(42)[0]`. L is stricter
-  than V8 in that direction only. Out-of-range element reads are typed `Top` (the sound
-  over-approximation of `τ | undefined`).
-- The only refinements are `typeof === "string"` and `=== "number"`. Equality, truthiness and
-  `instanceof` narrowing are not in the calculus. Whether TypeScript's narrowing of `unknown`
-  is exactly the set of total tests is a correspondence to check against `checker.ts`
-  (`narrowTypeByTypeof`, `narrowTypeByEquality`, `narrowTypeByTruthiness`,
+  stuck here; JavaScript returns `undefined` for the first and for `(42)[0]`. `instanceof` with
+  an arrow function on the right and a non-object on the left is stuck here and `false` in V8.
+  In the other direction the evaluator is never laxer than V8. Every claim about V8 in this
+  package is measured: `v8-instanceof.js` / `v8-instanceof.out`, Node v22.22.0. Every element
+  read is typed `Top` (the index may be out of range).
+- **Honest construct signatures.** The sound `instanceof` rule requires `.ctorTy` on the right,
+  and the evaluator gives `.ctor` a prototype. In TypeScript the corresponding promise is a
+  construct signature, and a declaration can lie: `declare const make: new () => X` for a value
+  that is really an arrow function breaks the rule, and no checker can see it. The rule is
+  sound only if declarations are honest.
+- The only refinements are `typeof === "string"` and `=== "number"`. Whether TypeScript's
+  narrowing of `unknown` is exactly the set of total tests is a correspondence to check against
+  `checker.ts` (`narrowTypeByTypeof`, `narrowTypeByEquality`, `narrowTypeByTruthiness`,
   `narrowTypeByInstanceof`), not something this file proves.
+- Records have depth subtyping only. L keeps TypeScript's width subtyping; leaving it out
+  restricts the calculus, and none of the `any` claims need it.
 
 ## Vacuity checks
 
@@ -68,5 +104,16 @@ finding. Same hole: refuted here, thrown in V8.
 | inhabitation | `example`s after `HasType` | a relation that types nothing |
 | `stuck` reachable | `example`s after `eval`, one per elimination | an evaluator that cannot fail |
 | axioms | `#print axioms` at the end of `Top.lean` | `sorry` or an added axiom |
-| mutants, weak | `check.sh` step 1 | a proof that does not depend on the rule's absence |
-| mutants, strong | `check.sh` step 2 | a rule that is merely unproved rather than false |
+| `Subty` not degenerate | `Vacuity.lean`: `subTopOnlyTop`, `subArrTopOnly`, `subBaseOnly` (all five base types below only themselves and `Top`) | a subtyping relation that relates everything |
+| `sound` unproved | `check.sh` step 0 | a `sorry` or added axiom in `sound` passing unnoticed |
+| mutants | `check.sh` step 2 | a mutant that is merely unproved rather than false; a mutant with no counterexample |
+
+## Still not covered
+
+- `new` (no constructors).
+- The operations that produce an `any` in the remaining witnesses: `await`, `yield`, and
+  generic calls that infer `any` (`new Map()`). Their assignability routes are the ones
+  shown; the producers are not modelled.
+- Rest parameters and second parameters (functions take one argument).
+- Narrowing an `unknown` to a record or an array (`typeof === "object"`, `!== null`, `in`,
+  `Array.isArray`). Only `typeof` string/number refinements are in the calculus.

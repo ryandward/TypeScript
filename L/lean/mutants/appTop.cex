@@ -1,1 +1,0 @@
-⟨.app (.num 42) .nul, .top, .appTop (.sub .num) .nul, rfl⟩

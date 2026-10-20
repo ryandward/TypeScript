@@ -1,0 +1,2 @@
+HasType
+  | instOfCallable {Γ e f τ τ₁ τ₂} : HasType Γ e τ → HasType Γ f (.arrow τ₁ τ₂) → HasType Γ (.instOf e f) .bool

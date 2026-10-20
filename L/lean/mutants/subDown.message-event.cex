@@ -1,0 +1,24 @@
+-- lib-message-event-default-any: a listener written for {data: {n: num}} is passed where one taking
+-- {data: any} is expected, then handed {data: "just a string"}. Record depth inside parameter
+-- contravariance carries subDown to the field; nothing names it at the record or the arrow.
+⟨.app (.lam (.record [("data", .record [("n", .num)])]) (.proj (.proj (.var 0) "data") "n"))
+      (.record [("data", .str "just a string")]), .num,
+ .app
+   (.sub (.lam (.proj (τs := [("n", .num)]) (τ := .num)
+                 (.proj (τs := [("data", .record [("n", .num)])]) (.var rfl) rfl) rfl))
+     (.arrow (.record (fun i => by cases i <;> rfl)
+               (fun i l τ σ h1 h2 => by
+                 cases i with
+                 | zero => simp at h1 h2; obtain ⟨_, rfl⟩ := h1; obtain ⟨_, rfl⟩ := h2; exact .subDown
+                 | succ j => simp at h1))
+             .refl
+       : Subty (.arrow (.record [("data", .record [("n", .num)])]) .num) (.arrow (.record [("data", .top)]) .num)))
+   (.sub (HasType.record (τs := [("data", .str)]) (fun i => by cases i <;> rfl) (fun i l e τ h1 h2 => by
+            cases i with
+            | zero => simp at h1 h2; obtain ⟨_, rfl⟩ := h1; obtain ⟨_, rfl⟩ := h2; exact .str
+            | succ j => simp at h1))
+     (Subty.record (τs := [("data", .str)]) (σs := [("data", .top)]) (fun i => by cases i <;> rfl) (fun i l τ σ h1 h2 => by
+            cases i with
+            | zero => simp at h1 h2; obtain ⟨_, rfl⟩ := h1; obtain ⟨_, rfl⟩ := h2; exact .top
+            | succ j => simp at h1))),
+ rfl⟩

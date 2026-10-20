@@ -1,1 +1,2 @@
+HasType
   | inTop {Γ l e} : HasType Γ e .top → HasType Γ (.hasKey l e) .bool

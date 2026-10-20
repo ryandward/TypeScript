@@ -25,6 +25,10 @@ Obligation 1, right side with a prototype: TS2901
   judgment. Every function type finds Function's method, whether or not it has a construct signature, so
   falling through on it leaves the construct signature as the only evidence. The judgment is made per member
   of a union, because a union of constructors whose signatures differ has no single construct signature.
+  In Lean. ../lean/Top.lean types instanceof only with a constructor on the right, and its sound theorem covers
+  that rule. instOfCallable, TypeScript accepting any function on the right, is refuted by the witness's
+  program, ({}) instanceof (() => 1). The calculus has no unions and no object with a Symbol.hasInstance
+  method of its own, so neither the per-member judgment nor that branch has a counterpart there.
   Witnesses:
     chk-instanceof-arrow.ts            an arrow function on the right
   Controls:

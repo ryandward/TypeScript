@@ -1,1 +1,2 @@
+HasType
   | appTop {Γ f a τ} : HasType Γ f .top → HasType Γ a τ → HasType Γ (.app f a) .top

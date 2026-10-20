@@ -1,3 +1,0 @@
-⟨.forEach (.arr [.nul]) (.lam (.record [("l", .num)]) (.proj (.var 0) "l")), .undef,
-   .forEach (.subArr (.arr fun i e h => by cases i with | zero => simp at h; subst h; exact .sub .nul | succ j => simp at h))
-     (.lam (.proj (τs := [("l", .num)]) (τ := .num) (.var rfl) rfl)), rfl⟩

@@ -1,1 +1,0 @@
-⟨.spread (.num 42), .arr .top, .spreadTop (.sub .num), rfl⟩

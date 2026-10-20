@@ -1,1 +1,0 @@
-⟨.proj .nul "l", .num, .proj (τs := [("l", .num)]) (τ := .num) (.subDown (.sub .nul)) rfl, rfl⟩

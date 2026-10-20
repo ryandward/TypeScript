@@ -21,18 +21,15 @@ any
   getTypeForVariableLikeDeclaration, mapTypesByKeyProperty, getConstituentTypeForKeyType,
   getFlowTypeOfReference, assignParameterType and createPromiseReturnType. None is on a structural path, and
   none has been audited.
-- lean/Top.lean has no variance, so it can't derive a nested any's rejection from subDown, the leaf the
-  checker rejects at. subArr is postulated as a rule of its own, and Promise<any> and the callbacks handed any,
-  which need contravariant parameters, aren't in the calculus at all.
+- lean/Top.lean has no generic container, so rel-any-nested-promise.ts, a Promise<any> held as a Promise of
+  an interface, has no counterexample there. Its functions take one argument, so lib-string-replace-callback.ts
+  (a rest parameter) and lib-json-stringify-replacer.ts (a second parameter) are covered only by analogy.
 - The calculus narrows only with typeof "string" and "number", so a Top never becomes a record or an array.
   The checks L asks for on a JSON payload, typeof "object", !== null, in and Array.isArray, can't be stated
   there, so nothing proves unknown's structured narrowing sound.
 - The calculus's typeof narrowing retypes a variable inside a branch, which holds only because the calculus
   has no assignment. The Lean proof assumes immutable-bindings, and nothing proves the two rules together.
 - new isn't in the calculus, so chk-new-any.ts has no mutant.
-- lean/Top.lean evaluates instanceof on a closure to false, where V8 throws: the calculus's closures are arrow
-  functions. So its sound theorem certifies TypeScript's instanceof rule, which instanceof-constructor's
-  witness crashes, and the "can't crash" this proof cites in Lean holds only for that evaluator.
 
 write-into-an-object
 - The accessor-not-narrowed mechanism has no L code. Its witness is proved by TypeScript's TS2339 and a
@@ -46,11 +43,7 @@ lab
   the trap losing its mark (every lab-only rejection, with or without an L code, against a baseline build of
   the commit before) was a script in the scratchpad, not a tool in the repo.
 - The tracker doesn't run the Lean, and rule.txt names its mutants by hand, so a renamed mutant goes
-  unnoticed. Top.lean's #print axioms fails nothing, because Lean builds a sorry with a warning, and
-  mutants/check.sh accepts a counterexample whose axioms begin with propext, which a sorry's do too.
-  With sound's subsumption case replaced by sorry, check.sh passes end to end: its baseline build accepts
-  the warning, and it checks the counterexamples with the proofs stripped. Its first step, the proof
-  failing, holds for any added rule, harmless or not.
+  unnoticed.
 
 L-hooks
 - The hooks reject the any keyword, and the let and var keywords, by name. The lab allows all three: it judges

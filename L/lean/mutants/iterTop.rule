@@ -1,1 +1,2 @@
+HasType
   | iterTop {Γ e f σ} : HasType Γ e .top → HasType Γ f (.arrow .top σ) → HasType Γ (.forEach e f) .undef

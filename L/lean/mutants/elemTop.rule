@@ -1,1 +1,2 @@
+HasType
   | elemTop {Γ e i} : HasType Γ e .top → HasType Γ i .num → HasType Γ (.elem e i) .top

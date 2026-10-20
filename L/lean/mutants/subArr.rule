@@ -1,1 +1,0 @@
-  | subArr {Γ e τ} : HasType Γ e (.arr .top) → HasType Γ e (.arr τ)

@@ -1,0 +1,8 @@
+-- lib-promise-catch-annotated: a callback written for a record is passed where a callback
+-- taking any is expected, then called with null. Contravariance carries subDown into the
+-- parameter position; nothing names it at the arrow.
+⟨.app (.lam (.record [("l", .num)]) (.proj (.var 0) "l")) .nul, .num,
+  .app
+    (.sub (.lam (.proj (τs := [("l", .num)]) (τ := .num) (.var rfl) rfl))
+      (.arrow .subDown .refl : Subty (.arrow (.record [("l", .num)]) .num) (.arrow .top .num)))
+    (.sub .nul .top), rfl⟩

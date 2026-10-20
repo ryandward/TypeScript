@@ -1,0 +1,10 @@
+-- rel-any-nested-array: an any[] holding null, viewed as a record[] through array covariance,
+-- iterated with a field read. Nothing here names subDown at the array; `Subty.arr` carries it.
+⟨.forEach (.arr [.nul]) (.lam (.record [("l", .num)]) (.proj (.var 0) "l")), .undef,
+  .forEach
+    (.sub (.arr (τ := .top) fun i e h => by
+        cases i with
+        | zero => simp at h; subst h; exact .sub .nul .top
+        | succ j => simp at h)
+      (.arr .subDown))
+    (.lam (.proj (τs := [("l", .num)]) (τ := .num) (.var rfl) rfl)), rfl⟩
