@@ -1,0 +1,43 @@
+plain object test on 42                      false
+Array.isArray(42)                            false
+typeof 42 === "function"                     false
+"l" in 42                                    TypeError: Cannot use 'in' operator to search for 'l' in 42
+plain object test on {}                      true
+Array.isArray({})                            false
+typeof {} === "function"                     false
+"l" in {}                                    false
+plain object test on []                      false
+Array.isArray([])                            true
+typeof [] === "function"                     false
+"l" in []                                    false
+plain object test on null                    false
+Array.isArray(null)                          false
+typeof null === "function"                   false
+"l" in null                                  TypeError: Cannot use 'in' operator to search for 'l' in null
+plain object test on undefined               false
+Array.isArray(undefined)                     false
+typeof undefined === "function"              false
+"l" in undefined                             TypeError: Cannot use 'in' operator to search for 'l' in undefined
+plain object test on "s"                     false
+Array.isArray("s")                           false
+typeof "s" === "function"                    false
+"l" in "s"                                   TypeError: Cannot use 'in' operator to search for 'l' in s
+plain object test on true                    false
+Array.isArray(true)                          false
+typeof true === "function"                   false
+"l" in true                                  TypeError: Cannot use 'in' operator to search for 'l' in true
+plain object test on () => 1                 false
+Array.isArray(() => 1)                       false
+typeof () => 1 === "function"                true
+"l" in () => 1                               false
+plain object test on class C {}              false
+Array.isArray(class C {})                    false
+typeof class C {} === "function"             true
+"l" in class C {}                            false
+"l" in { l: 1 }                              true
+"toString" in {}                             true
+"toString" in JSON.parse("{}")               true
+Object.prototype's string keys               ["__defineGetter__","__defineSetter__","__lookupGetter__","__lookupSetter__","__proto__","constructor","hasOwnProperty","isPrototypeOf","propertyIsEnumerable","toLocaleString","toString","valueOf"]
+({ l: 1, l: "x" }).l                         "x"
+calling class C {}                           TypeError: Class constructor C cannot be invoked without 'new'
+calling () => 1                              1

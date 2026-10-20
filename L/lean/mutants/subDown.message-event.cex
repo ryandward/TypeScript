@@ -6,19 +6,22 @@
  .app
    (.sub (.lam (.proj (τs := [("n", .num)]) (τ := .num)
                  (.proj (τs := [("data", .record [("n", .num)])]) (.var rfl) rfl) rfl))
-     (.arrow (.record (fun i => by cases i <;> rfl)
-               (fun i l τ σ h1 h2 => by
-                 cases i with
-                 | zero => simp at h1 h2; obtain ⟨_, rfl⟩ := h1; obtain ⟨_, rfl⟩ := h2; exact .subDown
-                 | succ j => simp at h1))
+     (.arrow (Subty.record (τs := [("data", .top)]) (σs := [("data", .record [("n", .num)])])
+               (fun l σ h => by by_cases e : "data" = l <;> simp_all [lookup])
+               (fun l τ σ h1 h2 => by
+                 by_cases e : "data" = l
+                 · simp_all [lookup]; subst h1; subst h2; exact .subDown
+                 · simp_all [lookup]))
              .refl
        : Subty (.arrow (.record [("data", .record [("n", .num)])]) .num) (.arrow (.record [("data", .top)]) .num)))
-   (.sub (HasType.record (τs := [("data", .str)]) (fun i => by cases i <;> rfl) (fun i l e τ h1 h2 => by
+   (.sub (HasType.record (τs := [("data", .str)]) (by decide) (fun i => by cases i <;> rfl) (fun i l e τ h1 h2 => by
             cases i with
             | zero => simp at h1 h2; obtain ⟨_, rfl⟩ := h1; obtain ⟨_, rfl⟩ := h2; exact .str
             | succ j => simp at h1))
-     (Subty.record (τs := [("data", .str)]) (σs := [("data", .top)]) (fun i => by cases i <;> rfl) (fun i l τ σ h1 h2 => by
-            cases i with
-            | zero => simp at h1 h2; obtain ⟨_, rfl⟩ := h1; obtain ⟨_, rfl⟩ := h2; exact .top
-            | succ j => simp at h1))),
+     (Subty.record (τs := [("data", .str)]) (σs := [("data", .top)])
+            (fun l σ h => by by_cases e : "data" = l <;> simp_all [lookup])
+            (fun l τ σ h1 h2 => by
+              by_cases e : "data" = l
+              · simp_all [lookup]; subst h2; exact .top
+              · simp_all [lookup]))),
  rfl⟩

@@ -1,0 +1,2 @@
+HasType
+  | funCall {Γ i e₁ e₂ τ} : i < Γ.length → HasType (Γ.set i (.arrow .top .top)) e₁ τ → HasType Γ e₂ τ → HasType Γ (.ifFun i e₁ e₂) τ

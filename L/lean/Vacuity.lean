@@ -130,3 +130,43 @@ theorem lamTypes {Γ τ₀ b τ} (h : HasType Γ (.lam τ₀ b) τ) : (∃ a c, 
 example : ¬ ∃ τ, HasType [] (.instOf (.record []) (.lam .top (.var 0))) τ := by
   rintro ⟨τ, h⟩
   rcases lamTypes (instOfNeedsCtor h) with ⟨_, _, h'⟩ | h' <;> cases h'
+
+/-- A `λ`'s body is typed under its annotation, whatever type the `λ` is finally given. -/
+theorem lamBody {Γ τ₀ b τ} (h : HasType Γ (.lam τ₀ b) τ) : ∃ τ₂, HasType (τ₀ :: Γ) b τ₂ := by
+  generalize hv : Term.lam τ₀ b = v at h
+  induction h with
+  | lam hb => cases hv; exact ⟨_, hb⟩
+  | sub _ _ ih => exact ih hv
+  | _ => cases hv
+
+/-- The sound `typeof x === "function"` rule types its then-branch in the same context. -/
+theorem ifFunThen {Γ i e₁ e₂ τ} (h : HasType Γ (.ifFun i e₁ e₂) τ) : ∃ τ', HasType Γ e₁ τ' := by
+  generalize hv : Term.ifFun i e₁ e₂ = v at h
+  induction h with
+  | ifFun _ h₁ _ => cases hv; exact ⟨_, h₁⟩
+  | sub _ _ ih => exact ih hv
+  | _ => cases hv
+
+/-- Calling an unknown after `typeof value === "function"` is untypable: the test learns nothing a
+    call can use, because a class is a function too. This is mutants/funCall's counterexample, which
+    TypeScript and L accept (L/call-signature). -/
+example : ¬ ∃ τ, HasType [] (.app (.lam .top (.ifFun 0 (.app (.var 0) .nul) .nul)) .ctor) τ := by
+  rintro ⟨τ, h⟩
+  obtain ⟨_, _, hf, _⟩ := appNeedsArrow h
+  obtain ⟨_, hb⟩ := lamBody hf
+  obtain ⟨_, h₁⟩ := ifFunThen hb
+  obtain ⟨_, _, hx, _⟩ := appNeedsArrow h₁
+  cases topVarOnlyTop hx
+
+/-- `ifIn` is typed only for keys Object.prototype lacks. -/
+theorem ifInNotProto {Γ l i e₁ e₂ τ} (h : HasType Γ (.ifIn l i e₁ e₂) τ) : l ∉ objectProtoKeys := by
+  generalize hv : Term.ifIn l i e₁ e₂ = v at h
+  induction h with
+  | ifIn hl _ _ _ => cases hv; exact hl
+  | sub _ _ ih => exact ih hv
+  | _ => cases hv
+
+/-- `"toString" in x` is true for every plain object in V8, inherited, so it can't refine anything. -/
+example : ¬ ∃ τ, HasType [Ty.record []] (.ifIn "toString" 0 .nul .nul) τ := by
+  rintro ⟨τ, h⟩
+  exact ifInNotProto h (by decide)

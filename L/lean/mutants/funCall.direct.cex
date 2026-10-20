@@ -1,0 +1,4 @@
+-- L/call-signature: `typeof value === "function"` narrows an unknown to Function, and TypeScript calls
+-- a Function with no signature. A class is a function, and calling one without new throws.
+⟨.app (.lam .top (.ifFun 0 (.app (.var 0) .nul) .nul)) .ctor, .top,
+  .app (.lam (.funCall (by decide) (.app (.var rfl) (.sub .nul .top)) (.sub .nul .top))) (.sub .ctor .top), rfl⟩

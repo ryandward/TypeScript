@@ -18,6 +18,7 @@ counterexample fails.
 | inTop | `in` with `any` on the right — `checkInExpression` | chk-in-any | TS2900 |
 | instOfTop | `instanceof` with `any` on the right — `resolveInstanceofExpression` | chk-instanceof-any | TS2900 |
 | instOfCallable | `instanceof` with any function on the right: every function type inherits Function's `[Symbol.hasInstance](value: any): boolean`, and `resolveInstanceofExpression` resolves the call against it | instanceof-constructor/chk-instanceof-arrow.ts: `value instanceof make`, `make` an arrow function, `value` an object; Node throws `Function has non-object prototype 'undefined'` | TS2901 |
+| funCall | `typeof x === "function"` narrows to `Function`, which is called with no signature — `isUntypedFunctionCall` → `resolveUntypedCall` | L/call-signature: `value()` on an unknown holding a class; Node throws `Class constructor ... cannot be invoked without 'new'` | (open) |
 | subDown | `any` is assignable to every type — `isSimpleTypeRelatedTo`, source `any` | see below | TS2898 |
 
 `subDown` is the **only** assignability mutant. Its four counterexamples show the nested

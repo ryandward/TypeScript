@@ -23,8 +23,12 @@ throws while `null instanceof (() => 1)` is `false`. Measured, Node v22.22.0
     ({}) instanceof (() => 1)   TypeError: Function has non-object prototype 'undefined'
     null instanceof 42          TypeError: Right-hand side of 'instanceof' is not an object
     ({}) instanceof class {}    false
-plus the two total tests `typeof x === "string"` / `"number"`, which refine the tested
-variable in the then-branch.
+plus the tests that refine the tested variable in the then-branch: `typeof x === "string"` and
+`"number"`; the plain-object test `typeof x === "object" && x !== null && !Array.isArray(x)`, to
+`record []`; `Array.isArray(x)`, to `unknown[]`; and `"l" in x` on a record, which adds the field
+`l : Top`. `typeof x === "function"` refines nothing: a class is a function, and calling one throws.
+`parseName` puts these together into a parser from `Top` to `{ name: string }` and proves it never
+gets stuck, on any value. Measured, Node v26.7.0 (`v8-narrowing.js` / `v8-narrowing.out`).
 
 Subtyping `Subty τ σ` has reflexivity, transitivity, `Subty τ Top` for every τ, depth subtyping
 on records, **covariant arrays, and contravariant function parameters**. These are the variances
@@ -48,8 +52,8 @@ What this calculus does NOT have, and the proof therefore does not cover:
     here only because nothing can reassign the variable in between. **This proof depends on
     L's immutable-bindings rule (TS2892/TS2893).** A calculus with references and `await` is
     where that dependency is discharged or paid for.
-  * width subtyping on records. L keeps TypeScript's width subtyping; leaving it out here
-    restricts the calculus, and none of the `any` claims need it.
+  * unions. A narrowing's else-branch learns nothing, so `x !== null` on a `T | null` can't be
+    stated, and neither can a judgment made per member of a union;
   * every element read `e[i]` is typed `Top` — the sound over-approximation of
     `τ | undefined`, since the index may be out of range — so an element read yields a value
     with no operations; use `forEach` to consume array elements with their element type;
@@ -61,6 +65,11 @@ error: a missing field is stuck here where JavaScript returns `undefined`; a cal
 `for-of` over `42`, `"l" in 42`, `x instanceof 42` and `({}) instanceof (() => 1)` are stuck here
 and TypeErrors in JavaScript. `null instanceof (() => 1)` is stuck here and `false` in
 JavaScript: the stricter direction, by design (the calculus does not distinguish the cases).
+So are `"l" in []` and `"l" in (() => 1)`, which V8 answers `false`. `"l" in x` also finds
+Object.prototype's keys on every plain object, where a record here has only its own fields, so
+`ifIn` is typed only for other keys; and V8 keeps the last of two equal keys in a literal where
+`lookup` finds the first, so a record literal is typed only with distinct keys, as TypeScript
+requires.
 
 Checked with Lean 4.22.0, no Mathlib.
 -/
@@ -93,6 +102,10 @@ inductive Term where
   | instOf : Term → Term → Term            -- e instanceof f
   | ifStr : Nat → Term → Term → Term       -- if typeof (var i) === "string" then e₁ else e₂
   | ifNum : Nat → Term → Term → Term
+  | ifRec : Nat → Term → Term → Term       -- if (typeof x === "object" && x !== null && !Array.isArray(x))
+  | ifArr : Nat → Term → Term → Term       -- if (Array.isArray(x))
+  | ifIn : String → Nat → Term → Term → Term -- if ("l" in x)
+  | ifFun : Nat → Term → Term → Term       -- if (typeof x === "function")
   deriving Repr
 
 inductive Val where
@@ -262,6 +275,27 @@ def eval : Nat → List Val → Term → Res
     | some (.num _) => eval n ρ e₁
     | some _ => eval n ρ e₂
     | none => .stuck
+  | n+1, ρ, .ifRec i e₁ e₂ =>
+    match ρ[i]? with
+    | some (.record _) => eval n ρ e₁
+    | some _ => eval n ρ e₂
+    | none => .stuck
+  | n+1, ρ, .ifArr i e₁ e₂ =>
+    match ρ[i]? with
+    | some (.arr _) => eval n ρ e₁
+    | some _ => eval n ρ e₂
+    | none => .stuck
+  | n+1, ρ, .ifIn l i e₁ e₂ =>
+    match ρ[i]? with
+    | some (.record vs) => if (lookup vs l).isSome then eval n ρ e₁ else eval n ρ e₂
+    | some _ => .stuck          -- V8 throws on a primitive; the calculus is stricter on an array or a function
+    | none => .stuck
+  | n+1, ρ, .ifFun i e₁ e₂ =>
+    match ρ[i]? with
+    | some (.clos _ _ _) => eval n ρ e₁
+    | some .ctor => eval n ρ e₁
+    | some _ => eval n ρ e₂
+    | none => .stuck
 
 /-- The evaluator can get stuck: these are the runtime errors, by computation. One per
     structural elimination; each is a `chk-*` witness in the `any` finding. -/
@@ -276,11 +310,23 @@ example : eval 3 [] (.instOf (.record []) (.lam .top (.var 0))) = .stuck := rfl 
 example : eval 3 [] (.instOf .nul (.lam .top (.var 0))) = .val (.bool false) := rfl -- null instanceof arrow: V8 false
 example : eval 3 [] (.instOf (.record []) .ctor) = .val (.bool false) := rfl      -- object instanceof class: V8 false
 example : eval 3 [Val.nul] (.proj (.var 0) "l") = .stuck := rfl         -- x.l with x = null
+example : eval 3 [Val.num 42] (.ifIn "l" 0 .nul .nul) = .stuck := rfl   -- "l" in 42: V8 throws
+example : eval 3 [Val.record [("l", .num 1)]] (.ifIn "l" 0 (.num 1) (.num 2)) = .val (.num 1) := rfl
+example : eval 3 [Val.arr []] (.ifRec 0 (.num 1) (.num 2)) = .val (.num 2) := rfl -- an array isn't a plain object
+example : eval 3 [Val.ctor] (.ifFun 0 (.num 1) (.num 2)) = .val (.num 1) := rfl   -- typeof class C {}: "function"
 
 abbrev Ctx := List Ty
 
 def LabelsAgree {α β : Type} (xs : List (String × α)) (ys : List (String × β)) : Prop :=
   ∀ i : Nat, (xs[i]?).map Prod.fst = (ys[i]?).map Prod.fst
+
+/-- Object.prototype's string keys, measured in `v8-narrowing.out`. `"l" in x` finds them on every
+    plain object, inherited, where the calculus's records have only their own fields; so `ifIn` is
+    typed only for other keys, and for those `in` on a plain object is an own-field lookup. -/
+def objectProtoKeys : List String :=
+  ["__defineGetter__", "__defineSetter__", "__lookupGetter__", "__lookupSetter__", "__proto__",
+   "constructor", "hasOwnProperty", "isPrototypeOf", "propertyIsEnumerable", "toLocaleString",
+   "toString", "valueOf"]
 
 /-- Subtyping. What matters is what is **absent**: nothing is a supertype of `.top` except
     `.top` itself (`subTopOnlyTop`, proved below), so a `Top` never flows into a structured
@@ -290,9 +336,9 @@ inductive Subty : Ty → Ty → Prop where
   | refl {τ} : Subty τ τ
   | trans {τ σ υ} : Subty τ σ → Subty σ υ → Subty τ υ
   | top {τ} : Subty τ .top                               -- every type is below Top
-  | record {τs σs} :
-      LabelsAgree τs σs →
-      (∀ (i : Nat) l τ σ, τs[i]? = some (l, τ) → σs[i]? = some (l, σ) → Subty τ σ) →
+  | record {τs σs} :                                       -- width and depth, by label
+      (∀ l σ, lookup σs l = some σ → (lookup τs l).isSome) →
+      (∀ l τ σ, lookup τs l = some τ → lookup σs l = some σ → Subty τ σ) →
       Subty (.record τs) (.record σs)
   | arr {τ σ} : Subty τ σ → Subty (.arr τ) (.arr σ)           -- covariant (readonly arrays)
   | arrow {τ₁ τ₂ σ₁ σ₂} : Subty σ₁ τ₁ → Subty τ₂ σ₂ → Subty (.arrow τ₁ τ₂) (.arrow σ₁ σ₂)
@@ -310,8 +356,8 @@ inductive HasType : Ctx → Term → Ty → Prop where
   | bool {Γ b} : HasType Γ (.bool b) .bool
   | nul {Γ} : HasType Γ .nul .nul
   | undef {Γ} : HasType Γ .undef .undef
-  | record {Γ fs τs} :
-      LabelsAgree fs τs →
+  | record {Γ fs τs} :                                    -- distinct keys: V8 keeps the last, lookup finds the first
+      (fs.map Prod.fst).Nodup → LabelsAgree fs τs →
       (∀ (i : Nat) l e τ, fs[i]? = some (l, e) → τs[i]? = some (l, τ) → HasType Γ e τ) →
       HasType Γ (.record fs) (.record τs)
   | arr {Γ es τ} :
@@ -336,6 +382,19 @@ inductive HasType : Ctx → Term → Ty → Prop where
   | ifNum {Γ i e₁ e₂ τ} :
       i < Γ.length → HasType (Γ.set i .num) e₁ τ → HasType Γ e₂ τ →
       HasType Γ (.ifNum i e₁ e₂) τ
+  | ifRec {Γ i e₁ e₂ τ} :                                 -- a plain object has every field `record []` asks for
+      i < Γ.length → HasType (Γ.set i (.record [])) e₁ τ → HasType Γ e₂ τ →
+      HasType Γ (.ifRec i e₁ e₂) τ
+  | ifArr {Γ i e₁ e₂ τ} :
+      i < Γ.length → HasType (Γ.set i (.arr .top)) e₁ τ → HasType Γ e₂ τ →
+      HasType Γ (.ifArr i e₁ e₂) τ
+  | ifIn {Γ l i e₁ e₂ τ τs} :                             -- the field is there; its value is anything
+      l ∉ objectProtoKeys → Γ[i]? = some (.record τs) →
+      HasType (Γ.set i (.record ((l, .top) :: τs))) e₁ τ → HasType Γ e₂ τ →
+      HasType Γ (.ifIn l i e₁ e₂) τ
+  | ifFun {Γ i e₁ e₂ τ} :                                 -- learns nothing a call can use: a class is a function
+      i < Γ.length → HasType Γ e₁ τ → HasType Γ e₂ τ →
+      HasType Γ (.ifFun i e₁ e₂) τ
   | sub {Γ e τ σ} : HasType Γ e τ → Subty τ σ → HasType Γ e σ
   -- MUTANT-POINT HasType
 
@@ -361,9 +420,9 @@ inductive HasVal : Val → Ty → Prop where
   | bool {b} : HasVal (.bool b) .bool
   | nul : HasVal .nul .nul
   | undef : HasVal .undef .undef
-  | record {vs τs} :
-      LabelsAgree vs τs →
-      (∀ (i : Nat) l v τ, vs[i]? = some (l, v) → τs[i]? = some (l, τ) → HasVal v τ) →
+  | record {vs τs} :                                      -- every field the type asks for, by label
+      (∀ l τ, lookup τs l = some τ → (lookup vs l).isSome) →
+      (∀ l v τ, lookup vs l = some v → lookup τs l = some τ → HasVal v τ) →
       HasVal (.record vs) (.record τs)
   | arr {vs τ} : (∀ (i : Nat) v, vs[i]? = some v → HasVal v τ) → HasVal (.arr vs) (.arr τ)
   | clos {ρ Γ τ₁' b τ₂' τ₁ τ₂} :
@@ -415,10 +474,20 @@ theorem envSet {Γ : Ctx} {ρ : List Val} {i : Nat} {v τ'} (h : EnvTyped Γ ρ)
 /-! ## Canonical forms. `HasVal.top` only concludes `.top`, so `cases` excludes it. -/
 
 theorem canonRec {v τs} (h : HasVal v (.record τs)) :
-    ∃ vs, v = .record vs ∧ LabelsAgree vs τs ∧
-      ∀ (i : Nat) l w τ, vs[i]? = some (l, w) → τs[i]? = some (l, τ) → HasVal w τ := by
+    ∃ vs, v = .record vs ∧ (∀ l τ, lookup τs l = some τ → (lookup vs l).isSome) ∧
+      ∀ l w τ, lookup vs l = some w → lookup τs l = some τ → HasVal w τ := by
   cases h with
-  | record hl hf => exact ⟨_, rfl, hl, hf⟩
+  | record hp hf => exact ⟨_, rfl, hp, hf⟩
+
+/-- A field the type asks for is there, with a value of its type. -/
+theorem fieldOf {vs : List (String × Val)} {τs : List (String × Ty)} {l τ}
+    (hp : ∀ l τ, lookup τs l = some τ → (lookup vs l).isSome)
+    (hf : ∀ l w τ, lookup vs l = some w → lookup τs l = some τ → HasVal w τ)
+    (hk : lookup τs l = some τ) : ∃ w, lookup vs l = some w ∧ HasVal w τ := by
+  have := hp l τ hk
+  cases hw : lookup vs l with
+  | none => rw [hw] at this; simp at this
+  | some w => exact ⟨w, rfl, hf l w τ hw hk⟩
 
 theorem canonArr {v τ} (h : HasVal v (.arr τ)) :
     ∃ vs, v = .arr vs ∧ ∀ (i : Nat) w, vs[i]? = some w → HasVal w τ := by
@@ -438,20 +507,19 @@ theorem subsume {τ σ} (hs : Subty τ σ) : ∀ {v}, HasVal v τ → HasVal v �
   | refl => intro v h; exact h
   | trans _ _ ih₁ ih₂ => intro v h; exact ih₂ (ih₁ h)
   | top => intro v _; exact .top
-  | @record τs σs hl hf ih =>
+  | @record τs σs hp hf ih =>
     intro v h
-    obtain ⟨vs, rfl, hlv, hfv⟩ := canonRec h
-    refine .record (fun i => (hlv i).trans (hl i)) ?_
-    intro i l w σ' hw hσ
-    have h0 := hlv i; have h1 := hl i
-    rw [hw] at h0; rw [hσ] at h1
-    cases hτ : τs[i]? with
-    | none => rw [hτ] at h1; simp at h1
-    | some p =>
-      obtain ⟨l', τ'⟩ := p
-      rw [hτ] at h0 h1; simp at h0 h1
-      cases h0; cases h1
-      exact ih i _ _ _ hτ hσ (hfv i _ _ _ hw hτ)
+    obtain ⟨vs, rfl, hpv, hfv⟩ := canonRec h
+    have hτ : ∀ {l σ}, lookup σs l = some σ → ∃ τ, lookup τs l = some τ := fun {l σ} hσ => by
+      have := hp l σ hσ
+      cases ht : lookup τs l with
+      | none => rw [ht] at this; simp at this
+      | some τ => exact ⟨τ, rfl⟩
+    refine .record (fun l σ hσ => ?_) (fun l w σ hw hσ => ?_)
+    · obtain ⟨τ, ht⟩ := hτ hσ
+      exact hpv l τ ht
+    · obtain ⟨τ, ht⟩ := hτ hσ
+      exact ih l τ σ ht hσ (hfv l w τ hw ht)
   | arr _ ih =>
     intro v h
     obtain ⟨vs, rfl, hvs⟩ := canonArr h
@@ -496,6 +564,18 @@ theorem lookupTyped {vs : List (String × Val)} {τs : List (String × Ty)} {l �
         · intro i; have := hl (i + 1); simpa using this
         · intro i a b c ha hb; exact hf (i + 1) a b c (by simpa using ha) (by simpa using hb)
         · exact hk
+
+/-- A record literal's value has its type: the positional agreement `fieldsSound` gives, read by
+    label. -/
+theorem recordVal {vs : List (String × Val)} {τs : List (String × Ty)}
+    (hl : LabelsAgree vs τs)
+    (hf : ∀ (i : Nat) l w τ, vs[i]? = some (l, w) → τs[i]? = some (l, τ) → HasVal w τ) :
+    HasVal (.record vs) (.record τs) := by
+  refine .record (fun l τ hk => ?_) (fun l w τ hw hk => ?_)
+  · obtain ⟨w, hw, _⟩ := lookupTyped hl hf hk
+    rw [hw]; rfl
+  · obtain ⟨w', hw', hτ⟩ := lookupTyped hl hf hk
+    rw [hw] at hw'; cases hw'; exact hτ
 
 /-! ## Soundness of the list helpers, given soundness of the element evaluator -/
 
@@ -627,7 +707,7 @@ theorem sound : ∀ (n : Nat) {Γ ρ e τ}, HasType Γ e τ → EnvTyped Γ ρ �
     | bool => exact ⟨by simp [eval], fun v hv => by simp [eval] at hv; subst hv; exact .bool⟩
     | nul => exact ⟨by simp [eval], fun v hv => by simp [eval] at hv; subst hv; exact .nul⟩
     | undef => exact ⟨by simp [eval], fun v hv => by simp [eval] at hv; subst hv; exact .undef⟩
-    | record hl hf _ =>
+    | record _ hl hf _ =>
       obtain ⟨hns, hty⟩ := fieldsSound (eval n ρ) (fun he => ih he henv) hl hf
       simp only [eval]
       cases hr : evalFieldsWith (eval n ρ) _ with
@@ -635,7 +715,7 @@ theorem sound : ∀ (n : Nat) {Γ ρ e τ}, HasType Γ e τ → EnvTyped Γ ρ �
       | timeout => simp
       | ok vs =>
         obtain ⟨hlv, hfv⟩ := hty vs hr
-        exact ⟨by simp, fun v hv => by simp at hv; subst hv; exact .record hlv hfv⟩
+        exact ⟨by simp, fun v hv => by simp at hv; subst hv; exact recordVal hlv hfv⟩
     | arr hf _ =>
       obtain ⟨hns, hty⟩ := listSound (eval n ρ) (fun he => ih he henv) hf
       simp only [eval]
@@ -651,8 +731,8 @@ theorem sound : ∀ (n : Nat) {Γ ρ e τ}, HasType Γ e τ → EnvTyped Γ ρ �
       | stuck => exact absurd hr hns
       | timeout => simp
       | val v =>
-        obtain ⟨vs, rfl, hlv, hfv⟩ := canonRec (hty v hr)
-        obtain ⟨w, hw, hwτ⟩ := lookupTyped hlv hfv hk
+        obtain ⟨vs, rfl, hpv, hfv⟩ := canonRec (hty v hr)
+        obtain ⟨w, hw, hwτ⟩ := fieldOf hpv hfv hk
         exact ⟨by simp [hw], fun u hu => by simp [hw] at hu; subst hu; exact hwτ⟩
     | elem he hi _ _ =>
       obtain ⟨hnse, htye⟩ := ih he henv
@@ -720,7 +800,7 @@ theorem sound : ∀ (n : Nat) {Γ ρ e τ}, HasType Γ e τ → EnvTyped Γ ρ �
       | stuck => exact absurd hr hns
       | timeout => simp
       | val v =>
-        obtain ⟨vs, rfl, _⟩ := canonRec (hty v hr)
+        obtain ⟨vs, rfl, _, _⟩ := canonRec (hty v hr)
         exact ⟨by simp, fun w hw => by simp at hw; subst hw; exact .bool⟩
     | ctor => exact ⟨by simp [eval], fun v hv => by simp [eval] at hv; subst hv; exact .ctor⟩
     | instOf he hf _ _ =>
@@ -771,6 +851,58 @@ theorem sound : ∀ (n : Nat) {Γ ρ e τ}, HasType Γ e τ → EnvTyped Γ ρ �
       | arr _ => exact ih h₂ henv
       | clos _ _ _ => exact ih h₂ henv
       | ctor => exact ih h₂ henv
+    | @ifRec Γ' i e₁ e₂ τ' hi h₁ h₂ _ _ =>
+      have hlt : i < ρ.length := by rw [henv.1]; exact hi
+      have hget : ρ[i]? = some ρ[i] := List.getElem?_eq_getElem hlt
+      simp only [eval]
+      rw [hget]
+      cases hv : ρ[i] with
+      | record vs =>
+        have henv' := envSet henv (hget.trans (by rw [hv]))
+          (HasVal.record (vs := vs) (τs := []) (fun _ _ h => by simp [lookup] at h)
+            (fun _ _ _ _ h => by simp [lookup] at h))
+        exact ih h₁ henv'
+      | _ => exact ih h₂ henv
+    | @ifArr Γ' i e₁ e₂ τ' hi h₁ h₂ _ _ =>
+      have hlt : i < ρ.length := by rw [henv.1]; exact hi
+      have hget : ρ[i]? = some ρ[i] := List.getElem?_eq_getElem hlt
+      simp only [eval]
+      rw [hget]
+      cases hv : ρ[i] with
+      | arr vs =>
+        have henv' := envSet henv (hget.trans (by rw [hv]))
+          (HasVal.arr (vs := vs) (τ := .top) (fun _ _ _ => .top))
+        exact ih h₁ henv'
+      | _ => exact ih h₂ henv
+    | @ifIn Γ' l i e₁ e₂ τ' τs _ hi h₁ h₂ _ _ =>
+      obtain ⟨v, hv, hvτ⟩ := envLookup henv hi
+      obtain ⟨vs, rfl, hpv, hfv⟩ := canonRec hvτ
+      simp only [eval]
+      rw [hv]
+      cases hk : (lookup vs l).isSome with
+      | false => simp only [hk]; exact ih h₂ henv
+      | true =>
+        simp only [hk, if_true]
+        have hval : HasVal (.record vs) (.record ((l, .top) :: τs)) := by
+          refine .record (fun l' τ'' h => ?_) (fun l' w τ'' hw h => ?_)
+          · simp only [lookup] at h
+            by_cases he : l = l'
+            · subst he; exact hk
+            · simp only [he, if_false] at h; exact hpv l' τ'' h
+          · simp only [lookup] at h
+            by_cases he : l = l'
+            · simp only [he, if_true] at h; cases h; exact .top
+            · simp only [he, if_false] at h; exact hfv l' w τ'' hw h
+        exact ih h₁ (envSet henv hv hval)
+    | @ifFun Γ' i e₁ e₂ τ' hi h₁ h₂ _ _ =>
+      have hlt : i < ρ.length := by rw [henv.1]; exact hi
+      have hget : ρ[i]? = some ρ[i] := List.getElem?_eq_getElem hlt
+      simp only [eval]
+      rw [hget]
+      cases hv : ρ[i] with
+      | clos _ _ _ => exact ih h₁ henv
+      | ctor => exact ih h₁ henv
+      | _ => exact ih h₂ henv
     | sub _ hs ihs =>
       obtain ⟨hns, hty⟩ := ihs henv
       exact ⟨hns, fun v hv => subsume hs (hty v hv)⟩
@@ -778,6 +910,66 @@ theorem sound : ∀ (n : Nat) {Γ ρ e τ}, HasType Γ e τ → EnvTyped Γ ρ �
 /-- Corollary in the oracle's form: a closed, well-typed term is never stuck. -/
 theorem closedNeverStuck {e τ} (h : HasType [] e τ) (n : Nat) : eval n [] e ≠ .stuck :=
   (sound n h ⟨rfl, fun i v τ hv _ => by simp at hv⟩).1
+
+/-! ## Parsing at the boundary
+
+The other half of the `any` rule: once a value is `unknown`, a check decides what it is. `parseName σ`
+takes a value of type `Top` and decides whether it is `{ name: string }`, the way L asks a parser to:
+a plain-object test, an `in` test, the field bound to a name, and a `typeof` test on that name (L
+doesn't narrow a property path, which a call in between could change). It hands the parsed record to
+`ok`, or the value it was given to `fail`, so no made-up value stands in for a failed parse. -/
+
+def nameTy : Ty := .record [("name", .str)]
+
+def parseName (σ : Ty) : Term :=
+  .lam .top (.lam (.arrow nameTy σ) (.lam (.arrow .top σ)          -- x, ok, fail
+    (.ifRec 2
+      (.ifIn "name" 2
+        (.app (.lam .top                                           -- n := x.name
+            (.ifStr 0 (.app (.var 2) (.record [("name", .var 0)])) (.app (.var 1) (.var 3))))
+          (.proj (.var 2) "name"))
+        (.app (.var 0) (.var 2)))
+      (.app (.var 0) (.var 2)))))
+
+theorem parseNameTyped (σ : Ty) :
+    HasType [] (parseName σ) (.arrow .top (.arrow (.arrow nameTy σ) (.arrow (.arrow .top σ) σ))) :=
+  .lam (.lam (.lam
+    (.ifRec (by simp)
+      (.ifIn (τs := []) (by decide) rfl
+        (.app (.lam
+            (.ifStr (by simp)
+              (.app (.var rfl)
+                (.record (τs := [("name", .str)]) (by decide) (fun i => by cases i <;> rfl)
+                  (fun i l e τ h1 h2 => by
+                    cases i with
+                    | zero => simp at h1 h2; obtain ⟨_, rfl⟩ := h1; obtain ⟨_, rfl⟩ := h2; exact .var rfl
+                    | succ j => simp at h1)))
+              (.app (.var rfl) (.sub (.var rfl) .top))))
+          (.proj (τs := [("name", .top)]) (.var rfl) rfl))
+        (.app (.var rfl) (.sub (.var rfl) .top)))
+      (.app (.var rfl) (.var rfl)))))
+
+/-- Whatever value arrives, the parse never gets stuck, and `ok` only ever receives a `{ name: string }`
+    (its argument is typed `nameTy`, and `sound` gives every value its type). -/
+theorem parseNameNeverStuck (σ : Ty) {e ok fail : Term} (he : HasType [] e .top)
+    (hok : HasType [] ok (.arrow nameTy σ)) (hfail : HasType [] fail (.arrow .top σ)) (n : Nat) :
+    eval n [] (.app (.app (.app (parseName σ) e) ok) fail) ≠ .stuck :=
+  closedNeverStuck (.app (.app (.app (parseNameTyped σ) he) hok) hfail) n
+
+/-- It runs, and takes the branch V8 would: a name is parsed; a missing name, a name that isn't a
+    string, an array and `null` all go to `fail`. -/
+def okName : Term := .lam nameTy (.proj (.var 0) "name")
+def noName : Term := .lam .top (.str "no name")
+example : eval 20 [] (.app (.app (.app (parseName .str) (.record [("name", .str "ann")])) okName) noName)
+    = .val (.str "ann") := rfl
+example : eval 20 [] (.app (.app (.app (parseName .str) (.record [("id", .num 1)])) okName) noName)
+    = .val (.str "no name") := rfl
+example : eval 20 [] (.app (.app (.app (parseName .str) (.record [("name", .num 1)])) okName) noName)
+    = .val (.str "no name") := rfl
+example : eval 20 [] (.app (.app (.app (parseName .str) (.arr [])) okName) noName)
+    = .val (.str "no name") := rfl
+example : eval 20 [] (.app (.app (.app (parseName .str) .nul) okName) noName)
+    = .val (.str "no name") := rfl
 
 /-! ## Inversion: what is *not* derivable. Each elimination needs its structure, never `Top`. -/
 
@@ -865,3 +1057,4 @@ theorem topVarOnlyTop {τ} (h : HasType [Ty.top] (.var 0) τ) : τ = .top := by
 #print axioms subsume
 #print axioms subTopOnlyTop
 #print axioms topVarOnlyTop
+#print axioms parseNameNeverStuck

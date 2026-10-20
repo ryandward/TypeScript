@@ -24,12 +24,17 @@ any
 - lean/Top.lean has no generic container, so rel-any-nested-promise.ts, a Promise<any> held as a Promise of
   an interface, has no counterexample there. Its functions take one argument, so lib-string-replace-callback.ts
   (a rest parameter) and lib-json-stringify-replacer.ts (a second parameter) are covered only by analogy.
-- The calculus narrows only with typeof "string" and "number", so a Top never becomes a record or an array.
-  The checks L asks for on a JSON payload, typeof "object", !== null, in and Array.isArray, can't be stated
-  there, so nothing proves unknown's structured narrowing sound.
+- lean/Top.lean has no unions, so a narrowing's else-branch learns nothing there: x !== null on a T | null
+  can't be stated. Its narrowing tests are ones the calculus can state, not TypeScript's steps; that
+  narrowTypeByTypeof, narrowTypeByInKeyword and the rest compose to no more than these is unproven.
 - The calculus's typeof narrowing retypes a variable inside a branch, which holds only because the calculus
   has no assignment. The Lean proof assumes immutable-bindings, and nothing proves the two rules together.
 - new isn't in the calculus, so chk-new-any.ts has no mutant.
+
+call-signature
+- Not built, so chk-call-narrowed-function.ts is open: the release and the lab both call a Function with no
+  signature, and Node throws when it holds a class. Nobody has measured how much real code calls a value
+  typed Function.
 
 write-into-an-object
 - The accessor-not-narrowed mechanism has no L code. Its witness is proved by TypeScript's TS2339 and a

@@ -2,5 +2,5 @@
 -- object. TypeScript accepts any function on the right, through Function's [Symbol.hasInstance];
 -- V8 reads the right side's prototype only because the left side is an object, and throws.
 ⟨.instOf (.record []) (.lam .top (.var 0)), .bool,
-  .instOfCallable (.record (τs := []) (fun i => by cases i <;> rfl) (fun i l e τ h _ => by simp at h))
+  .instOfCallable (.record (τs := []) (by decide) (fun i => by cases i <;> rfl) (fun i l e τ h _ => by simp at h))
     (.lam (.var rfl)), rfl⟩

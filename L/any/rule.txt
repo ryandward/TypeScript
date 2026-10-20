@@ -74,7 +74,9 @@ Obligation 2, structure: TS2900
   a calculus with records, arrays, functions and one constructor, so instanceof has a sound rule to compare
   against. Each of any's permissions added back to Top is refuted by a well-typed program that crashes:
   projTop for a property read and destructuring, elemTop, appTop for a call and a tagged template, iterTop,
-  spreadTop, inTop and instOfTop. new isn't in the calculus.
+  spreadTop, inTop and instOfTop. new isn't in the calculus. It also proves the other half of the claim: a
+  parser from Top to { name: string }, built from the checks L asks for (a plain-object test, in, and typeof on
+  the field bound to a name), never gets stuck on any value.
   Witnesses:
     chk-property-off-any.ts            a property read off null
     chk-element-off-any.ts             an element read off null
