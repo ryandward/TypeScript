@@ -33,11 +33,6 @@ any
 - lean/Top.lean evaluates instanceof on a closure to false, where V8 throws: the calculus's closures are arrow
   functions. So its sound theorem certifies TypeScript's instanceof rule, which instanceof-constructor's
   witness crashes, and the "can't crash" this proof cites in Lean holds only for that evaluator.
-- rel-any-nested-promise.ts isn't nested. await unwraps the Promise<any> before the relation, so the lab
-  reports unknown flowing straight into User, the same flow as lib-response-json-await.ts. Obligation 1's
-  statement names Promise<any>, but no case relates a Promise<any> to a Promise<T>. This one would:
-  `const pending: Promise<User> = new Response('{"id": 1}').json()`. The release accepts it, the lab rejects
-  it through Promise<any>, Promise<User>, any and User with TS2898, and Node crashes on the read.
 
 instanceof-constructor
 - Not built, so chk-instanceof-arrow.ts is open: the release and the lab both accept an arrow function, a

@@ -31,9 +31,9 @@ Obligation 1, assignability: TS2898
   above, that a nested any reaches the same branch, is untested.
   Witnesses:
     rel-any-nested-array.ts            Array.isArray's any[] returned as readonly string[]
-    rel-any-nested-promise.ts          Response.json's Promise<any>, awaited into an interface
+    rel-any-nested-promise.ts          Response.json's Promise<any> held as a Promise of an interface
     lib-array-isarray-any.ts           the same any[], through a ternary
-    lib-response-json-await.ts         the same Promise<any>, through a Response held in a const
+    lib-response-json-await.ts         Response.json's Promise<any>, awaited into an interface
     lib-then-json-parse.ts             then(JSON.parse) infers Promise<any>
     lib-map-no-typeargs.ts             new Map() is Map<any, any>, so values() yields any
     lib-new-array-any.ts               new Array(3) is any[]

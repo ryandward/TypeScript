@@ -1,5 +1,6 @@
-// witness: Same any-source branch through Promise<any>: Response.json() is never read as `any` itself.
+// witness: Promise<any> relates to Promise<User> because Promise's type argument is related through its variance,
+// and any relates to User. Response.json() returns Promise<any>, and nothing awaits it before the relation.
 interface User { readonly name: string }
-const user: User = await new Response('{"id": 1}').json(); // rejected here: TS2898
-console.log(user.name.toUpperCase());
+const pending: Promise<User> = new Response('{"id": 1}').json(); // rejected here: TS2898
+console.log((await pending).name.toUpperCase());
 export {};
