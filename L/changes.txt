@@ -81,7 +81,7 @@ any (soundness: TS2898, TS2900; 8ac4d727f, 2adfd653a, 29e19bf5e, f0cb8e20c)
   checkNonNullTypeWithReporter (the value is of type unknown), invocationError (the value isn't callable),
   resolveInstanceofExpression (the right side isn't a function) and reportTypeNotIterableError.
 
-writes (soundness: TS2904, and TypeScript's own TS2339 and TS2550; the commit after cb6676137)
+writes (soundness: TS2904, and TypeScript's own TS2339 and TS2550; a36084efe)
 - checkReferenceExpression, which checks every assignment target (=, a compound assignment, ++, --, a
   destructuring target, a for-in or for-of target), reports TS2904 on a property or element access, and
   checkDeleteExpression reports it on every delete.
@@ -200,7 +200,7 @@ stops compiling, which costs nothing L keeps.
 - WeakMap and WeakSet keys are objects: WeakKeyTypes has no symbol, since a registered symbol throws as a key
   (es2023.collection).
 
-The library's writes (src/lib; the commit after cb6676137)
+The library's writes (src/lib; a36084efe)
 
 The core changes no object in place, so the fork deletes every method and function in its ES library that does,
 and the rule writes holds the deletions. Each file the deletions touched opens with a `// L:` comment saying so.
