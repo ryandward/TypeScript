@@ -126,7 +126,7 @@ non-null-assertion (soundness: TS2895; 58e788680)
 type-assertion (soundness: TS2896; ebc32199d)
 - checkAssertion reports every `x as T` and `<T>x` except `as const`.
 
-classes (soundness: TS2902, TS2903; the commit after 44902bc7b)
+classes (soundness: TS2902, TS2903; f92faa0b1)
 - checkClassLikeDeclaration, which checks every class declaration and expression, reports TS2902.
 - checkThisExpression and checkSuperExpression report TS2903 on every this and super.
 - checkPropertyDeclaration no longer reports definite-assignment's TS2897 (added in 251cbe601): only a class
