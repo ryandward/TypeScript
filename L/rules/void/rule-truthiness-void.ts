@@ -3,4 +3,4 @@
 const produce: () => void = () => 42;
 const widened: () => string | void = produce;
 const result = widened();
-console.log(result ? result.toUpperCase() : 'none');
+console.log(result ? result.toUpperCase() : 'none'); // rejected here: TS2339

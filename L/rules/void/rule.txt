@@ -1,0 +1,37 @@
+void
+kind: soundness
+
+Claim. If the lab accepts a program, a void result is never read as anything a test didn't establish, and none is
+passed to a parameter typed void.
+
+Counterexample in plain TypeScript. A function that returns a number passes as one that returns void, since its
+caller discards the result, and that is kept: a void result may hold anything. But TypeScript gives void the
+facts of undefined, so `x !== undefined`, a truthiness test or `typeof x === 'object'` takes void out of a union,
+and `typeof x === 'object'` narrows void to never. A () => void view widened to () => string | void, or a
+Getter<void> to a Getter<string | void>, then reads 42 as a string. Each witness is such a program.
+
+Obligation 1, a void result narrowed: TS2339 (TypeScript's code)
+  Statement. No test takes void out of a type, except typeof, which narrows void to what it names, as it
+  narrows unknown.
+  Mechanism. VoidFacts is every fact, so a filter by facts keeps void, and narrowTypeByTypeFacts gives a void
+  constituent the type typeof implied. A member read on what's left reports TS2339 on void.
+  Why it suffices. Every narrowing by a test goes through the type facts or narrowTypeByTypeFacts.
+  Witnesses:
+    rel-void-return.ts                 a () => void widened to () => string | void, read after !== undefined
+    rel-void-type-argument.ts          a Getter<void> widened to Getter<string | void>, the same
+    rule-truthiness-void.ts            the same, after a truthiness test
+    flow-void-typeof.ts                the same, after typeof x === 'object'
+    flow-optchain-void.ts              o?.x compared with a void value, then o read
+  Controls:
+    void-discard.ts                    a function returning a number viewed as returning void
+    void-typeof.ts                     typeof narrows a void result to a string
+
+Obligation 2, a void result passed to a void parameter: TS2911
+  Statement. No argument whose type includes void is passed to a parameter whose type includes void: a void
+  result may hold anything, and a parameter typed void takes only undefined.
+  Mechanism. getSignatureApplicabilityError reports TS2911 for such an argument, under valueAssignableRelation.
+  Why it suffices. Every argument of every call is checked there.
+  Witnesses:
+    flow-optchain-void.ts              void results passed for a Box | void and a number | void
+  Rejected sound code, because a parameter typed void takes only undefined:
+    void-argument.ts                   a void result handed to a function that can't use it

@@ -4094,6 +4094,10 @@
         "category": "Error",
         "code": 2910
     },
+    "A void result may hold anything, and a parameter typed void takes only undefined.": {
+        "category": "Error",
+        "code": 2911
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

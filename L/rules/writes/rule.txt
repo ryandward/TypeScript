@@ -47,8 +47,6 @@ Obligation 1, a write: TS2904
     fresh-literal-index-signature.ts       a fresh object literal against an index signature in a union
     fresh-literal-union-expected-type.ts   a fresh array literal whose expected type is a union
     function-result-copy.ts                slice()'s result passed where a wider list is taken
-    generator-widened.ts                   a generator widened
-    iterator-widened.ts                    an iterator widened
     iterator-wider-return.ts               an iterator viewed with a wider return type
     library-list-named-exactly.ts          a library's maybe-missing list, named with exactly its type
     library-mapped-partial.ts              a Date passed to TypeORM's mapped copy of an entity
@@ -60,7 +58,6 @@ Obligation 1, a write: TS2904
     parameter-typed-mutable-only-reads.ts  a parameter typed unknown[], handed strings
     readonly-object-into-writable-type.ts  a readonly object passed where its field is writable
     readonly-property.ts                   a readonly property widened
-    readonly-set-widened.ts                a ReadonlySet widened
     readonly-tuple.ts                      a readonly tuple widened
     readonly-widened.ts                    a readonly array widened
     rest-parameter-tuple.ts                a function value whose rest parameter is a tuple

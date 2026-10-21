@@ -1,6 +1,6 @@
 // witness: x.constructor === C narrows to C's instances (isConstructedBy compares the constructor's symbol), but any
 // object can carry a constructor property.
 type Rock = { readonly constructor: Function };
-const poke = (x: Map<string, number> | Rock): string => (x.constructor === Map ? String(x.get('a')) : 'rock');
-const rock: Rock = { constructor: Map };
+const poke = (x: Error | Rock): number => (x.constructor === Error ? x.message.length : 0);
+const rock: Rock = { constructor: Error };
 console.log(poke(rock));

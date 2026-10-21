@@ -66,6 +66,14 @@ ambient-declarations
 directives
 - The compiler option noCheck still skips the checker for the whole program, as a directive would for a file.
 
+parameters
+- Array, ReadonlyArray and tuples are covariant because getVariances hard-codes them (arrayVariances), not because
+  a measurement found it: includes, indexOf and lastIndexOf take T, and a measurement would call T invariant. The
+  covariance holds because those only compare and the core's arrays have no writers, but it is trust in the
+  library, not a measurement. A Map's key, a Set's element and an iterator's T are measured, and invariant.
+- Inference (inferFromSignature) still records method positions as bivariant. It chooses type arguments; the
+  relation then checks them one way.
+
 call-signature
 - Not built, so chk-call-narrowed-function.ts is open: the release and the lab both call a Function with no
   signature, and Node throws when it holds a constructor. Nobody has measured how much real code calls a value

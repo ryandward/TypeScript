@@ -3,8 +3,7 @@
 interface Generator<T = unknown, TReturn = any, TNext = any> extends IteratorObject<T, TReturn, TNext> {
     // NOTE: 'next' is defined using a tuple to ensure we report the correct assignability errors in all places.
     next(...[value]: [] | [TNext]): IteratorResult<T, TReturn>;
-    return(value: TReturn): IteratorResult<T, TReturn>;
-    throw(e: any): IteratorResult<T, TReturn>;
+    // L: no return or throw: each takes a value into the iterator, which makes TReturn invariant, and the core drives no iterator by hand
     [Symbol.iterator](): Generator<T, TReturn, TNext>;
 }
 

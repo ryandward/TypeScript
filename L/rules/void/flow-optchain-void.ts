@@ -4,5 +4,5 @@
 type Box = { readonly x: number };
 const noNumber: () => number | void = () => { console.log('no number'); };
 const noBox: () => Box | void = () => { console.log('no box'); };
-const read = (o: Box | void, w: number | void): number => (o?.x === w ? o.x : -1);
-console.log(read(noBox(), noNumber()));
+const read = (o: Box | void, w: number | void): number => (o?.x === w ? o.x : -1); // rejected here: TS2339
+console.log(read(noBox(), noNumber())); // rejected here: TS2911

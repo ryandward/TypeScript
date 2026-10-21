@@ -1299,7 +1299,8 @@ export const enum TypeFacts {
     ObjectFacts = ObjectStrictFacts | EQUndefined | EQNull | EQUndefinedOrNull | Falsy,
     FunctionStrictFacts = TypeofEQFunction | TypeofEQHostObject | TypeofNEString | TypeofNENumber | TypeofNEBigInt | TypeofNEBoolean | TypeofNESymbol | TypeofNEObject | NEUndefined | NENull | NEUndefinedOrNull | Truthy,
     FunctionFacts = FunctionStrictFacts | EQUndefined | EQNull | EQUndefinedOrNull | Falsy,
-    VoidFacts = TypeofNEString | TypeofNENumber | TypeofNEBigInt | TypeofNEBoolean | TypeofNESymbol | TypeofNEObject | TypeofNEFunction | TypeofNEHostObject | EQUndefined | EQUndefinedOrNull | NENull | Falsy,
+    // L: a void result is whatever the function returned, so no test rules it out: it has every fact.
+    VoidFacts = All,
     UndefinedFacts = TypeofNEString | TypeofNENumber | TypeofNEBigInt | TypeofNEBoolean | TypeofNESymbol | TypeofNEObject | TypeofNEFunction | TypeofNEHostObject | EQUndefined | EQUndefinedOrNull | NENull | Falsy | IsUndefined,
     NullFacts = TypeofEQObject | TypeofNEString | TypeofNENumber | TypeofNEBigInt | TypeofNEBoolean | TypeofNESymbol | TypeofNEFunction | TypeofNEHostObject | EQNull | EQUndefinedOrNull | NEUndefined | Falsy | IsNull,
     EmptyObjectStrictFacts = All & ~(EQUndefined | EQNull | EQUndefinedOrNull | IsUndefinedOrNull),
@@ -21986,9 +21987,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             void instantiateType(sourceRestType || targetRestType, reportUnreliableMarkers);
         }
 
-        const kind = target.declaration ? target.declaration.kind : SyntaxKind.Unknown;
-        const strictVariance = !(checkMode & SignatureCheckMode.Callback) && strictFunctionTypes && kind !== SyntaxKind.MethodDeclaration &&
-            kind !== SyntaxKind.MethodSignature && kind !== SyntaxKind.Constructor;
+        // L: every parameter relates one way, contravariantly, whatever declared the target: a function, a method, a method
+        // signature or a constructor. strictFunctionTypes can't turn it off.
         let result = Ternary.True;
 
         const sourceThisType = getThisTypeOfSignature(source);
@@ -21996,8 +21996,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             const targetThisType = getThisTypeOfSignature(target);
             if (targetThisType) {
                 // void sources are assignable to anything.
-                const related = !strictVariance && compareTypes(sourceThisType, targetThisType, /*reportErrors*/ false)
-                    || compareTypes(targetThisType, sourceThisType, reportErrors);
+                const related = compareTypes(targetThisType, sourceThisType, reportErrors);
                 if (!related) {
                     if (reportErrors) {
                         errorReporter!(Diagnostics.The_this_types_of_each_signature_are_incompatible);
@@ -22013,7 +22012,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
 
         for (let i = 0; i < paramCount; i++) {
             const sourceType = i === restIndex ? getRestOrAnyTypeAtPosition(source, i) : tryGetTypeAtPosition(source, i);
-            const targetType = i === restIndex ? getRestOrAnyTypeAtPosition(target, i) : tryGetTypeAtPosition(target, i);
+            // L: a parameter the target never passes still receives what a wider view of the target passes, which can be anything.
+            const targetType = i === restIndex ? getRestOrAnyTypeAtPosition(target, i) : tryGetTypeAtPosition(target, i) ?? (sourceType && unknownType);
             if (sourceType && targetType && (sourceType !== targetType || checkMode & SignatureCheckMode.StrictArity)) {
                 // In order to ensure that any generic type Foo<T> is at least co-variant with respect to T no matter
                 // how Foo uses T, we need to relate parameters bi-variantly (given that parameters are input positions,
@@ -22028,8 +22028,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 const callbacks = sourceSig && targetSig && !getTypePredicateOfSignature(sourceSig) && !getTypePredicateOfSignature(targetSig) &&
                     getTypeFacts(sourceType, TypeFacts.IsUndefinedOrNull) === getTypeFacts(targetType, TypeFacts.IsUndefinedOrNull);
                 let related = callbacks ?
-                    compareSignaturesRelated(targetSig, sourceSig, (checkMode & SignatureCheckMode.StrictArity) | (strictVariance ? SignatureCheckMode.StrictCallback : SignatureCheckMode.BivariantCallback), reportErrors, errorReporter, incompatibleErrorReporter, compareTypes, reportUnreliableMarkers) :
-                    !(checkMode & SignatureCheckMode.Callback) && !strictVariance && compareTypes(sourceType, targetType, /*reportErrors*/ false) || compareTypes(targetType, sourceType, reportErrors);
+                    compareSignaturesRelated(targetSig, sourceSig, (checkMode & SignatureCheckMode.StrictArity) | SignatureCheckMode.StrictCallback, reportErrors, errorReporter, incompatibleErrorReporter, compareTypes, reportUnreliableMarkers) :
+                    compareTypes(targetType, sourceType, reportErrors);
                 // With strict arity, (x: number | undefined) => void is a subtype of (x?: number | undefined) => void
                 if (related && checkMode & SignatureCheckMode.StrictArity && i >= getMinArgumentCount(source) && i < getMinArgumentCount(target) && compareTypes(sourceType, targetType, /*reportErrors*/ false)) {
                     related = Ternary.False;
@@ -22042,6 +22042,19 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 }
                 result &= related;
             }
+        }
+
+        // L: the rest of a rest parameter past every parameter the target has receives what a wider view passes, which can be anything.
+        if (sourceRestType && !targetRestType && sourceCount > targetCount) {
+            const rest = getRestTypeAtPosition(source, targetCount);
+            const related = compareTypes(createArrayType(unknownType), rest, reportErrors);
+            if (!related) {
+                if (reportErrors) {
+                    errorReporter!(Diagnostics.Types_of_parameters_0_and_1_are_incompatible, unescapeLeadingUnderscores(getParameterNameAtPosition(source, targetCount)), unescapeLeadingUnderscores(getParameterNameAtPosition(source, targetCount)));
+                }
+                return Ternary.False;
+            }
+            result &= related;
         }
 
         if (!(checkMode & SignatureCheckMode.IgnoreReturnTypes)) {
@@ -29922,6 +29935,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
 
         function narrowTypeByTypeFacts(type: Type, impliedType: Type, facts: TypeFacts) {
             return mapType(type, t =>
+                // L: a void result is whatever the function returned, so a test narrows it as it narrows unknown.
+                t.flags & TypeFlags.Void ? impliedType :
                 // We first check if a constituent is a subtype of the implied type. If so, we either keep or eliminate
                 // the constituent based on its type facts. We use the strict subtype relation because it treats `object`
                 // as a subtype of `{}`, and we need the type facts check because function types are subtypes of `object`,
@@ -36240,6 +36255,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 // parameter types yet and therefore excess property checks may yield false positives (see #17041).
                 const checkArgType = checkMode & CheckMode.SkipContextSensitive ? getRegularTypeOfObjectLiteral(argType) : argType;
                 const effectiveCheckArgumentNode = getEffectiveCheckNode(arg);
+                // L: a void result may hold anything, and a parameter typed void takes only undefined.
+                if (relation === valueAssignableRelation && someType(paramType, t => !!(t.flags & TypeFlags.Void)) && someType(checkArgType, t => !!(t.flags & TypeFlags.Void))) {
+                    return reportErrors ? [createDiagnosticForNode(effectiveCheckArgumentNode, Diagnostics.A_void_result_may_hold_anything_and_a_parameter_typed_void_takes_only_undefined)] : emptyArray;
+                }
                 if (!checkTypeRelatedToAndOptionallyElaborate(checkArgType, paramType, relation, reportErrors ? effectiveCheckArgumentNode : undefined, effectiveCheckArgumentNode, headMessage, containingMessageChain, errorOutputContainer)) {
                     Debug.assert(!reportErrors || !!errorOutputContainer.errors, "parameter should have errors when reporting errors");
                     maybeAddMissingAwaitInfo(arg, checkArgType, paramType);

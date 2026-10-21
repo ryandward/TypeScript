@@ -2,5 +2,5 @@
 // so parameters are compared in both directions.
 interface Formatter { format(x: string | number): string }
 const upper = { format: (x: string): string => x.toUpperCase() };
-const fmt: Formatter = upper;
+const fmt: Formatter = upper; // rejected here: TS2322
 console.log(fmt.format(42));

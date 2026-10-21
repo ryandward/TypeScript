@@ -5,4 +5,4 @@ type Job = { readonly run: () => number };
 const callback: () => void = () => ({ other: 1 });
 const widened: () => Job | void = callback;
 const result = widened();
-console.log(typeof result === 'object' ? result.run() : 0);
+console.log(typeof result === 'object' ? result.run() : 0); // rejected here: TS2339

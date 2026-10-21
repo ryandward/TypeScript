@@ -2,7 +2,7 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds seventeen diagnostics, changes the checker and two functions in utilities.ts that decide which
+things: it adds eighteen diagnostics, changes the checker and two functions in utilities.ts that decide which
 files are checked, adds one internal type flag, declares readonly the new objects and collections the library
 hands out, deletes from the ES library every effect and every method that changes an object in place, and
 corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
@@ -17,7 +17,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Seventeen new errors, from TS2892 to TS2910, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+Eighteen new errors, from TS2892 to TS2911, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
 The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
 rules and TS2897 to definite-assignment.
 
@@ -59,6 +59,8 @@ rules and TS2897 to definite-assignment.
           '{0}' hides what the checker found. L has no directives that suppress or skip its checks.
   TS2910  ambient-declarations
           This adds to the library's declaration of '{0}', which nothing in this program implements.
+  TS2911  void
+          A void result may hold anything, and a parameter typed void takes only undefined.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -155,6 +157,20 @@ ambient-declarations, namespaces, enums, overloads and directives (soundness: TS
   file of the program's own is checked, and canIncludeBindAndCheckDiagnostics no longer lets @ts-nocheck skip a
   TypeScript file.
 
+parameters and void (soundness: TS2911, and TypeScript's own TS2322 and TS2339; the commit after ba06984f4)
+- compareSignaturesRelated relates every parameter contravariantly, whatever declared the target (a function, a
+  method, a method signature or a constructor) and whatever strictFunctionTypes says; strictVariance, the
+  declaration kind it read and the bivariant comparisons are gone. A callback's signature is related in
+  StrictCallback mode at every depth, so BivariantCallback is never passed, and a this type relates one way.
+- compareSignaturesRelated takes unknown as the target's type at a parameter position the target doesn't reach,
+  and compares unknown[] with what a source's rest parameter takes past the target's last parameter.
+- VoidFacts is All: a void result is whatever the function returned, so no test rules it out, and
+  narrowTypeByTypeFacts gives a void constituent the type a typeof test implies, as it gives unknown's.
+- getSignatureApplicabilityError reports TS2911 when an argument whose type includes void goes to a parameter whose
+  type includes void, under valueAssignableRelation.
+- With method parameters strict, isImplementationCompatibleWithOverload rejects a method or constructor overload
+  that widens a parameter (TypeScript's TS2394), filed under classes.
+
 Rules with no checker change: effects and library-declarations are built in the library alone (below),
 optional-field is a specification only, and call-signature isn't built (its witness is open; see debt.txt).
 
@@ -246,6 +262,18 @@ and the rule writes holds the deletions. Each file the deletions touched opens w
   set, defineProperty, deleteProperty, setPrototypeOf and preventExtensions (es2015.reflect).
 - ArrayBuffer's resize, transfer and transferToFixedLength (es2024.arraybuffer), SharedArrayBuffer's grow
   (es2024.sharedmemory), and the DisposableStack and AsyncDisposableStack constructors (esnext.disposable).
+
+The library's members the strict relation can't type (src/lib; the commit after ba06984f4)
+
+With every parameter related one way, two parts of the library no longer compiled, and the core uses neither:
+
+- Iterator's and AsyncIterator's return and throw (es2015.iterable, es2018.asynciterable), and Generator's and
+  AsyncGenerator's (es2015.generator, es2018.asyncgenerator). return takes a TReturn in, which made TReturn
+  invariant: with Iterable's any defaults the any rule then refused an array as an Iterable, and Generator's
+  required parameter didn't fit IteratorObject's optional one. The core drives no iterator by hand.
+- Function's, CallableFunction's and NewableFunction's apply, call and bind (es5). Each binds a this, the core has
+  none, and their this parameters, narrower than Function's, kept CallableFunction and NewableFunction from
+  extending Function.
 
 Outside src/
 

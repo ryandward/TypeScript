@@ -1,0 +1,52 @@
+parameters
+kind: soundness
+
+Claim. If the lab accepts a program, a function is never viewed as taking an argument it can't take: every
+parameter relates contravariantly, whatever declared it, and a parameter the view never passes is one the view
+could pass anything to.
+
+Counterexample in plain TypeScript. compareSignaturesRelated compares parameters in both directions when the
+target was declared as a method, a method signature or a constructor, or when strictFunctionTypes is off, and
+relates a callback's return types both ways when its parent did. So a function that takes a string passes as a
+method that takes string | number, and getVariances, which measures through the relation, calls a type parameter
+used only in a method's parameter bivariant. And the comparison skips a parameter the target doesn't have, so a
+function with an optional parameter passes as one that takes none, which then passes as one that takes a number.
+Each witness is such a program, and Node crashes on it.
+
+A function that takes fewer arguments than its caller passes is fine: JavaScript drops the rest, and the function
+reads none of them. A method that takes T makes T invariant, even where the method only compares the argument, as a
+set's has does: three programs that can't go wrong are rejected below for it, and the relation stays as it is.
+
+Obligation 1, a parameter relates one way: TS2322 (TypeScript's code)
+  Statement. Every parameter of a source signature accepts what the target's parameter accepts, and nothing is
+  related the other way: not for a method, a method signature, a constructor or a callback, whatever
+  strictFunctionTypes says.
+  Mechanism. compareSignaturesRelated relates each parameter with compareTypes(targetType, sourceType) alone, a
+  callback's signature in StrictCallback mode at every depth, and a this type contravariantly. getVariancesWorker
+  measures through the relation, so a type parameter used in a method's parameter is measured contravariant there.
+  src/lib deletes Iterator's, AsyncIterator's, Generator's and AsyncGenerator's return and throw, which took a
+  TReturn in and made it invariant, so an array is still an Iterable of any return type.
+  Why it suffices. Every relation between two signatures goes through compareSignaturesRelated, and variance is
+  measured with the same relation.
+  Witnesses:
+    rel-method-bivariance.ts           a string function passed as a method taking string | number
+    smoke-method-bivariance.ts         the same, on a sink
+    rel-method-variance-cache.ts       Sink<string> as Sink<string | number>, through the measured variance
+    rel-bivariant-callback-return.ts   a callback's return related both ways under a method
+  Rejected sound code, because a method that takes T makes T invariant:
+    readonly-set-widened.ts            a ReadonlySet widened, through has(value: T)
+    iterator-widened.ts                an iterator widened, through reduce's initialValue: T
+    generator-widened.ts               a generator widened, through the same reduce
+  Controls:
+    fewer-arguments.ts                 a callback that takes fewer arguments than map passes
+    wider-parameter.ts                 a function whose parameter is wider than its type asks
+
+Obligation 2, a parameter the target never passes: TS2322 (TypeScript's code)
+  Statement. A source parameter at a position the target has no parameter for is related as receiving unknown,
+  and so is the rest of a source's rest parameter past every parameter the target has.
+  Mechanism. compareSignaturesRelated takes unknown as the target's type at a position it doesn't reach, and
+  compares unknown[] with what a source's rest parameter takes past the target's last parameter.
+  Why it suffices. A view's caller can only pass a parameter the view has; any later, wider view can pass
+  anything at the rest, so only a parameter that takes unknown can be forgotten.
+  Witnesses:
+    rel-arity-optional-param.ts        an optional parameter forgotten, then filled with a number

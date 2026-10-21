@@ -6,4 +6,4 @@ const numbers: Getter<number> = { get: () => 42 };
 const voided: Getter<void> = numbers;
 const maybeText: Getter<string | void> = voided;
 const v = maybeText.get();
-console.log(typeof v !== 'undefined' ? v.toUpperCase() : 'none');
+console.log(typeof v !== 'undefined' ? v.toUpperCase() : 'none'); // rejected here: TS2339

@@ -86,3 +86,21 @@ Obligation 2, this or super: TS2903
   Rejected sound code, because the core has no classes:
     assigned-by-a-method.ts            a field a method the constructor calls assigns
     constructor-assigned.ts            a field the constructor assigns
+
+Obligation 3, an overload its implementation can't accept: TS2394 (TypeScript's code)
+  Statement. A method's or a constructor's overload takes nothing its implementation doesn't.
+  Mechanism. With every parameter related one way (see parameters), isImplementationCompatibleWithOverload
+  rejects a method or constructor overload that widens a parameter, as it already rejected a function's.
+  Why it suffices. Every overload is checked against its implementation there.
+  Witnesses:
+    chk-overload-ctor-param.ts         a constructor's overload admits a key its body doesn't
+    chk-overload-method-param.ts       a method's overload admits a key its body doesn't
+
+Obligation 4, a deleted apply, call or bind: TS2339 (TypeScript's code)
+  Statement. A function has no apply, call or bind: each binds a this, and the core has none.
+  Mechanism. src/lib/es5.d.ts deletes them from Function, CallableFunction and NewableFunction, so a call
+  reports TS2339. Their this parameters, narrower than Function's, also kept the library from compiling once
+  every parameter related one way.
+  Why it suffices. A method is called through the declaration its type has, and the deletion leaves none.
+  Witnesses:
+    lib-call-unbound-this.ts           a method called through call with any this
