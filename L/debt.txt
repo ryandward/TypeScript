@@ -49,8 +49,9 @@ writes
 - Iterators and generators are the state the core can still change: next() advances one, and every getter or
   function that reads one can return something new. RegExp's exec and test write lastIndex on a regex with the g
   or y flag. Neither is a write the checker sees, and no rule closes them.
-- The ban is the core's. The shell can still change an object it handed the core, between a check and an await
-  (flow-await-interleave in the catalog), since narrowing a property path survives the await.
+- The ban is the core's. The shell can still change an object it handed the core between a check and an await,
+  as flow-await-interleave's Object.assign did inside the core, since narrowing a property path survives the
+  await.
 
 call-signature
 - Not built, so chk-call-narrowed-function.ts is open: the release and the lab both call a Function with no

@@ -5,4 +5,4 @@ const checks = {
   },
 };
 const probe: object = { a: 1 };
-console.log(probe instanceof checks.widget);
+console.log(probe instanceof checks.widget); // rejected here: TS2901

@@ -33,6 +33,9 @@ Obligation 2, assignment to a binding: TS2893
   Why it suffices. Every assignment to a binding, plain, compound, increment or destructuring, resolves its
   target through checkIdentifier, which sees that it is being assigned.
   Witnesses:
+    flow-destructure-param-reassign.ts the same, through a destructured alias
+    flow-alias-param-reassign.ts       a parameter reassigned while an alias of its tag stays narrowed
+    flow-alias-closure.ts              a parameter reassigned before a closure reads its narrowed alias
     chk-captured-let.ts                the assignment after the declaration, which TypeScript took as proof
                                        the read was initialized
   Controls:

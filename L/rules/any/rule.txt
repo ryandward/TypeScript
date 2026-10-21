@@ -31,6 +31,8 @@ Obligation 1, assignability: TS2898
   parameter, none of them postulated at the container. Promise<any> isn't in the calculus, and functions there
   take one argument, so a rest parameter or a second parameter is covered only by analogy.
   Witnesses:
+    flow-typeof-function.ts            typeof 'function' keeps an object type callable, and its call gives any
+    rel-erased-overload-target.ts      an erased generic signature, (x: any) => any, held as two overloads
     rel-any-nested-array.ts            Array.isArray's any[] returned as readonly string[]
     rel-any-nested-promise.ts          then(JSON.parse)'s Promise<any> held as a Promise of an interface
     lib-array-isarray-any.ts           the same any[], through a ternary
@@ -76,6 +78,7 @@ Obligation 2, structure: TS2900
   parser from Top to { name: string }, built from the checks L asks for (a plain-object test, in, and typeof on
   the field bound to a name), never gets stuck on any value.
   Witnesses:
+    rule-any.ts                        a value typed any read as a string
     chk-property-off-any.ts            a property read off null
     chk-element-off-any.ts             an element read off null
     chk-call-any.ts                    a call on 42

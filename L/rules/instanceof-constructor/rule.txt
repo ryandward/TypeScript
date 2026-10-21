@@ -30,6 +30,7 @@ Obligation 1, right side with a prototype: TS2901
   program, ({}) instanceof (() => 1). The calculus has no unions and no object with a Symbol.hasInstance
   method of its own, so neither the per-member judgment nor that branch has a counterpart there.
   Witnesses:
+    chk-instanceof-method.ts           an object-literal method on the right
     chk-instanceof-arrow.ts            an arrow function on the right
   Controls:
     built-in-constructor.ts            Error, declared with a construct signature

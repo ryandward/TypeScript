@@ -97,6 +97,9 @@ Obligation 3, a deleted function a later library would have: TS2550 (TypeScript'
   version, as Object.assign, and TS2339 for the rest.
   Why it suffices. The same as obligation 2.
   Witnesses:
+    flow-tuple-element.ts              Object.assign replaces a narrowed tuple element
+    flow-call-mutation.ts              Object.assign replaces a narrowed property in a call
+    flow-await-interleave.ts           Object.assign replaces a checked state across an await
     lib-object-assign-prototype.ts         Object.assign copies none of a Map's methods
 
 Obligation 4, an accessor is not narrowed: TS2339 (TypeScript's code)
