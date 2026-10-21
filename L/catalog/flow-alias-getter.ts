@@ -5,12 +5,11 @@ type Circle = { readonly kind: 'circle'; readonly radius: () => number };
 type Square = { readonly kind: 'square'; readonly side: number };
 
 const reads = new Set<number>();
-class Flipper {
+const f = {
   get shape(): Circle | Square {
     reads.add(reads.size);
     return reads.size === 1 ? { kind: 'circle', radius: () => 1 } : { kind: 'square', side: 2 };
-  }
-}
-const f = new Flipper();
+  },
+};
 const isCircle = f.shape.kind === 'circle';
 console.log(isCircle ? f.shape.radius() : 0);

@@ -1,0 +1,90 @@
+classes
+kind: soundness
+
+Claim. If the lab accepts a program, it declares no class and reads no this or super. So no field is read before
+the constructor sets it, no method runs with this unbound, and no super read finds the prototype without the
+field.
+
+Counterexample in plain TypeScript. TypeScript checks a class's members against its type, not against the order
+construction runs them in: a field initializer may call a method that reads a field declared below it, a base
+class's initializer may call an override that reads a subclass field, and a parameter property is assigned only
+after every initializer. It types this by where a method is written, not by how it is called, so a method passed
+as a callback, read off its object or called through call runs with this unbound. And it types a class's
+prototype, its super and its spreads as an instance. Each witness is such a program, accepted by the release.
+
+The core has no classes, no this and no super. A function that returns a record takes a class's place, and a
+function takes what it needs as a parameter. That closes every hole above at once instead of one analysis at a
+time, and the rules that only classes needed go with them: definite-assignment's TS2897 is gone, since only a
+class declares a field with `!`, and its cases are here.
+
+Obligation 1, a class: TS2902
+  Statement. No class is declared, as a declaration or an expression.
+  Mechanism. checkClassLikeDeclaration, which both checkClassDeclaration and checkClassExpression call, reports
+  TS2902 on every class.
+  Why it suffices. Every class is checked there, so none is accepted.
+  Witnesses:
+    chk-abstract-prop-via-method.ts    a field initializer reads an abstract property the subclass sets later
+    chk-accessor-order.ts              a field initializer reads an auto-accessor declared below it
+    chk-base-ctor-virtual.ts           a base class's initializer calls an override that reads an unset field
+    chk-declare-field.ts               a declare field that nothing assigns
+    chk-extends-null.ts                a class that extends null, constructed
+    chk-field-order-arrow.ts           an initializer calls an arrow field that reads a later field
+    chk-field-order-method.ts          an initializer calls a method that reads a later field
+    chk-field-order-paramprop.ts       an initializer reads a parameter property, assigned after it
+    chk-interface-class-merge.ts       an interface merged into a class promises a method it lacks
+    chk-method-extract-callback.ts     a method passed to map without its object
+    chk-method-extract-class.ts        a method read off its object and called alone
+    chk-overload-ctor-param.ts         a constructor's overload admits a key its body doesn't
+    chk-overload-method-param.ts       a method's overload admits a key its body doesn't
+    chk-private-order.ts               an initializer reads a private field declared below it
+    chk-prototype-field.ts             an instance field read off the class's prototype
+    chk-setter-only-read.ts            a property with only a setter, read
+    chk-spread-interface-methods.ts    a spread drops the prototype's method its type keeps
+    chk-static-method-extract.ts       a static method that reads this, passed to map
+    chk-static-order.ts                a static initializer reads a static field declared below it
+    chk-super-interface-base.ts        super.name, where name is a field of the instance
+    chk-super-paramprop.ts             super.name, where name is a parameter property
+    chk-tdz-class.ts                   a class constructed before its declaration has run
+    chk-this-before-super-arrow.ts     an arrow reads this before super() is called
+    flow-adjacent-field-order.ts       an initializer calls a method that reads a later field
+    flow-instanceof-else.ts            instanceof's else branch drops a value of the class's type
+    lib-call-unbound-this.ts           a method called through call with any this
+    lib-object-assign-prototype.ts     Object.assign copies no method from the prototype
+    rel-this-unbound.ts                a method that reads this passed as a free callback
+    rule-definite.ts                   a field asserted assigned that nothing assigns
+  Rejected sound code, because the core has no classes:
+    abstract-class.ts                  an abstract class on the right of instanceof
+    abstract-predicate.ts              an abstract method's predicate
+    assigned-by-a-method.ts            a field a method the constructor calls assigns
+    class-on-the-right.ts              a class on the right of instanceof
+    constructor-assigned.ts            a field the constructor assigns
+    initialized-property.ts            a field initialized where it's declared
+
+Obligation 2, this or super: TS2903
+  Statement. No expression reads this or super.
+  Mechanism. checkThisExpression and checkSuperExpression report TS2903 on every this and super.
+  Why it suffices. Every this and super an expression reads is checked by one of the two. Without classes, a
+  this could still come from an object literal's method or a function, which TS2903 rejects the same way.
+  Witnesses:
+    chk-abstract-prop-via-method.ts    a field initializer reads an abstract property the subclass sets later
+    chk-accessor-order.ts              a field initializer reads an auto-accessor declared below it
+    chk-base-ctor-virtual.ts           a base class's initializer calls an override that reads an unset field
+    chk-field-order-arrow.ts           an initializer calls an arrow field that reads a later field
+    chk-field-order-method.ts          an initializer calls a method that reads a later field
+    chk-field-order-paramprop.ts       an initializer reads a parameter property, assigned after it
+    chk-method-extract-callback.ts     a method passed to map without its object
+    chk-method-extract-class.ts        a method read off its object and called alone
+    chk-method-extract-object.ts       an object literal's method destructured and called alone
+    chk-overload-ctor-param.ts         a constructor's overload admits a key its body doesn't
+    chk-private-order.ts               an initializer reads a private field declared below it
+    chk-static-method-extract.ts       a static method that reads this, passed to map
+    chk-super-interface-base.ts        super.name, where name is a field of the instance
+    chk-super-paramprop.ts             super.name, where name is a parameter property
+    chk-this-before-super-arrow.ts     an arrow reads this before super() is called
+    flow-adjacent-field-order.ts       an initializer calls a method that reads a later field
+    lib-call-unbound-this.ts           a method called through call with any this
+    lib-object-assign-prototype.ts     Object.assign copies no method from the prototype
+    rel-this-unbound.ts                a method that reads this passed as a free callback
+  Rejected sound code, because the core has no classes:
+    assigned-by-a-method.ts            a field a method the constructor calls assigns
+    constructor-assigned.ts            a field the constructor assigns

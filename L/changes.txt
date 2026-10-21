@@ -2,21 +2,22 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds twelve diagnostics, changes the checker, adds one internal type flag, declares readonly the new
-objects and collections the library hands out where a mutable type would make a read-only view invariant,
+things: it adds thirteen diagnostics, changes the checker, adds one internal type flag, declares readonly the
+new objects and collections the library hands out where a mutable type would make a read-only view invariant,
 deletes every effect from the ES library, and corrects the library's declarations that lie about what the engine
 does. The parser, binder, emitter, transformers, language service, command line and compiler options are
 unchanged, and no test baseline has been updated. L's rules have no compiler option: they are always on. Each
-change in code carries a comment that starts `// L:`, 40 of them in checker.ts, 1 in types.ts and the rest in
-the lib, so `grep -rn '// L:' src` finds them. The entries() changes in dom.generated.d.ts,
-webworker.generated.d.ts, es2020.bigint.d.ts and es2025.float16.d.ts carry no comment of their own.
+change in code carries a comment that starts `// L:`, in checker.ts, types.ts and the lib, so `grep -rn '// L:'
+src` finds them. The entries() changes in dom.generated.d.ts, webworker.generated.d.ts, es2020.bigint.d.ts and
+es2025.float16.d.ts carry no comment of their own.
 
 When a commit changes src/, this file changes with it.
 
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Twelve new errors, TS2890 to TS2901, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+Thirteen new errors, TS2890 to TS2903 without TS2897, each the code of one rule's mechanism in
+L/rules/<rule>/rule.txt. TS2897 was definite-assignment's, which the class ban made unreachable.
 
   TS2890  write-into-an-object, mutable-array-or-tuple
           A value of type '{0}' could be written into this position, which holds '{1}'.
@@ -32,8 +33,6 @@ Twelve new errors, TS2890 to TS2901, each the code of one rule's mechanism in L/
           This asserts the value is present without checking it. L has no non-null assertions.
   TS2896  type-assertion
           This asserts '{0}' without checking it. L has no type assertions other than 'as const'.
-  TS2897  definite-assignment
-          '{0}' is asserted to be assigned without being checked. L has no definite assignment assertions.
   TS2898  any
           A value of type 'any' was never checked, so it can't flow into '{0}'. Only 'unknown' accepts it.
   TS2899  type-guard-or-assertion-function
@@ -44,6 +43,10 @@ Twelve new errors, TS2890 to TS2901, each the code of one rule's mechanism in L/
   TS2901  instanceof-constructor
           Nothing in the type '{0}' promises a prototype for instanceof to read, and an arrow function has none.
           Only a construct signature promises one.
+  TS2902  classes
+          L has no classes. A function that returns a record takes a class's place.
+  TS2903  classes
+          L has no '{0}'. A function takes what it needs as a parameter.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -123,9 +126,11 @@ non-null-assertion (soundness: TS2895; 58e788680)
 type-assertion (soundness: TS2896; ebc32199d)
 - checkAssertion reports every `x as T` and `<T>x` except `as const`.
 
-definite-assignment (soundness: TS2897; 251cbe601)
-- checkPropertyDeclaration reports a property declared `name!: T`. A variable declared `let x!: T` has no
-  initializer, so TS2892 rejects it.
+classes (soundness: TS2902, TS2903; the commit after 44902bc7b)
+- checkClassLikeDeclaration, which checks every class declaration and expression, reports TS2902.
+- checkThisExpression and checkSuperExpression report TS2903 on every this and super.
+- checkPropertyDeclaration no longer reports definite-assignment's TS2897 (added in 251cbe601): only a class
+  declares a field with `!`, and a variable declared `let x!: T` has no initializer, so TS2892 rejects it.
 
 type-guard-or-assertion-function (soundness: TS2899; af679072f)
 - checkTypePredicate reports `x is T` and `asserts x` written on a function, method or arrow function that isn't

@@ -31546,6 +31546,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function checkThisExpression(node: Node): Type {
+        // L: this is bound by how a function is called, which no type says, so the core has none.
+        error(node, Diagnostics.L_has_no_0_A_function_takes_what_it_needs_as_a_parameter, "this");
         const isNodeInTypeQuery = isInTypeQuery(node);
         // Stop at the first arrow function so that we can
         // tell whether 'this' needs to be captured.
@@ -31758,6 +31760,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function checkSuperExpression(node: Node): Type {
+        // L: super reads a prototype a class built, and the core has no classes.
+        error(node, Diagnostics.L_has_no_0_A_function_takes_what_it_needs_as_a_parameter, "super");
         const isCallExpression = node.parent.kind === SyntaxKind.CallExpression && (node.parent as CallExpression).expression === node;
 
         const immediateContainer = getSuperContainer(node, /*stopOnFunctions*/ true);
@@ -42592,10 +42596,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         // Grammar checking
         if (!checkGrammarModifiers(node) && !checkGrammarProperty(node)) checkGrammarComputedPropertyName(node.name);
         checkVariableLikeDeclaration(node);
-        // L: a definite assignment assertion claims a property is assigned without checking it.
-        if (node.kind === SyntaxKind.PropertyDeclaration && node.exclamationToken) {
-            error(node.name, Diagnostics._0_is_asserted_to_be_assigned_without_being_checked_L_has_no_definite_assignment_assertions, declarationNameToString(node.name));
-        }
 
         setNodeLinksForPrivateIdentifierScope(node);
 
@@ -47277,6 +47277,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function checkClassLikeDeclaration(node: ClassLikeDeclaration) {
+        // L: a class's construction order, its this and its prototype are where the checker takes the program's word, so the core has none.
+        error(node, Diagnostics.L_has_no_classes_A_function_that_returns_a_record_takes_a_class_s_place);
         checkGrammarClassLikeDeclaration(node);
         checkDecorators(node);
         checkCollisionsForDeclarationName(node, node.name);

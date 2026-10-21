@@ -39,7 +39,7 @@ Obligation 1, writable position: TS2890
     context-sensitive-argument.ts      overload resolution with a context-sensitive function in a literal
   Rejected sound code, because the type grants the write, whatever the code does:
     readonly-object-into-writable-type.ts  the receiver only reads, but its field is writable
-    subclass-narrows-writable-field.ts     a subclass narrows a field its base declares writable
+    narrower-writable-field.ts         a record narrows a field the type it is viewed as declares writable
   Rejected sound code, because the library's declaration grants a write it never makes:
     library-mapped-partial.ts          TypeORM's update takes a mapped copy whose methods became fields
     library-phantom-fields.ts          zod's input and output fields, declared writable to carry types

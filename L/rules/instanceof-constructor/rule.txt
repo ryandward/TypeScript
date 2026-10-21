@@ -32,12 +32,9 @@ Obligation 1, right side with a prototype: TS2901
   Witnesses:
     chk-instanceof-arrow.ts            an arrow function on the right
   Controls:
-    class-on-the-right.ts              a class
     built-in-constructor.ts            Error, declared with a construct signature
-    abstract-class.ts                  an abstract class, whose construct signature can't be called
-    union-of-constructors.ts           two classes overloaded differently, whose union has no construct
-                                       signature of its own
-    type-parameter-constructor.ts      a type parameter bounded by a construct signature
+    union-of-constructors.ts           Map or Set, whose union has no construct signature of its own
+    type-parameter-constructor.ts      a type parameter bounded by a construct signature, given Map
     own-has-instance.ts                an object with a Symbol.hasInstance method of its own
   Rejected sound code, because the function's type has only a call signature:
     generator-function.ts              a generator function, which has a prototype

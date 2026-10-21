@@ -23,6 +23,5 @@ Obligation 1, type predicate on a function: TS2899
   Controls:
     inferred-predicate.ts              no predicate written, so the checker infers it and checks it
     guard-parameter.ts                 a predicate in a parameter's type, met by an inferred predicate
-    abstract-predicate.ts              an abstract method's predicate, met by the subclass's inferred one
   Rejected sound code, because L forbids writing the claim even when it is true:
     true-predicate.ts                  the written predicate is what the checker would infer

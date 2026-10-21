@@ -45,7 +45,7 @@ effects
 
 call-signature
 - Not built, so chk-call-narrowed-function.ts is open: the release and the lab both call a Function with no
-  signature, and Node throws when it holds a class. Nobody has measured how much real code calls a value
+  signature, and Node throws when it holds a constructor. Nobody has measured how much real code calls a value
   typed Function.
 
 write-into-an-object

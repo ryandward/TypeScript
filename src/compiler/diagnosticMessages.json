@@ -4054,10 +4054,6 @@
         "category": "Error",
         "code": 2896
     },
-    "'{0}' is asserted to be assigned without being checked. L has no definite assignment assertions.": {
-        "category": "Error",
-        "code": 2897
-    },
     "A value of type 'any' was never checked, so it can't flow into '{0}'. Only 'unknown' accepts it.": {
         "category": "Error",
         "code": 2898
@@ -4073,6 +4069,14 @@
     "Nothing in the type '{0}' promises a prototype for instanceof to read, and an arrow function has none. Only a construct signature promises one.": {
         "category": "Error",
         "code": 2901
+    },
+    "L has no classes. A function that returns a record takes a class's place.": {
+        "category": "Error",
+        "code": 2902
+    },
+    "L has no '{0}'. A function takes what it needs as a parameter.": {
+        "category": "Error",
+        "code": 2903
     },
 
     "Import declaration '{0}' is using private name '{1}'.": {
