@@ -19,6 +19,7 @@ L/
     tracker.mjs      runs every case, checks it against its proof, and prints where each rule and the catalog stand
     compare.mjs      lists what the lab rejects in a project that plain TypeScript accepts
     rules.mjs        reads every rule's proof, for the tracker and compare.mjs
+    console.d.ts     console.log, the one host function a case may call
 ```
 
 Build the compiler with `npx hereby local` from the repository's root, then run `node L/tools/tracker.mjs`. It
@@ -60,14 +61,18 @@ obligations it supports, in the role its first line claims; every marker names t
 cites it; and a rejection counts only when a diagnostic on that line carries that code.
 
 Each case is compiled in a program of its own, so a global that one case declares can't reach another, under L's
-options (strict, noUncheckedIndexedAccess and exactOptionalPropertyTypes) and the esnext and DOM libraries. Node
-runs the JavaScript the 6.0.3 release emits for the case, since the lab doesn't change what is emitted.
+options (strict, noUncheckedIndexedAccess and exactOptionalPropertyTypes) and the way the core is compiled:
+against the esnext library with its effects deleted (see rules/effects), with no DOM, no Node and no @types.
+tools/console.d.ts gives each case console.log, the one host function, to show a value with. Node runs the
+JavaScript the 6.0.3 release emits for the case, since the lab doesn't change what is emitted.
 
 ## The catalog
 
-catalog/ holds crashes that TypeScript 6.0.3 accepts and that no rule closes yet. They came from L-hooks'
-witnesses/cases at its commit d073d92, all but the ones a rule's folder already held and the ones 6.0.3
-rejects or runs without a crash. Every catalog case is a witness with no marked line. The tracker reports each
+catalog/ holds crashes that TypeScript 6.0.3 accepts and that no rule closes yet. Most came from L-hooks'
+witnesses/cases at its commit d073d92, all but the ones a rule's folder already held, the ones 6.0.3 rejects or
+runs without a crash, and four that need the host: lib-settimeout-function, lib-structuredclone-prototype and
+rel-optional-absent-lib call setTimeout or structuredClone, and lib-date-tojson-invalid needs an invalid Date,
+which only the shell can make. Every catalog case is a witness with no marked line. The tracker reports each
 one as open, when the lab accepts it, or as rejected, when the lab rejects it but no rule cites it yet. A rule
 that closes a catalog case takes it into its own folder, marks the line its mechanism rejects, and cites it, so
 every case lives in exactly one place.

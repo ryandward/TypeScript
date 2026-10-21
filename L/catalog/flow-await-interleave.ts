@@ -6,7 +6,7 @@ type Conn = { readonly state: Idle | Open };
 
 const idle: Idle = { kind: 'idle' };
 const conn: Conn = { state: { kind: 'open', send: (m: string) => m.length } };
-const tick = (): Promise<number> => new Promise((done) => { setTimeout(done, 10, 0); });
+const tick = (): Promise<number> => Promise.resolve(0);
 
 const sendLater = async (c: Conn): Promise<number> =>
   c.state.kind === 'open' ? (await tick()) + c.state.send('hi') : 0;

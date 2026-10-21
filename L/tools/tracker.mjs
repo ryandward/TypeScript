@@ -16,7 +16,8 @@
 // case should move into that rule's folder, marked and cited.
 //
 // Each case is compiled in a program of its own, so a global one case declares can't reach another, under L's catalog
-// options (strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes) and the esnext and DOM libraries. Every case
+// options (strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes) and the esnext library, the way the core is
+// compiled: no DOM, no Node and no @types. console.d.ts gives each case console.log to show a value with. Every case
 // is a module, except one whose name says it is a script. Node runs what the release emits for the case, so a case may
 // use syntax Node's type stripping refuses, such as an enum or a parameter property.
 import { spawnSync } from 'node:child_process';
@@ -30,6 +31,7 @@ const lab = join(import.meta.dirname, '..');
 const repo = join(lab, '..');
 const RULES = join(lab, 'rules');
 const CATALOG = join(lab, 'catalog');
+const CONSOLE = join(lab, 'tools', 'console.d.ts');
 const RELEASE = join(repo, 'lib/typescript.js');
 const LAB = join(repo, 'built/local/typescript.js');
 const MARK = /\/\/ rejected here(?:: TS(\d+)(?: (.*\S))?)?\s*$/;
@@ -67,7 +69,7 @@ function diagnose(path) {
   const ts = createRequire(import.meta.url)(path);
   const options = (file) => ({
     strict: true, noUncheckedIndexedAccess: true, exactOptionalPropertyTypes: true, noEmit: true, skipLibCheck: true, types: [],
-    target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, lib: ['lib.esnext.d.ts', 'lib.dom.d.ts'],
+    target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, lib: ['lib.esnext.d.ts'],
     moduleDetection: named(file, 'script') ? ts.ModuleDetectionKind.Legacy : ts.ModuleDetectionKind.Force,
   });
   const host = ts.createCompilerHost(options(''));
@@ -84,7 +86,7 @@ function diagnose(path) {
   const global = [];
   for (const c of everyCase) {
     const found = [];
-    for (const d of ts.getPreEmitDiagnostics(ts.createProgram([c.file], options(c.file), host))) {
+    for (const d of ts.getPreEmitDiagnostics(ts.createProgram([c.file, CONSOLE], options(c.file), host))) {
       const chain = typeof d.messageText === 'string' ? [{ code: d.code, text: d.messageText }] : flatten(d.messageText);
       if (d.file && d.file.fileName === c.file) found.push({ line: d.file.getLineAndCharacterOfPosition(d.start).line + 1, chain });
       else global.push(`TS${chain[0].code}: ${chain[0].text}`);

@@ -31,7 +31,7 @@ same leaf check):
 | `subDown.direct` | `Subty.top` then `subDown` | direct `any` → `T` |
 | `subDown.nested-array` | `Subty.arr subDown` — array covariance | rel-any-nested-array, lib-array-isarray-any, lib-new-array-any, lib-object-values-interface, lib-promise-any-errors (`errors: any[]`) |
 | `subDown.callback-param` | `Subty.arrow subDown refl` — parameter contravariance | lib-promise-catch-annotated, lib-promise-any-errors (catch parameter). lib-json-stringify-replacer and lib-string-replace-callback go through a second / rest parameter, not modelled |
-| `subDown.message-event` | `Subty.arrow (Subty.record … subDown) refl` — record depth inside parameter contravariance | lib-message-event-default-any |
+| `subDown.settled-reason` | `Subty.arrow (Subty.record … subDown) refl` — record depth inside parameter contravariance | lib-allsettled-reason-any |
 
 Not modelled, so not mutated: `new` (the calculus has a constructor *value* with a prototype, used
 only on the right of `instanceof`, and no construction); the producers of `any` in the

@@ -30,9 +30,10 @@ export function readRules(rulesDir) {
     if (header.length > 2) problems.push('rule.txt\'s header holds more than the rule\'s name and kind');
     return { name, dir, kind, mechanisms: obligations(text, dir, problems), problems };
   });
-  // A mechanism that closes holes in more than one rule is the same mechanism in each, under the same name.
+  // A mechanism of L's own that closes holes in more than one rule is the same mechanism in each, under the same
+  // name. TypeScript's own codes are reported by many mechanisms, so they may be named differently.
   const named = new Map();
-  for (const r of rules) for (const m of r.mechanisms) {
+  for (const r of rules) for (const m of r.mechanisms.filter((m) => m.own)) {
     const seen = named.get(m.code);
     if (seen === undefined) named.set(m.code, m.name);
     else if (seen !== m.name) r.problems.push(`TS${m.code} is called "${m.name}" here and "${seen}" in another rule`);

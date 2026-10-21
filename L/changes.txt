@@ -1,14 +1,15 @@
 Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
-changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes four
-things: it adds twelve diagnostics, changes the checker, adds one internal type flag, and declares readonly the
-new objects and collections the library hands out where a mutable type would make a read-only view invariant.
-The parser, binder, emitter, transformers, language service, command line and compiler options are unchanged,
-and no test baseline has been updated. L's rules have no compiler option: they are always on. Each change in
-code carries a comment that starts `// L:`: 40 in checker.ts, 1 in types.ts, and 4 in the lib, one at the head
-of the entries() changes in es2015.iterable.d.ts and one at each later lib change, so `grep -rn '// L:' src`
-finds them. The entries() changes in the other four lib files carry no comment of their own.
+changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes five
+things: it adds twelve diagnostics, changes the checker, adds one internal type flag, declares readonly the new
+objects and collections the library hands out where a mutable type would make a read-only view invariant, and
+deletes every effect from the ES library. The parser, binder, emitter, transformers, language service, command
+line and compiler options are unchanged, and no test baseline has been updated. L's rules have no compiler
+option: they are always on. Each change in code carries a comment that starts `// L:`: 40 in checker.ts, 1 in
+types.ts, and 24 in the lib, one at the head of the entries() changes in es2015.iterable.d.ts, one at each later
+readonly change, and one at the head of each file the effect deletions touched, so `grep -rn '// L:' src` finds
+them. The entries() changes in the other four lib files carry no comment of their own.
 
 When a commit changes src/, this file changes with it.
 
@@ -135,8 +136,8 @@ instanceof-constructor (soundness: TS2901; 08fd6afb1)
 - resolveInstanceofExpression no longer takes Function's own Symbol.hasInstance as the right side's method, and
   reports TS2901 unless every member of the right side's apparent type has a construct signature.
 
-Rules with no checker change: optional-field is a specification only, and call-signature isn't built (its
-witness is open; see debt.txt).
+Rules with no checker change: effects is built in the library alone (below), optional-field is a specification
+only, and call-signature isn't built (its witness is open; see debt.txt).
 
 
 The library (src/lib; 89beff3af, comment in fb73bc43f)
@@ -150,7 +151,7 @@ Under the esnext libraries three more types hand out new collections with mutabl
 an iterator's toArray(), and a ReadonlySet's union, intersection, difference and symmetricDifference. The value
 relation measured ConcatArray, every iterator and generator, and ReadonlySet as invariant because of them, so a
 Map couldn't be viewed as a ReadonlyMap with readonly values, nor a ReadonlySet or an iterator widened. They are
-declared readonly too (the commit after 7b79308fd), and the cost is code that writes into the new collection,
+declared readonly too (3e0509667), and the cost is code that writes into the new collection,
 which L doesn't write.
 
 - es5.d.ts: ConcatArray's slice() returns a readonly array.
@@ -169,6 +170,24 @@ which L doesn't write.
 - webworker.generated.d.ts: the same for the eight of those it declares: CSSNumericArray, CSSTransformValue,
   CSSUnparsedValue, FormData, Headers, StylePropertyMapReadOnly, URLSearchParams and FileSystemDirectoryHandle.
 
+
+The library's effects (src/lib; the commit after 3e0509667)
+
+TypeScript-L compiles only the functional core, which performs no effects, so the fork deletes every effect from
+its ES library, as L-hooks' pure lib does, and the rule effects holds the deletions. A type stays wherever a value
+of it can be handed in from the shell; only the value or the method that performs the effect goes. Each file the
+deletions touched opens with a `// L:` comment saying what it no longer declares, and 1,575 lines go in all.
+
+- Runs code from a string: eval and Function's constructor (es5).
+- Draws a random number: Math.random (es5).
+- Reads the clock: Date's constructor and statics (es5), and Temporal.Now (esnext.temporal).
+- Reads the machine's time zone: Date's local-time getters and setters, toDateString and toTimeString (es5).
+- Observes the garbage collector: WeakRef and FinalizationRegistry (es2021.weakref).
+- Shares memory between threads: Atomics and SharedArrayBuffer (es2017.sharedmemory).
+- Reads the machine's locale: every declaration of namespace Intl, in es5, es2020.bigint and the ten intl files
+  from es2016.intl to esnext.intl; and all 53 locale methods (toLocaleString, toLocaleDateString,
+  toLocaleTimeString, toLocaleUpperCase, toLocaleLowerCase and localeCompare), in es5, es2015.core,
+  es2020.bigint, es2020.date, es2020.number, es2020.string, es2025.float16 and esnext.temporal.
 
 Outside src/
 

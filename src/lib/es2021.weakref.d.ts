@@ -1,5 +1,6 @@
 /// <reference lib="es2015.symbol.wellknown" />
 
+// L: the core performs no effects, so this file declares nothing that observes the garbage collector.
 interface WeakRef<T extends WeakKey> {
     readonly [Symbol.toStringTag]: "WeakRef";
 
@@ -21,8 +22,6 @@ interface WeakRefConstructor {
      */
     new <T extends WeakKey>(target: T): WeakRef<T>;
 }
-
-declare var WeakRef: WeakRefConstructor;
 
 interface FinalizationRegistry<T> {
     readonly [Symbol.toStringTag]: "FinalizationRegistry";
@@ -56,5 +55,3 @@ interface FinalizationRegistryConstructor {
      */
     new <T>(cleanupCallback: (heldValue: T) => void): FinalizationRegistry<T>;
 }
-
-declare var FinalizationRegistry: FinalizationRegistryConstructor;

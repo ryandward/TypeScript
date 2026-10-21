@@ -14,7 +14,7 @@ class Flagged {
     console.log(input);
   }
 }
-const useParsed: boolean = new Date().getTime() > 0;
+const useParsed: boolean = 'x'.length > 0;
 const pick: typeof Parsed | typeof Flagged = useParsed ? Parsed : Flagged;
 const value: object = new Parsed('x');
 console.log(value instanceof pick);

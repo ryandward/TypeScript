@@ -32,9 +32,9 @@ Obligation 1, assignability: TS2898
   take one argument, so a rest parameter or a second parameter is covered only by analogy.
   Witnesses:
     rel-any-nested-array.ts            Array.isArray's any[] returned as readonly string[]
-    rel-any-nested-promise.ts          Response.json's Promise<any> held as a Promise of an interface
+    rel-any-nested-promise.ts          then(JSON.parse)'s Promise<any> held as a Promise of an interface
     lib-array-isarray-any.ts           the same any[], through a ternary
-    lib-response-json-await.ts         Response.json's Promise<any>, awaited into an interface
+    rel-any-declared-promise.ts        a function declared to return Promise<any>, awaited into an interface
     lib-then-json-parse.ts             then(JSON.parse) infers Promise<any>
     lib-map-no-typeargs.ts             new Map() is Map<any, any>, so values() yields any
     lib-new-array-any.ts               new Array(3) is any[]
@@ -42,7 +42,7 @@ Obligation 1, assignability: TS2898
     lib-promise-any-errors.ts          AggregateError.errors is any[]
     lib-generator-tnext-any.ts         yield is any when Generator's TNext is left to its default
     lib-promise-catch-annotated.ts     catch hands its callback reason: any
-    lib-message-event-default-any.ts   the message listener is handed MessageEvent<any>
+    lib-allsettled-reason-any.ts       a callback claims a record for PromiseRejectedResult's reason: any
     lib-json-stringify-replacer.ts     stringify hands its replacer value: any
     lib-string-replace-callback.ts     replace hands its callback ...args: any[]
   Controls:

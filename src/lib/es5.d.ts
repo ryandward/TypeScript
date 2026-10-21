@@ -5,14 +5,10 @@
 /// ECMAScript APIs
 /////////////////////////////
 
+// L: the core performs no effects, so this file declares nothing that runs code from a string, draws a random
+// number, reads the clock or the machine's time zone, or reads the machine's locale.
 declare var NaN: number;
 declare var Infinity: number;
-
-/**
- * Evaluates JavaScript code and executes it.
- * @param x A String value that contains valid JavaScript code.
- */
-declare function eval(x: string): any;
 
 /**
  * Converts a string to an integer.
@@ -108,9 +104,6 @@ interface Object {
 
     /** Returns a string representation of an object. */
     toString(): string;
-
-    /** Returns a date converted to a string using the current locale. */
-    toLocaleString(): string;
 
     /** Returns the primitive value of the specified object. */
     valueOf(): Object;
@@ -298,8 +291,6 @@ interface FunctionConstructor {
     readonly prototype: Function;
 }
 
-declare var Function: FunctionConstructor;
-
 /**
  * Extracts the type of the 'this' parameter of a function type, or 'unknown' if the function type has no 'this' parameter.
  */
@@ -426,12 +417,6 @@ interface String {
     lastIndexOf(searchString: string, position?: number): number;
 
     /**
-     * Determines whether two strings are equivalent in the current locale.
-     * @param that String to compare to target string
-     */
-    localeCompare(that: string): number;
-
-    /**
      * Matches a string with a regular expression, and returns an array containing the results of that search.
      * @param regexp A variable name or string literal containing the regular expression pattern and flags.
      */
@@ -483,14 +468,8 @@ interface String {
     /** Converts all the alphabetic characters in a string to lowercase. */
     toLowerCase(): string;
 
-    /** Converts all alphabetic characters to lowercase, taking into account the host environment's current locale. */
-    toLocaleLowerCase(locales?: string | string[]): string;
-
     /** Converts all the alphabetic characters in a string to uppercase. */
     toUpperCase(): string;
-
-    /** Returns a string where all alphabetic characters have been converted to uppercase, taking into account the host environment's current locale. */
-    toLocaleUpperCase(locales?: string | string[]): string;
 
     /** Removes the leading and trailing white space and line terminator characters from a string. */
     trim(): string;
@@ -724,8 +703,6 @@ interface Math {
      * @param y The exponent value of the expression.
      */
     pow(x: number, y: number): number;
-    /** Returns a pseudorandom number between 0 and 1. */
-    random(): number;
     /**
      * Returns a supplied numeric expression rounded to the nearest integer.
      * @param x The value to be rounded to the nearest integer.
@@ -754,76 +731,36 @@ declare var Math: Math;
 interface Date {
     /** Returns a string representation of a date. The format of the string depends on the locale. */
     toString(): string;
-    /** Returns a date as a string value. */
-    toDateString(): string;
-    /** Returns a time as a string value. */
-    toTimeString(): string;
-    /** Returns a value as a string value appropriate to the host environment's current locale. */
-    toLocaleString(): string;
-    /** Returns a date as a string value appropriate to the host environment's current locale. */
-    toLocaleDateString(): string;
-    /** Returns a time as a string value appropriate to the host environment's current locale. */
-    toLocaleTimeString(): string;
     /** Returns the stored time value in milliseconds since midnight, January 1, 1970 UTC. */
     valueOf(): number;
     /** Returns the stored time value in milliseconds since midnight, January 1, 1970 UTC. */
     getTime(): number;
-    /** Gets the year, using local time. */
-    getFullYear(): number;
     /** Gets the year using Universal Coordinated Time (UTC). */
     getUTCFullYear(): number;
-    /** Gets the month, using local time. */
-    getMonth(): number;
     /** Gets the month of a Date object using Universal Coordinated Time (UTC). */
     getUTCMonth(): number;
-    /** Gets the day-of-the-month, using local time. */
-    getDate(): number;
     /** Gets the day-of-the-month, using Universal Coordinated Time (UTC). */
     getUTCDate(): number;
-    /** Gets the day of the week, using local time. */
-    getDay(): number;
     /** Gets the day of the week using Universal Coordinated Time (UTC). */
     getUTCDay(): number;
-    /** Gets the hours in a date, using local time. */
-    getHours(): number;
     /** Gets the hours value in a Date object using Universal Coordinated Time (UTC). */
     getUTCHours(): number;
-    /** Gets the minutes of a Date object, using local time. */
-    getMinutes(): number;
     /** Gets the minutes of a Date object using Universal Coordinated Time (UTC). */
     getUTCMinutes(): number;
-    /** Gets the seconds of a Date object, using local time. */
-    getSeconds(): number;
     /** Gets the seconds of a Date object using Universal Coordinated Time (UTC). */
     getUTCSeconds(): number;
-    /** Gets the milliseconds of a Date, using local time. */
-    getMilliseconds(): number;
     /** Gets the milliseconds of a Date object using Universal Coordinated Time (UTC). */
     getUTCMilliseconds(): number;
-    /** Gets the difference in minutes between Universal Coordinated Time (UTC) and the time on the local computer. */
-    getTimezoneOffset(): number;
     /**
      * Sets the date and time value in the Date object.
      * @param time A numeric value representing the number of elapsed milliseconds since midnight, January 1, 1970 GMT.
      */
     setTime(time: number): number;
     /**
-     * Sets the milliseconds value in the Date object using local time.
-     * @param ms A numeric value equal to the millisecond value.
-     */
-    setMilliseconds(ms: number): number;
-    /**
      * Sets the milliseconds value in the Date object using Universal Coordinated Time (UTC).
      * @param ms A numeric value equal to the millisecond value.
      */
     setUTCMilliseconds(ms: number): number;
-
-    /**
-     * Sets the seconds value in the Date object using local time.
-     * @param sec A numeric value equal to the seconds value.
-     * @param ms A numeric value equal to the milliseconds value.
-     */
-    setSeconds(sec: number, ms?: number): number;
     /**
      * Sets the seconds value in the Date object using Universal Coordinated Time (UTC).
      * @param sec A numeric value equal to the seconds value.
@@ -831,27 +768,12 @@ interface Date {
      */
     setUTCSeconds(sec: number, ms?: number): number;
     /**
-     * Sets the minutes value in the Date object using local time.
-     * @param min A numeric value equal to the minutes value.
-     * @param sec A numeric value equal to the seconds value.
-     * @param ms A numeric value equal to the milliseconds value.
-     */
-    setMinutes(min: number, sec?: number, ms?: number): number;
-    /**
      * Sets the minutes value in the Date object using Universal Coordinated Time (UTC).
      * @param min A numeric value equal to the minutes value.
      * @param sec A numeric value equal to the seconds value.
      * @param ms A numeric value equal to the milliseconds value.
      */
     setUTCMinutes(min: number, sec?: number, ms?: number): number;
-    /**
-     * Sets the hour value in the Date object using local time.
-     * @param hours A numeric value equal to the hours value.
-     * @param min A numeric value equal to the minutes value.
-     * @param sec A numeric value equal to the seconds value.
-     * @param ms A numeric value equal to the milliseconds value.
-     */
-    setHours(hours: number, min?: number, sec?: number, ms?: number): number;
     /**
      * Sets the hours value in the Date object using Universal Coordinated Time (UTC).
      * @param hours A numeric value equal to the hours value.
@@ -861,34 +783,16 @@ interface Date {
      */
     setUTCHours(hours: number, min?: number, sec?: number, ms?: number): number;
     /**
-     * Sets the numeric day-of-the-month value of the Date object using local time.
-     * @param date A numeric value equal to the day of the month.
-     */
-    setDate(date: number): number;
-    /**
      * Sets the numeric day of the month in the Date object using Universal Coordinated Time (UTC).
      * @param date A numeric value equal to the day of the month.
      */
     setUTCDate(date: number): number;
-    /**
-     * Sets the month value in the Date object using local time.
-     * @param month A numeric value equal to the month. The value for January is 0, and other month values follow consecutively.
-     * @param date A numeric value representing the day of the month. If this value is not supplied, the value from a call to the getDate method is used.
-     */
-    setMonth(month: number, date?: number): number;
     /**
      * Sets the month value in the Date object using Universal Coordinated Time (UTC).
      * @param month A numeric value equal to the month. The value for January is 0, and other month values follow consecutively.
      * @param date A numeric value representing the day of the month. If it is not supplied, the value from a call to the getUTCDate method is used.
      */
     setUTCMonth(month: number, date?: number): number;
-    /**
-     * Sets the year of the Date object using local time.
-     * @param year A numeric value for the year.
-     * @param month A zero-based numeric value for the month (0 for January, 11 for December). Must be specified if numDate is specified.
-     * @param date A numeric value equal for the day of the month.
-     */
-    setFullYear(year: number, month?: number, date?: number): number;
     /**
      * Sets the year value in the Date object using Universal Coordinated Time (UTC).
      * @param year A numeric value equal to the year.
@@ -939,8 +843,6 @@ interface DateConstructor {
     /** Returns the number of milliseconds elapsed since midnight, January 1, 1970 Universal Coordinated Time (UTC). */
     now(): number;
 }
-
-declare var Date: DateConstructor;
 
 interface RegExpMatchArray extends Array<string> {
     /**
@@ -1180,10 +1082,6 @@ interface ReadonlyArray<T> {
      */
     toString(): string;
     /**
-     * Returns a string representation of an array. The elements are converted to string using their toLocaleString methods.
-     */
-    toLocaleString(): string;
-    /**
      * Combines two or more arrays.
      * @param items Additional items to add to the end of array1.
      */
@@ -1313,10 +1211,6 @@ interface Array<T> {
      * Returns a string representation of an array.
      */
     toString(): string;
-    /**
-     * Returns a string representation of an array. The elements are converted to string using their toLocaleString methods.
-     */
-    toLocaleString(): string;
     /**
      * Removes the last element from an array and returns it.
      * If the array is empty, undefined is returned and the array is not modified.
@@ -2091,11 +1985,6 @@ interface Int8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     subarray(begin?: number, end?: number): Int8Array<TArrayBuffer>;
 
     /**
-     * Converts a number to a string by using the current locale.
-     */
-    toLocaleString(): string;
-
-    /**
      * Returns a string representation of an array.
      */
     toString(): string;
@@ -2371,11 +2260,6 @@ interface Uint8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * @param end The index of the end of the array.
      */
     subarray(begin?: number, end?: number): Uint8Array<TArrayBuffer>;
-
-    /**
-     * Converts a number to a string by using the current locale.
-     */
-    toLocaleString(): string;
 
     /**
      * Returns a string representation of an array.
@@ -2655,11 +2539,6 @@ interface Uint8ClampedArray<TArrayBuffer extends ArrayBufferLike = ArrayBufferLi
     subarray(begin?: number, end?: number): Uint8ClampedArray<TArrayBuffer>;
 
     /**
-     * Converts a number to a string by using the current locale.
-     */
-    toLocaleString(): string;
-
-    /**
      * Returns a string representation of an array.
      */
     toString(): string;
@@ -2934,11 +2813,6 @@ interface Int16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * @param end The index of the end of the array.
      */
     subarray(begin?: number, end?: number): Int16Array<TArrayBuffer>;
-
-    /**
-     * Converts a number to a string by using the current locale.
-     */
-    toLocaleString(): string;
 
     /**
      * Returns a string representation of an array.
@@ -3218,11 +3092,6 @@ interface Uint16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     subarray(begin?: number, end?: number): Uint16Array<TArrayBuffer>;
 
     /**
-     * Converts a number to a string by using the current locale.
-     */
-    toLocaleString(): string;
-
-    /**
      * Returns a string representation of an array.
      */
     toString(): string;
@@ -3499,11 +3368,6 @@ interface Int32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     subarray(begin?: number, end?: number): Int32Array<TArrayBuffer>;
 
     /**
-     * Converts a number to a string by using the current locale.
-     */
-    toLocaleString(): string;
-
-    /**
      * Returns a string representation of an array.
      */
     toString(): string;
@@ -3778,11 +3642,6 @@ interface Uint32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * @param end The index of the end of the array.
      */
     subarray(begin?: number, end?: number): Uint32Array<TArrayBuffer>;
-
-    /**
-     * Converts a number to a string by using the current locale.
-     */
-    toLocaleString(): string;
 
     /**
      * Returns a string representation of an array.
@@ -4062,11 +3921,6 @@ interface Float32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     subarray(begin?: number, end?: number): Float32Array<TArrayBuffer>;
 
     /**
-     * Converts a number to a string by using the current locale.
-     */
-    toLocaleString(): string;
-
-    /**
      * Returns a string representation of an array.
      */
     toString(): string;
@@ -4344,11 +4198,6 @@ interface Float64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     subarray(begin?: number, end?: number): Float64Array<TArrayBuffer>;
 
     /**
-     * Converts a number to a string by using the current locale.
-     */
-    toLocaleString(): string;
-
-    /**
      * Returns a string representation of an array.
      */
     toString(): string;
@@ -4393,191 +4242,11 @@ interface Float64ArrayConstructor {
 }
 declare var Float64Array: Float64ArrayConstructor;
 
-/////////////////////////////
-/// ECMAScript Internationalization API
-/////////////////////////////
-
-declare namespace Intl {
-    interface CollatorOptions {
-        usage?: "sort" | "search" | undefined;
-        localeMatcher?: "lookup" | "best fit" | undefined;
-        numeric?: boolean | undefined;
-        caseFirst?: "upper" | "lower" | "false" | undefined;
-        sensitivity?: "base" | "accent" | "case" | "variant" | undefined;
-        collation?: "big5han" | "compat" | "default" | "dict" | "direct" | "ducet" | "emoji" | "eor" | "gb2312" | "phonebk" | "phonetic" | "pinyin" | "reformed" | "searchjl" | "stroke" | "trad" | "unihan" | "zhuyin" | undefined;
-        ignorePunctuation?: boolean | undefined;
-    }
-
-    interface ResolvedCollatorOptions {
-        locale: string;
-        usage: string;
-        sensitivity: string;
-        ignorePunctuation: boolean;
-        collation: string;
-        caseFirst: string;
-        numeric: boolean;
-    }
-
-    interface Collator {
-        compare(x: string, y: string): number;
-        resolvedOptions(): ResolvedCollatorOptions;
-    }
-
-    interface CollatorConstructor {
-        new (locales?: string | string[], options?: CollatorOptions): Collator;
-        (locales?: string | string[], options?: CollatorOptions): Collator;
-        supportedLocalesOf(locales: string | string[], options?: CollatorOptions): string[];
-    }
-
-    var Collator: CollatorConstructor;
-
-    interface NumberFormatOptionsStyleRegistry {
-        decimal: never;
-        percent: never;
-        currency: never;
-    }
-
-    type NumberFormatOptionsStyle = keyof NumberFormatOptionsStyleRegistry;
-
-    interface NumberFormatOptionsCurrencyDisplayRegistry {
-        code: never;
-        symbol: never;
-        name: never;
-    }
-
-    type NumberFormatOptionsCurrencyDisplay = keyof NumberFormatOptionsCurrencyDisplayRegistry;
-
-    interface NumberFormatOptionsUseGroupingRegistry {}
-
-    type NumberFormatOptionsUseGrouping = {} extends NumberFormatOptionsUseGroupingRegistry ? boolean : keyof NumberFormatOptionsUseGroupingRegistry | "true" | "false" | boolean;
-    type ResolvedNumberFormatOptionsUseGrouping = {} extends NumberFormatOptionsUseGroupingRegistry ? boolean : keyof NumberFormatOptionsUseGroupingRegistry | false;
-
-    interface NumberFormatOptions {
-        localeMatcher?: "lookup" | "best fit" | undefined;
-        style?: NumberFormatOptionsStyle | undefined;
-        currency?: string | undefined;
-        currencyDisplay?: NumberFormatOptionsCurrencyDisplay | undefined;
-        useGrouping?: NumberFormatOptionsUseGrouping | undefined;
-        minimumIntegerDigits?: number | undefined;
-        minimumFractionDigits?: number | undefined;
-        maximumFractionDigits?: number | undefined;
-        minimumSignificantDigits?: number | undefined;
-        maximumSignificantDigits?: number | undefined;
-    }
-
-    interface ResolvedNumberFormatOptions {
-        locale: string;
-        numberingSystem: string;
-        style: NumberFormatOptionsStyle;
-        currency?: string;
-        currencyDisplay?: NumberFormatOptionsCurrencyDisplay;
-        minimumIntegerDigits: number;
-        minimumFractionDigits?: number;
-        maximumFractionDigits?: number;
-        minimumSignificantDigits?: number;
-        maximumSignificantDigits?: number;
-        useGrouping: ResolvedNumberFormatOptionsUseGrouping;
-    }
-
-    interface NumberFormat {
-        format(value: number): string;
-        resolvedOptions(): ResolvedNumberFormatOptions;
-    }
-
-    interface NumberFormatConstructor {
-        new (locales?: string | string[], options?: NumberFormatOptions): NumberFormat;
-        (locales?: string | string[], options?: NumberFormatOptions): NumberFormat;
-        supportedLocalesOf(locales: string | string[], options?: NumberFormatOptions): string[];
-        readonly prototype: NumberFormat;
-    }
-
-    var NumberFormat: NumberFormatConstructor;
-
-    interface DateTimeFormatOptions {
-        localeMatcher?: "best fit" | "lookup" | undefined;
-        weekday?: "long" | "short" | "narrow" | undefined;
-        era?: "long" | "short" | "narrow" | undefined;
-        year?: "numeric" | "2-digit" | undefined;
-        month?: "numeric" | "2-digit" | "long" | "short" | "narrow" | undefined;
-        day?: "numeric" | "2-digit" | undefined;
-        hour?: "numeric" | "2-digit" | undefined;
-        minute?: "numeric" | "2-digit" | undefined;
-        second?: "numeric" | "2-digit" | undefined;
-        timeZoneName?: "short" | "long" | "shortOffset" | "longOffset" | "shortGeneric" | "longGeneric" | undefined;
-        formatMatcher?: "best fit" | "basic" | undefined;
-        hour12?: boolean | undefined;
-        timeZone?: string | undefined;
-    }
-
-    interface ResolvedDateTimeFormatOptions {
-        locale: string;
-        calendar: string;
-        numberingSystem: string;
-        timeZone: string;
-        hour12?: boolean;
-        weekday?: string;
-        era?: string;
-        year?: string;
-        month?: string;
-        day?: string;
-        hour?: string;
-        minute?: string;
-        second?: string;
-        timeZoneName?: string;
-    }
-
-    interface DateTimeFormat {
-        format(date?: Date | number): string;
-        resolvedOptions(): ResolvedDateTimeFormatOptions;
-    }
-
-    interface DateTimeFormatConstructor {
-        new (locales?: string | string[], options?: DateTimeFormatOptions): DateTimeFormat;
-        (locales?: string | string[], options?: DateTimeFormatOptions): DateTimeFormat;
-        supportedLocalesOf(locales: string | string[], options?: DateTimeFormatOptions): string[];
-        readonly prototype: DateTimeFormat;
-    }
-
-    var DateTimeFormat: DateTimeFormatConstructor;
-}
-
 interface String {
-    /**
-     * Determines whether two strings are equivalent in the current or specified locale.
-     * @param that String to compare to target string
-     * @param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.
-     * @param options An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.
-     */
-    localeCompare(that: string, locales?: string | string[], options?: Intl.CollatorOptions): number;
 }
 
 interface Number {
-    /**
-     * Converts a number to a string by using the current or specified locale.
-     * @param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.
-     * @param options An object that contains one or more properties that specify comparison options.
-     */
-    toLocaleString(locales?: string | string[], options?: Intl.NumberFormatOptions): string;
 }
 
 interface Date {
-    /**
-     * Converts a date and time to a string by using the current or specified locale.
-     * @param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.
-     * @param options An object that contains one or more properties that specify comparison options.
-     */
-    toLocaleString(locales?: string | string[], options?: Intl.DateTimeFormatOptions): string;
-    /**
-     * Converts a date to a string by using the current or specified locale.
-     * @param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.
-     * @param options An object that contains one or more properties that specify comparison options.
-     */
-    toLocaleDateString(locales?: string | string[], options?: Intl.DateTimeFormatOptions): string;
-
-    /**
-     * Converts a time to a string by using the current or specified locale.
-     * @param locales A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.
-     * @param options An object that contains one or more properties that specify comparison options.
-     */
-    toLocaleTimeString(locales?: string | string[], options?: Intl.DateTimeFormatOptions): string;
 }

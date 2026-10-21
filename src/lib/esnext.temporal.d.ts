@@ -2,6 +2,7 @@
 /// <reference lib="es2020.intl" />
 /// <reference lib="es2025.intl" />
 
+// L: the core performs no effects, so this file declares nothing that reads the clock, the machine's time zone or its locale.
 declare namespace Temporal {
     type CalendarLike = PlainDate | PlainDateTime | PlainMonthDay | PlainYearMonth | ZonedDateTime | string;
     type DurationLike = Duration | DurationLikeObject | string;
@@ -104,15 +105,6 @@ declare namespace Temporal {
         fractionalSecondDigits?: "auto" | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | undefined;
     }
 
-    namespace Now {
-        function timeZoneId(): string;
-        function instant(): Instant;
-        function plainDateTimeISO(timeZone?: TimeZoneLike): PlainDateTime;
-        function zonedDateTimeISO(timeZone?: TimeZoneLike): ZonedDateTime;
-        function plainDateISO(timeZone?: TimeZoneLike): PlainDate;
-        function plainTimeISO(timeZone?: TimeZoneLike): PlainTime;
-    }
-
     interface PlainDateToStringOptions {
         calendarName?: "auto" | "always" | "never" | "critical" | undefined;
     }
@@ -152,7 +144,6 @@ declare namespace Temporal {
         toZonedDateTime(timeZone: TimeZoneLike): ZonedDateTime;
         toZonedDateTime(item: PlainDateToZonedDateTimeOptions): ZonedDateTime;
         toString(options?: PlainDateToStringOptions): string;
-        toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string;
         toJSON(): string;
         valueOf(): never;
         readonly [Symbol.toStringTag]: "Temporal.PlainDate";
@@ -184,7 +175,6 @@ declare namespace Temporal {
         round(roundTo: PluralizeUnit<TimeUnit>): PlainTime;
         round(roundTo: RoundingOptions<TimeUnit>): PlainTime;
         toString(options?: PlainTimeToStringOptions): string;
-        toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string;
         toJSON(): string;
         valueOf(): never;
         readonly [Symbol.toStringTag]: "Temporal.PlainTime";
@@ -234,7 +224,6 @@ declare namespace Temporal {
         round(roundTo: RoundingOptions<"day" | TimeUnit>): PlainDateTime;
         equals(other: PlainDateTimeLike): boolean;
         toString(options?: PlainDateTimeToStringOptions): string;
-        toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string;
         toJSON(): string;
         valueOf(): never;
         toZonedDateTime(timeZone: TimeZoneLike, options?: DisambiguationOptions): ZonedDateTime;
@@ -301,7 +290,6 @@ declare namespace Temporal {
         round(roundTo: RoundingOptions<"day" | TimeUnit>): ZonedDateTime;
         equals(other: ZonedDateTimeLike): boolean;
         toString(options?: ZonedDateTimeToStringOptions): string;
-        toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string;
         toJSON(): string;
         valueOf(): never;
         startOfDay(): ZonedDateTime;
@@ -357,7 +345,6 @@ declare namespace Temporal {
         total(totalOf: PluralizeUnit<"day" | TimeUnit>): number;
         total(totalOf: DurationTotalOptions): number;
         toString(options?: DurationToStringOptions): string;
-        toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DurationFormatOptions): string;
         toJSON(): string;
         valueOf(): never;
         readonly [Symbol.toStringTag]: "Temporal.Duration";
@@ -386,7 +373,6 @@ declare namespace Temporal {
         round(roundTo: RoundingOptions<TimeUnit>): Instant;
         equals(other: InstantLike): boolean;
         toString(options?: InstantToStringOptions): string;
-        toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string;
         toJSON(): string;
         valueOf(): never;
         toZonedDateTimeISO(timeZone: TimeZoneLike): ZonedDateTime;
@@ -425,7 +411,6 @@ declare namespace Temporal {
         since(other: PlainYearMonthLike, options?: RoundingOptionsWithLargestUnit<"year" | "month">): Duration;
         equals(other: PlainYearMonthLike): boolean;
         toString(options?: PlainDateToStringOptions): string;
-        toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string;
         toJSON(): string;
         valueOf(): never;
         toPlainDate(item: PlainYearMonthToPlainDateOptions): PlainDate;
@@ -453,7 +438,6 @@ declare namespace Temporal {
         with(monthDayLike: PartialTemporalLike<DateLikeObject>, options?: OverflowOptions): PlainMonthDay;
         equals(other: PlainMonthDayLike): boolean;
         toString(options?: PlainDateToStringOptions): string;
-        toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string;
         toJSON(): string;
         valueOf(): never;
         toPlainDate(item: PlainMonthDayToPlainDateOptions): PlainDate;

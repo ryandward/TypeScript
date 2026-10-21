@@ -31,6 +31,18 @@ any
   has no assignment. The Lean proof assumes immutable-bindings, and nothing proves the two rules together.
 - new isn't in the calculus, so chk-new-any.ts has no mutant.
 
+effects
+- Nothing yet keeps a core project to the ES library. The lab compiles its cases against esnext alone, but
+  TypeScript-L still accepts lib: ['dom'], loads @types packages through types and typeRoots, and resolves an
+  import of an npm package, so a core project can reach a host API or a package the lab never sees.
+- A Date's toString reads the machine's time zone, and the library can't delete it: Object declares toString
+  for every type. A Date converted to a string without a call, in a template literal, by String() or by +,
+  reads the time zone with no declaration at all.
+- A Date the shell hands in can be invalid, and Date's toJSON is declared to return a string, though it returns
+  null for an invalid date (L-hooks' lib-date-tojson-invalid). No core program can construct a Date, so the
+  catalog has no witness for it. Whether the core takes a Date at all, or only what the shell's adapter parsed
+  out of one, is undecided.
+
 call-signature
 - Not built, so chk-call-narrowed-function.ts is open: the release and the lab both call a Function with no
   signature, and Node throws when it holds a class. Nobody has measured how much real code calls a value

@@ -1,0 +1,43 @@
+effects
+kind: policy
+
+Claim. If the lab accepts a module, it runs no code from a string, draws no random number, reads neither the
+clock nor the machine's time zone or locale, observes no garbage collection, and shares no memory between
+threads. The core is compiled only by TypeScript-L, against the ES library and nothing else: no DOM, no Node and
+no @types. So these are the effects left in what the core can see, and the library is where they are deleted.
+
+Counterexample in plain TypeScript. TypeScript's ES library declares each of them, so the release accepts
+Date.now(), Math.random() and new Intl.NumberFormat() in any module. None of them can go wrong, which is why
+the rule is policy: the core performs no effects, so what it computes depends on its inputs alone.
+
+Obligation 1, a deleted value: TS2693 (TypeScript's code)
+  Statement. A module may not use Date, Function, WeakRef, FinalizationRegistry, Atomics or SharedArrayBuffer
+  as a value. Their types stay, so a value of one the shell hands in still has a type.
+  Mechanism. src/lib deletes each one's `declare var`, which held its constructor and statics. Only the
+  interface is left, and TypeScript reports TS2693, a name that only refers to a type, for a use as a value.
+  Why it suffices. A global's value comes only from a declaration in the library the core compiles against,
+  and the deletion leaves none.
+  Rejected sound code, because the core performs no effects:
+    deleted-values.ts                  the clock, a string run as code, the garbage collector, shared memory
+
+Obligation 2, a deleted global: TS2304 (TypeScript's code)
+  Statement. A module may not name eval or Intl.
+  Mechanism. src/lib deletes eval's declaration and every declaration of namespace Intl, so TypeScript reports
+  TS2304, a name it can't find.
+  Why it suffices. Neither is declared anywhere else the core can see.
+  Rejected sound code, because the core performs no effects:
+    deleted-globals.ts                 eval, and Intl's number format
+
+Obligation 3, a deleted method: TS2339 (TypeScript's code)
+  Statement. A module may not call Math.random, a locale method (toLocaleString, toLocaleDateString,
+  toLocaleTimeString, toLocaleUpperCase, toLocaleLowerCase and localeCompare, on every type that has one), a
+  Date's local-time getters and setters, toDateString or toTimeString, or reach Temporal.Now.
+  Mechanism. src/lib deletes each method's declaration, and namespace Now from Temporal, so TypeScript reports
+  TS2339, a property the type doesn't have.
+  Why it suffices. A method is called through the declaration its type has, and the deletion leaves none. A
+  Date still has toString, which reads the time zone, through Object's declaration; see debt.txt.
+  Controls:
+    date-handed-in.ts                  a Date handed in, read through its time since the epoch and in UTC
+    pure-library.ts                    Math, JSON, promises, collections and iterator helpers
+  Rejected sound code, because the core performs no effects:
+    deleted-methods.ts                 Math.random, toLocaleString, getHours and Temporal.Now

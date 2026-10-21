@@ -90,8 +90,8 @@ array; whether its steps compose to these refinements is a claim about `checker.
 | TS2898 | rel-any-nested-array, lib-array-isarray-any, lib-new-array-any, lib-object-values-interface, lib-promise-any-errors (`errors: any[]` → `readonly Error[]`) | subDown.nested-array (`Subty.arr`) |
 | TS2898 | lib-promise-catch-annotated, lib-promise-any-errors (catch parameter annotated `AggregateError`) | subDown.callback-param (`Subty.arrow`) |
 | TS2898 | lib-json-stringify-replacer (second parameter), lib-string-replace-callback (rest parameter's element) | by analogy only: functions here take one argument, so these routes are not modelled |
-| TS2898 | lib-message-event-default-any (`data` field of `MessageEvent<T>` inside the listener's parameter) | subDown.message-event (`Subty.record` inside `Subty.arrow`) |
-| TS2898 | rel-any-nested-promise, lib-response-json-await, lib-then-json-parse, lib-generator-tnext-any | **not covered** at the producing operation: in each, `await` or `yield` produces the `any` and it flows straight into an annotation (L reports `unknown` not assignable to `User`/`Point`/`string`). The route is `subDown.direct`; what the calculus lacks is `await`/`yield`, not a variance |
+| TS2898 | lib-allsettled-reason-any (`reason` field of `PromiseRejectedResult` inside the callback's parameter) | subDown.settled-reason (`Subty.record` inside `Subty.arrow`) |
+| TS2898 | rel-any-nested-promise, rel-any-declared-promise, lib-then-json-parse, lib-generator-tnext-any | **not covered** at the producing operation: in each, `await` or `yield` produces the `any` and it flows straight into an annotation (L reports `unknown` not assignable to `User`/`Point`/`string`). The route is `subDown.direct`; what the calculus lacks is `await`/`yield`, not a variance |
 | TS2898 | lib-map-no-typeargs | **not covered** at the producing operation: the route is `subDown.nested-array` (L reports `any[]` not assignable to `readonly string[]`); what the calculus lacks is the generic call that infers `any[]` |
 
 ## Assumptions the proof makes

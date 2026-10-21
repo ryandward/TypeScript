@@ -1,6 +1,7 @@
 /// <reference lib="es2015.symbol" />
 /// <reference lib="es2015.symbol.wellknown" />
 
+// L: the core performs no effects, so this file declares nothing that shares memory between threads.
 interface SharedArrayBuffer {
     /**
      * Read-only. The length of the ArrayBuffer (in bytes).
@@ -19,7 +20,6 @@ interface SharedArrayBufferConstructor {
     new (byteLength?: number): SharedArrayBuffer;
     readonly [Symbol.species]: SharedArrayBufferConstructor;
 }
-declare var SharedArrayBuffer: SharedArrayBufferConstructor;
 
 interface ArrayBufferTypes {
     SharedArrayBuffer: SharedArrayBuffer;
@@ -113,5 +113,3 @@ interface Atomics {
 
     readonly [Symbol.toStringTag]: "Atomics";
 }
-
-declare var Atomics: Atomics;

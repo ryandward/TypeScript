@@ -1,5 +1,6 @@
 /// <reference lib="es2020.intl" />
 
+// L: the core performs no effects, so this file declares nothing that reads the machine's locale.
 interface BigIntToLocaleStringOptions {
     /**
      * The locale matching algorithm to use.The default is "best fit". For information about this option, see the {@link https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation Intl page}.
@@ -92,9 +93,6 @@ interface BigInt {
      * @param radix Specifies a radix for converting numeric values to strings.
      */
     toString(radix?: number): string;
-
-    /** Returns a string representation appropriate to the host environment's current locale. */
-    toLocaleString(locales?: Intl.LocalesArgument, options?: BigIntToLocaleStringOptions): string;
 
     /** Returns the primitive value of the specified object. */
     valueOf(): bigint;
@@ -349,9 +347,6 @@ interface BigInt64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> 
      * @param end The index of the end of the array.
      */
     subarray(begin?: number, end?: number): BigInt64Array<TArrayBuffer>;
-
-    /** Converts the array to a string by using the current locale. */
-    toLocaleString(locales?: string | string[], options?: Intl.NumberFormatOptions): string;
 
     /** Returns a string representation of the array. */
     toString(): string;
@@ -641,9 +636,6 @@ interface BigUint64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike>
      */
     subarray(begin?: number, end?: number): BigUint64Array<TArrayBuffer>;
 
-    /** Converts the array to a string by using the current locale. */
-    toLocaleString(locales?: string | string[], options?: Intl.NumberFormatOptions): string;
-
     /** Returns a string representation of the array. */
     toString(): string;
 
@@ -738,10 +730,4 @@ interface DataView<TArrayBuffer extends ArrayBufferLike> {
      * @param littleEndian If false or undefined, a big-endian value should be written.
      */
     setBigUint64(byteOffset: number, value: bigint, littleEndian?: boolean): void;
-}
-
-declare namespace Intl {
-    interface NumberFormat {
-        format(value: number | bigint): string;
-    }
 }

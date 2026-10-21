@@ -3,5 +3,5 @@
 // this relation: by L's boundary rule the agent stops and reports it.
 type QueryDeepPartial<T> = { [P in keyof T]?: QueryDeepPartial<T[P]> | (() => string) };
 function update(changes: QueryDeepPartial<{ updatedAt: Date }>): number { return Object.keys(changes).length; }
-const updatedAt = new Date();
-console.log(update({ updatedAt })); // rejected here: TS2890
+const touch = (updatedAt: Date): number => update({ updatedAt }); // rejected here: TS2890
+console.log(typeof touch);

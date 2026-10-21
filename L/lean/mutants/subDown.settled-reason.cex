@@ -1,0 +1,27 @@
+-- lib-allsettled-reason-any: a callback written for {reason: {n: num}} is passed where one taking
+-- {reason: any} is expected, then handed {reason: "just a string"}. Record depth inside parameter
+-- contravariance carries subDown to the field; nothing names it at the record or the arrow.
+⟨.app (.lam (.record [("reason", .record [("n", .num)])]) (.proj (.proj (.var 0) "reason") "n"))
+      (.record [("reason", .str "just a string")]), .num,
+ .app
+   (.sub (.lam (.proj (τs := [("n", .num)]) (τ := .num)
+                 (.proj (τs := [("reason", .record [("n", .num)])]) (.var rfl) rfl) rfl))
+     (.arrow (Subty.record (τs := [("reason", .top)]) (σs := [("reason", .record [("n", .num)])])
+               (fun l σ h => by by_cases e : "reason" = l <;> simp_all [lookup])
+               (fun l τ σ h1 h2 => by
+                 by_cases e : "reason" = l
+                 · simp_all [lookup]; subst h1; subst h2; exact .subDown
+                 · simp_all [lookup]))
+             .refl
+       : Subty (.arrow (.record [("reason", .record [("n", .num)])]) .num) (.arrow (.record [("reason", .top)]) .num)))
+   (.sub (HasType.record (τs := [("reason", .str)]) (by decide) (fun i => by cases i <;> rfl) (fun i l e τ h1 h2 => by
+            cases i with
+            | zero => simp at h1 h2; obtain ⟨_, rfl⟩ := h1; obtain ⟨_, rfl⟩ := h2; exact .str
+            | succ j => simp at h1))
+     (Subty.record (τs := [("reason", .str)]) (σs := [("reason", .top)])
+            (fun l σ h => by by_cases e : "reason" = l <;> simp_all [lookup])
+            (fun l τ σ h1 h2 => by
+              by_cases e : "reason" = l
+              · simp_all [lookup]; subst h2; exact .top
+              · simp_all [lookup]))),
+ rfl⟩

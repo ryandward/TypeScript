@@ -5,6 +5,7 @@
  * A typed array of 16-bit float values. The contents are initialized to 0. If the requested number
  * of bytes could not be allocated an exception is raised.
  */
+// L: the core performs no effects, so this file declares nothing that reads the machine's locale.
 interface Float16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     /**
      * The size in bytes of each element in the array.
@@ -289,11 +290,6 @@ interface Float16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * @param end The index of the end of the array.
      */
     subarray(begin?: number, end?: number): Float16Array<TArrayBuffer>;
-
-    /**
-     * Converts a number to a string by using the current locale.
-     */
-    toLocaleString(locales?: string | string[], options?: Intl.NumberFormatOptions): string;
 
     /**
      * Copies the array and returns the copy with the elements in reverse order.
