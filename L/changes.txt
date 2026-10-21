@@ -1,0 +1,165 @@
+Changes to TypeScript 6.0.3
+
+Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of commit f11d9971a.
+`git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes four things: it adds twelve
+diagnostics, changes the checker, adds one internal type flag, and makes the library's iterator results and
+entry tuples readonly. The parser, binder, emitter, transformers, language service, command line and compiler
+options are unchanged, and no test baseline has been updated. L's rules have no compiler option: they are always
+on. Each change in code carries a comment that starts `// L:`, 40 in checker.ts, 1 in types.ts and 1 at the head
+of the lib changes in es2015.iterable.d.ts, so `grep -rn '// L:' src` finds them. The lib changes in the other
+four lib files carry no comment of their own.
+
+When a commit changes src/, this file changes with it.
+
+
+Diagnostics (src/compiler/diagnosticMessages.json)
+
+Twelve new errors, TS2890 to TS2901, each the code of one rule's mechanism in L/<rule>/rule.txt.
+
+  TS2890  write-into-an-object, mutable-array-or-tuple
+          A value of type '{0}' could be written into this position, which holds '{1}'.
+  TS2891  mutable-array-or-tuple
+          '{0}' can be written through, so its type argument '{1}' cannot be widened to '{2}'.
+  TS2892  immutable-bindings
+          '{0}' must be initialized where it is declared. In L, every binding is assigned once.
+  TS2893  immutable-bindings
+          Cannot assign to '{0}' because all bindings are constant in L.
+  TS2894  delete
+          Property '{0}' is required, and the target could delete it.
+  TS2895  non-null-assertion
+          This asserts the value is present without checking it. L has no non-null assertions.
+  TS2896  type-assertion
+          This asserts '{0}' without checking it. L has no type assertions other than 'as const'.
+  TS2897  definite-assignment
+          '{0}' is asserted to be assigned without being checked. L has no definite assignment assertions.
+  TS2898  any
+          A value of type 'any' was never checked, so it can't flow into '{0}'. Only 'unknown' accepts it.
+  TS2899  type-guard-or-assertion-function
+          Nothing checks that the function's body proves '{0}'. L has no hand-written type predicates or
+          assertion functions.
+  TS2900  any
+          This value is 'any', which nothing has checked, so L reads it as 'unknown'.
+  TS2901  instanceof-constructor
+          Nothing in the type '{0}' promises a prototype for instanceof to read, and an arrow function has none.
+          Only a construct signature promises one.
+
+
+The checker (src/compiler/checker.ts), by rule
+
+Functions are named as they are in checker.ts. Commits are the ones that made the change; fb73bc43f later
+shortened every L comment to one line without changing code.
+
+any (soundness: TS2898, TS2900; 8ac4d727f, 2adfd653a, 29e19bf5e, f0cb8e20c)
+- checkExpression returns uncheckedType for every expression whose type is any, so a value of type any reads as
+  unknown, and every operation that needs a structure (a property read, a call, new, an element access,
+  iteration, a spread, in, instanceof) rejects it. Writing `any` in a type is allowed: only a value is judged.
+- uncheckedType is a new intrinsic type, flagged Unknown and printed as unknown. It is a different object from
+  unknownType so that a rejection can say the value came from an any.
+- getUnionType returns uncheckedType instead of unknownType for a union that holds it. addTypeToUnion marks such a
+  union with the new internal flag TypeFlags.IncludesUnchecked, which types.ts defines as Reserved3.
+- getNonNullableType leaves uncheckedType as it is: taking out null and undefined checks nothing else.
+- isSimpleTypeRelatedTo: under valueAssignableRelation (see the next rule), a source of type any relates only to
+  unknown or a union of undefined, null and {}, and anywhere else reports TS2898. An uncheckedType source that
+  fails to relate reports TS2898 as well.
+- errorOrUnchecked and headedIfUnchecked are new: where the rejected type is uncheckedType, they put TS2900 at
+  the head of the error's chain. They are used in getPropertyTypeForIndexType (the property doesn't exist),
+  checkNonNullTypeWithReporter (the value is of type unknown), invocationError (the value isn't callable),
+  resolveInstanceofExpression (the right side isn't a function) and reportTypeNotIterableError.
+
+mutable-array-or-tuple and write-into-an-object (soundness: TS2890, TS2891, and TypeScript's own TS2339;
+931689677, 8b384c9e3, 89beff3af, fadc61c80, e5795182f, 3b5956834)
+- valueAssignableRelation is a new relation, with its own cache and its own variance cache (valueVariances).
+  It is assignability for a value flowing into a slot, where a writable position must relate both ways.
+  assignableRelation still answers every type-level question: conditional types, constraints and inference.
+- Where values flow, the checker uses valueAssignableRelation: checkTypeAssignableToAndOptionallyElaborate,
+  which checks initializers, assignments, returns, properties, for-of, satisfies and yield; chooseOverload's
+  assignability pass; resolveCall's reports of argument errors; and the check behind the hint that a call
+  would have succeeded against an overload's implementation.
+- isPropertySymbolTypeRelated: a writable target property must also relate back to the source (relatedBack,
+  TS2890), unless the source is a fresh object literal, an array literal or JSX attributes, which nothing else
+  holds (isUnaliasedLiteral). isWritablePosition says what is writable: a property or accessor that isn't
+  readonly. Methods are left out, so method bivariance stays. A target of type unknown or any no longer
+  accepts a writable position without the check.
+- membersRelatedToIndexInfo and indexInfoRelatedTo: a writable index signature relates both ways, under the
+  same exception for literals.
+- getVariances, getAliasVariances and getVariancesWorker take the relation and cache per relation. For values,
+  ReadonlyArray and readonly tuples are covariant, Array is measured like any other generic type, a mutable
+  tuple is invariant, and `in` and `out` annotations are measured instead of trusted.
+- structuredTypeRelatedToWorker: an array literal relates with type-level variances, since nothing else holds
+  it. relateVariances finds a type argument that is covariant as a type but invariant as a value, and
+  writableTypeArgument carries it to the TS2891 report. Two conditional types' check types relate as types,
+  under assignableRelation.
+- unionOrIntersectionRelatedTo: a fresh literal stays fresh while it is related to each member of a union.
+- isSimpleTypeRelatedTo, hasExcessProperties and the T[K] target in structuredTypeRelatedToWorker treat
+  valueAssignableRelation the way they treat assignableRelation: a number relates to a numeric enum, excess
+  properties are checked, and T[K] relates through its write constraint.
+- Argument lists: argumentList and the new SignatureCheckMode.FreshArguments relate a rest parameter's list as
+  readonly, because every call builds a new list. signatureRelatedTo sets the mode under the value relation,
+  compareSignaturesRelated passes it to callbacks, and getSignatureApplicabilityError applies it to spread
+  arguments.
+- chooseOverload: the pass that skips arguments judges stand-ins for them, so it relates under
+  assignableRelation. The overload the subtype pass picks must also accept its arguments under
+  valueAssignableRelation.
+- resolveCall: past three failed overloads, the error reports the overload that type-level assignability
+  accepts, the one only the write rule rejected, instead of the last.
+- reportRelationError: an internal assertion checks against the relation that failed, not assignability.
+- getFlowTypeOfAccessExpression: an accessor is no longer narrowed, since its getter needn't return what was
+  checked or assigned. The read keeps its declared type, and TypeScript's own TS2339 rejects what follows.
+
+delete (soundness: TS2894; 2c957793d)
+- mayBeDeleted is new: where a writable optional property or a writable index signature lets the target delete a
+  property, the source's property must be optional too.
+
+immutable-bindings (soundness: TS2892, TS2893; dbe09f6e5, which called it policy until c6cb79ffc)
+- checkGrammarVariableDeclaration: a let or var declared without an initializer is TS2892. A for-in or for-of
+  variable, an ambient declaration and a catch variable are left alone.
+- checkIdentifier: an assignment to a variable is TS2893.
+
+non-null-assertion (soundness: TS2895; 58e788680)
+- checkNonNullAssertion reports every `x!`.
+
+type-assertion (soundness: TS2896; ebc32199d)
+- checkAssertion reports every `x as T` and `<T>x` except `as const`.
+
+definite-assignment (soundness: TS2897; 251cbe601)
+- checkPropertyDeclaration reports a property declared `name!: T`. A variable declared `let x!: T` has no
+  initializer, so TS2892 rejects it.
+
+type-guard-or-assertion-function (soundness: TS2899; af679072f)
+- checkTypePredicate reports `x is T` and `asserts x` written on a function, method or arrow function that isn't
+  abstract. In a function type, an interface's method or an abstract method the predicate is a requirement,
+  which assignment checks, and it stays.
+
+instanceof-constructor (soundness: TS2901; 08fd6afb1)
+- resolveInstanceofExpression no longer takes Function's own Symbol.hasInstance as the right side's method, and
+  reports TS2901 unless every member of the right side's apparent type has a construct signature.
+
+Rules with no checker change: optional-field is a specification only, and call-signature isn't built (its
+witness is open; see debt.txt).
+
+
+The library (src/lib; 89beff3af, comment in fb73bc43f)
+
+Each iterator result and each tuple a built-in entries() yields is a new object that nothing else holds, so the
+fork declares them readonly. Under the value relation a mutable tuple is invariant, and without this change
+sound code such as an Iterator<T, undefined> used as an Iterator<T, unknown>, or a Map used as a ReadonlyMap,
+would be rejected.
+
+- es2015.iterable.d.ts: IteratorYieldResult's and IteratorReturnResult's done and value are readonly. These yield
+  readonly tuples: entries() of Array, ReadonlyArray, Set and ReadonlySet; [Symbol.iterator]() and entries() of
+  Map and ReadonlyMap; entries() of Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array,
+  Int32Array, Uint32Array, Float32Array and Float64Array.
+- es2020.bigint.d.ts: entries() of BigInt64Array and BigUint64Array.
+- es2025.float16.d.ts: entries() of Float16Array.
+- dom.generated.d.ts: entries() of CSSNumericArray, CSSTransformValue, CSSUnparsedValue, DOMTokenList, NodeList
+  and NodeListOf; the iterator and entries() of FormData, Headers, URLSearchParams, MediaKeyStatusMap and
+  StylePropertyMapReadOnly; the async iterator and entries() of FileSystemDirectoryHandle.
+- webworker.generated.d.ts: the same for the eight of those it declares: CSSNumericArray, CSSTransformValue,
+  CSSUnparsedValue, FormData, Headers, StylePropertyMapReadOnly, URLSearchParams and FileSystemDirectoryHandle.
+
+
+Outside src/
+
+- README.md says what the fork is. Microsoft's README moved to README.upstream.md (5cc49e510).
+- The 19 files under .github are gone: the CI workflows, the CodeQL config and Dependabot (877bb9b85).
+- L/ is new: the lab, with a folder per rule, the tracker, compare.mjs, debt.txt, this file, and lean/.

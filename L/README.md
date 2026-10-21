@@ -10,6 +10,7 @@ L/
   tracker.mjs        runs every case, checks it against its proof, and prints where each rule stands
   compare.mjs        lists what the lab rejects in a project that plain TypeScript accepts
   debt.txt           what is known to be wrong or unproven, by rule
+  changes.txt        every change the fork makes to TypeScript 6.0.3, by rule
   lean/              machine-checked calculi that the proofs cite, with their own README
   <rule>/
     rule.txt         the rule's proof
