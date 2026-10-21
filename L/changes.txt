@@ -171,7 +171,7 @@ which L doesn't write.
   CSSUnparsedValue, FormData, Headers, StylePropertyMapReadOnly, URLSearchParams and FileSystemDirectoryHandle.
 
 
-The library's effects (src/lib; the commit after 3e0509667)
+The library's effects (src/lib; 8ab65f25b)
 
 TypeScript-L compiles only the functional core, which performs no effects, so the fork deletes every effect from
 its ES library, as L-hooks' pure lib does, and the rule effects holds the deletions. A type stays wherever a value
@@ -189,7 +189,7 @@ deletions touched opens with a `// L:` comment saying what it no longer declares
   toLocaleTimeString, toLocaleUpperCase, toLocaleLowerCase and localeCompare), in es5, es2015.core,
   es2020.bigint, es2020.date, es2020.number, es2020.string, es2025.float16 and esnext.temporal.
 
-The library's declarations made true (src/lib; the commit after 8ab65f25b)
+The library's declarations made true (src/lib; 6b878d78b)
 
 The core's library declared things the engine doesn't do, and each lie let a crash through. The rule
 library-declarations holds each correction to a witness that crashed on it. Code written to the old declarations
