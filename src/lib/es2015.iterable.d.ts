@@ -81,7 +81,7 @@ interface ArrayConstructor {
      * Creates an array from an iterable object.
      * @param iterable An iterable object to convert to an array.
      */
-    from<T>(iterable: Iterable<T> | ArrayLike<T>): T[];
+    from<T>(iterable: Iterable<T>): T[]; // L: an array-like goes to es2015.core's from, whose places may hold nothing
 
     /**
      * Creates an array from an iterable object.
@@ -89,7 +89,7 @@ interface ArrayConstructor {
      * @param mapfn A mapping function to call on every element of the array.
      * @param thisArg Value of 'this' used to invoke the mapfn.
      */
-    from<T, U>(iterable: Iterable<T> | ArrayLike<T>, mapfn: (v: T, k: number) => U, thisArg?: any): U[];
+    from<T, U>(iterable: Iterable<T>, mapfn: (v: T, k: number) => U, thisArg?: any): U[]; // L: the same
 }
 
 interface ReadonlyArray<T> {

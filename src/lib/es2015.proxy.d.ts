@@ -107,4 +107,4 @@ interface ProxyConstructor {
      */
     new <T extends object>(target: T, handler: ProxyHandler<T>): T;
 }
-declare var Proxy: ProxyConstructor;
+// L: no Proxy: every read of one runs its handler, which may return anything

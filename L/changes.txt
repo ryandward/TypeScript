@@ -1,15 +1,15 @@
 Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
-changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes five
+changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
 things: it adds twelve diagnostics, changes the checker, adds one internal type flag, declares readonly the new
-objects and collections the library hands out where a mutable type would make a read-only view invariant, and
-deletes every effect from the ES library. The parser, binder, emitter, transformers, language service, command
-line and compiler options are unchanged, and no test baseline has been updated. L's rules have no compiler
-option: they are always on. Each change in code carries a comment that starts `// L:`: 40 in checker.ts, 1 in
-types.ts, and 24 in the lib, one at the head of the entries() changes in es2015.iterable.d.ts, one at each later
-readonly change, and one at the head of each file the effect deletions touched, so `grep -rn '// L:' src` finds
-them. The entries() changes in the other four lib files carry no comment of their own.
+objects and collections the library hands out where a mutable type would make a read-only view invariant,
+deletes every effect from the ES library, and corrects the library's declarations that lie about what the engine
+does. The parser, binder, emitter, transformers, language service, command line and compiler options are
+unchanged, and no test baseline has been updated. L's rules have no compiler option: they are always on. Each
+change in code carries a comment that starts `// L:`, 40 of them in checker.ts, 1 in types.ts and the rest in
+the lib, so `grep -rn '// L:' src` finds them. The entries() changes in dom.generated.d.ts,
+webworker.generated.d.ts, es2020.bigint.d.ts and es2025.float16.d.ts carry no comment of their own.
 
 When a commit changes src/, this file changes with it.
 
@@ -136,8 +136,8 @@ instanceof-constructor (soundness: TS2901; 08fd6afb1)
 - resolveInstanceofExpression no longer takes Function's own Symbol.hasInstance as the right side's method, and
   reports TS2901 unless every member of the right side's apparent type has a construct signature.
 
-Rules with no checker change: effects is built in the library alone (below), optional-field is a specification
-only, and call-signature isn't built (its witness is open; see debt.txt).
+Rules with no checker change: effects and library-declarations are built in the library alone (below),
+optional-field is a specification only, and call-signature isn't built (its witness is open; see debt.txt).
 
 
 The library (src/lib; 89beff3af, comment in fb73bc43f)
@@ -188,6 +188,29 @@ deletions touched opens with a `// L:` comment saying what it no longer declares
   from es2016.intl to esnext.intl; and all 53 locale methods (toLocaleString, toLocaleDateString,
   toLocaleTimeString, toLocaleUpperCase, toLocaleLowerCase and localeCompare), in es5, es2015.core,
   es2020.bigint, es2020.date, es2020.number, es2020.string, es2025.float16 and esnext.temporal.
+
+The library's declarations made true (src/lib; the commit after 8ab65f25b)
+
+The core's library declared things the engine doesn't do, and each lie let a crash through. The rule
+library-declarations holds each correction to a witness that crashed on it. Code written to the old declarations
+stops compiling, which costs nothing L keeps.
+
+- Function has no caller or arguments, which throw on a strict-mode function (es5).
+- JSON.stringify returns string | undefined (es5).
+- A regex match's elements past the whole match are string | undefined (RegExpMatchArray and RegExpExecArray in
+  es5), and so are its named groups (es2018.regexp) and their indices (es2022.regexp).
+- Array has no call or construct signatures, which made holes typed as elements (es5). isArray, from and of stay.
+- Array.from and Array.fromAsync of an array-like that isn't iterable give (T | undefined)[], and a map function
+  over one is handed T | undefined (es2015.core, es2015.iterable, esnext.array).
+- reduce and reduceRight have no overload without a starting value, on arrays, typed arrays and iterators (29
+  overloads, in es5, es2020.bigint, es2025.float16 and es2025.iterator).
+- There is no Proxy, whose reads run its handler (es2015.proxy), and no Object.groupBy, whose result has a null
+  prototype (es2024.object).
+- matchAll and replaceAll take a string, never a RegExp, which throws without the g flag (es2020.string,
+  es2021.string).
+- An iterator's flatMap takes a callback that returns no string, which it throws on (es2025.iterator).
+- WeakMap and WeakSet keys are objects: WeakKeyTypes has no symbol, since a registered symbol throws as a key
+  (es2023.collection).
 
 Outside src/
 

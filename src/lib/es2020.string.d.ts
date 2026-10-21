@@ -9,5 +9,5 @@ interface String {
      * containing the results of that search.
      * @param regexp A regular expression
      */
-    matchAll(regexp: RegExp): RegExpStringIterator<RegExpExecArray>;
+    matchAll(regexp: string): RegExpStringIterator<RegExpExecArray>; // L: a RegExp without the g flag throws, so only a string, which matchAll makes global
 }

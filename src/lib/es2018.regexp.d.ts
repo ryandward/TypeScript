@@ -1,12 +1,12 @@
 interface RegExpMatchArray {
     groups?: {
-        [key: string]: string;
+        [key: string]: string | undefined; // L: a group that took no part is undefined
     };
 }
 
 interface RegExpExecArray {
     groups?: {
-        [key: string]: string;
+        [key: string]: string | undefined; // L: a group that took no part is undefined
     };
 }
 

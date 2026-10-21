@@ -276,9 +276,7 @@ interface Function {
     prototype: any;
     readonly length: number;
 
-    // Non-standard extensions
-    arguments: any;
-    caller: Function;
+    // L: no caller or arguments: reading either on a strict-mode function throws, and every function in a module is strict
 }
 
 interface FunctionConstructor {
@@ -844,7 +842,7 @@ interface DateConstructor {
     now(): number;
 }
 
-interface RegExpMatchArray extends Array<string> {
+interface RegExpMatchArray extends Array<string | undefined> { // L: a group that took no part is undefined
     /**
      * The index of the search at which the result was found.
      */
@@ -859,7 +857,7 @@ interface RegExpMatchArray extends Array<string> {
     0: string;
 }
 
-interface RegExpExecArray extends Array<string> {
+interface RegExpExecArray extends Array<string | undefined> { // L: a group that took no part is undefined
     /**
      * The index of the search at which the result was found.
      */
@@ -1052,7 +1050,7 @@ interface JSON {
      * @param space Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.
      * @throws {TypeError} If a circular reference or a BigInt value is found.
      */
-    stringify(value: any, replacer?: (this: any, key: string, value: any) => any, space?: string | number): string;
+    stringify(value: any, replacer?: (this: any, key: string, value: any) => any, space?: string | number): string | undefined; // L: undefined for a function, a symbol or undefined
     /**
      * Converts a JavaScript value to a JavaScript Object Notation (JSON) string.
      * @param value A JavaScript value, usually an object or array, to be converted.
@@ -1060,7 +1058,7 @@ interface JSON {
      * @param space Adds indentation, white space, and line break characters to the return-value JSON text to make it easier to read.
      * @throws {TypeError} If a circular reference or a BigInt value is found.
      */
-    stringify(value: any, replacer?: (number | string)[] | null, space?: string | number): string;
+    stringify(value: any, replacer?: (number | string)[] | null, space?: string | number): string | undefined; // L: undefined for a function, a symbol or undefined
 }
 
 /**
@@ -1165,12 +1163,7 @@ interface ReadonlyArray<T> {
      * @param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.
      */
     filter(predicate: (value: T, index: number, array: readonly T[]) => unknown, thisArg?: any): T[];
-    /**
-     * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
-     */
-    reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: readonly T[]) => T): T;
+    // L: no overload without an initial value: on an empty list it throws
     reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: readonly T[]) => T, initialValue: T): T;
     /**
      * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
@@ -1178,12 +1171,7 @@ interface ReadonlyArray<T> {
      * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: readonly T[]) => U, initialValue: U): U;
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
-     */
-    reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: readonly T[]) => T): T;
+    // L: no overload without an initial value: on an empty list it throws
     reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: readonly T[]) => T, initialValue: T): T;
     /**
      * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
@@ -1356,12 +1344,7 @@ interface Array<T> {
      * @param thisArg An object to which the this keyword can refer in the predicate function. If thisArg is omitted, undefined is used as the this value.
      */
     filter(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): T[];
-    /**
-     * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
-     */
-    reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T): T;
+    // L: no overload without an initial value: on an empty list it throws
     reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue: T): T;
     /**
      * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
@@ -1369,12 +1352,7 @@ interface Array<T> {
      * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U, initialValue: U): U;
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
-     */
-    reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T): T;
+    // L: no overload without an initial value: on an empty list it throws
     reduceRight(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue: T): T;
     /**
      * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
@@ -1387,12 +1365,7 @@ interface Array<T> {
 }
 
 interface ArrayConstructor {
-    new (arrayLength?: number): any[];
-    new <T>(arrayLength: number): T[];
-    new <T>(...items: T[]): T[];
-    (arrayLength?: number): any[];
-    <T>(arrayLength: number): T[];
-    <T>(...items: T[]): T[];
+    // L: no constructor: given one number it makes that many holes, and which it does is decided when it runs
     isArray(arg: any): arg is any[];
     readonly prototype: any[];
 }
@@ -1885,18 +1858,7 @@ interface Int8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     map(callbackfn: (value: number, index: number, array: this) => number, thisArg?: any): Int8Array<ArrayBuffer>;
-
-    /**
-     * Calls the specified callback function for all the elements in an array. The return value of
-     * the callback function is the accumulated result, and is provided as an argument in the next
-     * call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the
-     * callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an argument
-     * instead of an array value.
-     */
-    reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -1910,18 +1872,7 @@ interface Int8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * instead of an array value.
      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result, and is provided as an
-     * argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
-     * the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an
-     * argument instead of an array value.
-     */
-    reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -2162,18 +2113,7 @@ interface Uint8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     map(callbackfn: (value: number, index: number, array: this) => number, thisArg?: any): Uint8Array<ArrayBuffer>;
-
-    /**
-     * Calls the specified callback function for all the elements in an array. The return value of
-     * the callback function is the accumulated result, and is provided as an argument in the next
-     * call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the
-     * callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an argument
-     * instead of an array value.
-     */
-    reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -2187,18 +2127,7 @@ interface Uint8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * instead of an array value.
      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result, and is provided as an
-     * argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
-     * the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an
-     * argument instead of an array value.
-     */
-    reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -2439,18 +2368,7 @@ interface Uint8ClampedArray<TArrayBuffer extends ArrayBufferLike = ArrayBufferLi
      * If thisArg is omitted, undefined is used as the this value.
      */
     map(callbackfn: (value: number, index: number, array: this) => number, thisArg?: any): Uint8ClampedArray<ArrayBuffer>;
-
-    /**
-     * Calls the specified callback function for all the elements in an array. The return value of
-     * the callback function is the accumulated result, and is provided as an argument in the next
-     * call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the
-     * callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an argument
-     * instead of an array value.
-     */
-    reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -2464,18 +2382,7 @@ interface Uint8ClampedArray<TArrayBuffer extends ArrayBufferLike = ArrayBufferLi
      * instead of an array value.
      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result, and is provided as an
-     * argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
-     * the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an
-     * argument instead of an array value.
-     */
-    reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -2715,18 +2622,7 @@ interface Int16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     map(callbackfn: (value: number, index: number, array: this) => number, thisArg?: any): Int16Array<ArrayBuffer>;
-
-    /**
-     * Calls the specified callback function for all the elements in an array. The return value of
-     * the callback function is the accumulated result, and is provided as an argument in the next
-     * call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the
-     * callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an argument
-     * instead of an array value.
-     */
-    reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -2740,18 +2636,7 @@ interface Int16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * instead of an array value.
      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result, and is provided as an
-     * argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
-     * the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an
-     * argument instead of an array value.
-     */
-    reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -2992,18 +2877,7 @@ interface Uint16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     map(callbackfn: (value: number, index: number, array: this) => number, thisArg?: any): Uint16Array<ArrayBuffer>;
-
-    /**
-     * Calls the specified callback function for all the elements in an array. The return value of
-     * the callback function is the accumulated result, and is provided as an argument in the next
-     * call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the
-     * callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an argument
-     * instead of an array value.
-     */
-    reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -3017,18 +2891,7 @@ interface Uint16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * instead of an array value.
      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result, and is provided as an
-     * argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
-     * the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an
-     * argument instead of an array value.
-     */
-    reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -3268,18 +3131,7 @@ interface Int32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     map(callbackfn: (value: number, index: number, array: this) => number, thisArg?: any): Int32Array<ArrayBuffer>;
-
-    /**
-     * Calls the specified callback function for all the elements in an array. The return value of
-     * the callback function is the accumulated result, and is provided as an argument in the next
-     * call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the
-     * callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an argument
-     * instead of an array value.
-     */
-    reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -3293,18 +3145,7 @@ interface Int32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * instead of an array value.
      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result, and is provided as an
-     * argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
-     * the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an
-     * argument instead of an array value.
-     */
-    reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -3544,18 +3385,7 @@ interface Uint32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     map(callbackfn: (value: number, index: number, array: this) => number, thisArg?: any): Uint32Array<ArrayBuffer>;
-
-    /**
-     * Calls the specified callback function for all the elements in an array. The return value of
-     * the callback function is the accumulated result, and is provided as an argument in the next
-     * call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the
-     * callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an argument
-     * instead of an array value.
-     */
-    reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -3569,18 +3399,7 @@ interface Uint32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * instead of an array value.
      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result, and is provided as an
-     * argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
-     * the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an
-     * argument instead of an array value.
-     */
-    reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -3821,18 +3640,7 @@ interface Float32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     map(callbackfn: (value: number, index: number, array: this) => number, thisArg?: any): Float32Array<ArrayBuffer>;
-
-    /**
-     * Calls the specified callback function for all the elements in an array. The return value of
-     * the callback function is the accumulated result, and is provided as an argument in the next
-     * call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the
-     * callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an argument
-     * instead of an array value.
-     */
-    reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -3846,18 +3654,7 @@ interface Float32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * instead of an array value.
      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result, and is provided as an
-     * argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
-     * the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an
-     * argument instead of an array value.
-     */
-    reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -4098,18 +3895,7 @@ interface Float64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     map(callbackfn: (value: number, index: number, array: this) => number, thisArg?: any): Float64Array<ArrayBuffer>;
-
-    /**
-     * Calls the specified callback function for all the elements in an array. The return value of
-     * the callback function is the accumulated result, and is provided as an argument in the next
-     * call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the
-     * callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an argument
-     * instead of an array value.
-     */
-    reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**
@@ -4123,18 +3909,7 @@ interface Float64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * instead of an array value.
      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result, and is provided as an
-     * argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
-     * the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an
-     * argument instead of an array value.
-     */
-    reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number): number;
+    // L: no overload without an initial value: on an empty list it throws
     reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: this) => number, initialValue: number): number;
 
     /**

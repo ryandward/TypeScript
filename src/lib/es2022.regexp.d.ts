@@ -8,7 +8,7 @@ interface RegExpExecArray {
 
 interface RegExpIndicesArray extends Array<[number, number] | undefined> {
     groups?: {
-        [key: string]: [number, number];
+        [key: string]: [number, number] | undefined; // L: a group that took no part is undefined
     };
 }
 

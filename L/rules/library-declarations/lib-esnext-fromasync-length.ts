@@ -1,4 +1,4 @@
 // witness: Array.fromAsync<T>(ArrayLike<T>) has the same { length } hole as Array.from.
-const cells: readonly string[] = await Array.fromAsync({ length: 2 });
+const cells: readonly string[] = await Array.fromAsync({ length: 2 }); // rejected here: TS2322
 console.log(cells.map((c) => c.trim()));
 export {};

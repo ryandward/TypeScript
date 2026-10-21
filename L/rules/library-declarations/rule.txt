@@ -1,0 +1,96 @@
+library-declarations
+kind: soundness
+
+Claim. If the lab accepts a program, every declaration it relies on from the core's library is true of what the
+engine does: the library declares no member the engine lacks or that runs code on a read, no result narrower
+than what the engine returns, and no argument, key or overload the engine throws on.
+
+Counterexample in plain TypeScript. TypeScript's ES library declares Function's caller, which throws on a
+strict-mode function; JSON.stringify returning a string, though a function gives undefined; a regex match's
+groups as strings, though a group that took no part is undefined; reduce with no start, which throws on an
+empty list; and more, below. Each witness is a program the release accepts on the declaration's word and Node
+crashes on. TypeScript-L compiles only the core, so its library can say what the engine does, whatever code
+written for the declaration's word stops compiling.
+
+Obligation 1, a deleted member: TS2339 (TypeScript's code)
+  Statement. A function has no caller or arguments.
+  Mechanism. src/lib/es5.d.ts deletes both from interface Function, so a read reports TS2339.
+  Why it suffices. A property is read through the declaration its type has, and the deletion leaves none.
+  Witnesses:
+    lib-function-caller.ts             caller read on an arrow function
+
+Obligation 2, a deleted member a later library would have: TS2550 (TypeScript's code)
+  Statement. There is no Object.groupBy, whose result has a null prototype its type can't express. Map.groupBy
+  stays.
+  Mechanism. src/lib/es2024.object.d.ts deletes it, and TypeScript reports TS2550, since it knows the member
+  from a library version.
+  Why it suffices. The same as obligation 1.
+  Witnesses:
+    lib-esnext-groupby-null-proto.ts   hasOwnProperty called on the result
+    lib-esnext-groupby-template.ts     the result converted to a string
+
+Obligation 3, a deleted global: TS2304 (TypeScript's code)
+  Statement. There is no Proxy, since every read of one runs its handler, which may return anything.
+  Mechanism. src/lib/es2015.proxy.d.ts deletes `declare var Proxy`. No type is named Proxy, so a use reports
+  TS2304.
+  Why it suffices. A global's value comes only from a declaration in the library.
+  Witnesses:
+    lib-proxy-get-any.ts               a handler's get returns a number for a string field
+
+Obligation 4, a deleted constructor: TS2351 (TypeScript's code)
+  Statement. Array can't be called or constructed. Given one number it makes that many holes, typed as
+  elements, and given anything else it makes its arguments, which is decided when it runs.
+  Mechanism. src/lib/es5.d.ts deletes ArrayConstructor's call and construct signatures, keeping isArray, and
+  es2015's from and of. A new-expression reports TS2351, and a call reports TS2349.
+  Why it suffices. Every way to call or construct Array goes through those signatures.
+  Witnesses:
+    lib-new-array-typed-holes.ts       new Array<string>(2), read as strings
+    lib-new-array-any.ts               new Array(3), any[] of holes
+
+Obligation 5, a deleted overload: TS2554 (TypeScript's code)
+  Statement. reduce and reduceRight take a starting value, on every array, typed array and iterator.
+  Mechanism. src/lib deletes each overload without one (22 in es5.d.ts, 4 in es2020.bigint.d.ts, 2 in
+  es2025.float16.d.ts and 1 in es2025.iterator.d.ts). Each remaining overload takes two arguments, so a call with
+  one reports TS2554.
+  Why it suffices. Every reduce is declared on one of those types, and every overload left takes a start.
+  Witnesses:
+    lib-partial-reduce-empty.ts        reduce with no start on an empty list
+
+Obligation 6, a result as wide as the engine's: TS2322 (TypeScript's code)
+  Statement. JSON.stringify returns string | undefined. Array.from and Array.fromAsync of an array-like that
+  isn't iterable give (T | undefined)[], and a map function over one is handed T | undefined. A regex match's
+  elements, past the whole match, are string | undefined, and so are its named groups and their indices.
+  Mechanism. src/lib corrects each declaration (es5.d.ts, es2015.core.d.ts, es2015.iterable.d.ts,
+  esnext.array.d.ts, es2018.regexp.d.ts, es2022.regexp.d.ts), so the result no longer fits a narrower slot, and
+  TypeScript reports TS2322 where it is given one.
+  Why it suffices. A call's result has the type its declaration gives it, and that type now admits undefined
+  wherever the engine returns it.
+  Witnesses:
+    lib-json-stringify-function.ts     a function stringified, held as a string
+    lib-array-from-length.ts           Array.from({ length: 2 }) held as strings
+    lib-esnext-fromasync-length.ts     the same through Array.fromAsync
+    lib-regexp-exec-groups.ts          a group that took no part, held as a string
+  Controls:
+    ordinary-uses.ts                   what code ordinarily does with these declarations
+
+Obligation 7, an argument the engine accepts: TS2345 (TypeScript's code)
+  Statement. matchAll and replaceAll take a string, never a RegExp, which throws without the g flag; matchAll
+  makes a string's pattern global itself. The release declares matchAll for a RegExp only, so no case can call
+  it with a string and compile under both. An iterator's flatMap takes a callback that returns no string, which
+  it throws on.
+  Mechanism. src/lib/es2020.string.d.ts, es2021.string.d.ts and es2025.iterator.d.ts narrow each parameter,
+  so an argument outside it reports TS2345.
+  Why it suffices. Every call to these methods is checked against their declared parameters.
+  Witnesses:
+    lib-partial-matchall-nonglobal.ts  matchAll with a RegExp that isn't global
+    lib-partial-replaceall-nonglobal.ts  replaceAll with a RegExp that isn't global
+    lib-partial-esnext-iterator-flatmap-string.ts  flatMap with a callback that returns a string
+
+Obligation 8, a key the engine accepts: TS2344 (TypeScript's code)
+  Statement. A WeakMap's or WeakSet's key is an object. A registered symbol throws as a key, and a symbol's type
+  can't say whether it is registered.
+  Mechanism. src/lib/es2023.collection.d.ts deletes symbol from WeakKeyTypes, so WeakKey is object, and a symbol
+  key reports TS2344.
+  Why it suffices. WeakMap and WeakSet constrain their key to WeakKey.
+  Witnesses:
+    lib-partial-esnext-weakmap-registered-symbol.ts  a WeakMap keyed by symbol

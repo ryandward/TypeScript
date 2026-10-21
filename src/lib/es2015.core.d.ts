@@ -50,7 +50,7 @@ interface ArrayConstructor {
      * Creates an array from an array-like object.
      * @param arrayLike An array-like object to convert to an array.
      */
-    from<T>(arrayLike: ArrayLike<T>): T[];
+    from<T>(arrayLike: ArrayLike<T>): (T | undefined)[]; // L: an array-like's places may hold nothing
 
     /**
      * Creates an array from an iterable object.
@@ -58,7 +58,7 @@ interface ArrayConstructor {
      * @param mapfn A mapping function to call on every element of the array.
      * @param thisArg Value of 'this' used to invoke the mapfn.
      */
-    from<T, U>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => U, thisArg?: any): U[];
+    from<T, U>(arrayLike: ArrayLike<T>, mapfn: (v: T | undefined, k: number) => U, thisArg?: any): U[]; // L: the same
 
     /**
      * Returns a new array from a set of elements.

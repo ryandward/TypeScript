@@ -258,18 +258,7 @@ interface BigInt64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> 
      * If thisArg is omitted, undefined is used as the this value.
      */
     map(callbackfn: (value: bigint, index: number, array: BigInt64Array<TArrayBuffer>) => bigint, thisArg?: any): BigInt64Array<ArrayBuffer>;
-
-    /**
-     * Calls the specified callback function for all the elements in an array. The return value of
-     * the callback function is the accumulated result, and is provided as an argument in the next
-     * call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the
-     * callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an argument
-     * instead of an array value.
-     */
-    reduce(callbackfn: (previousValue: bigint, currentValue: bigint, currentIndex: number, array: BigInt64Array<TArrayBuffer>) => bigint): bigint;
+    // L: no overload without an initial value: on an empty list it throws
 
     /**
      * Calls the specified callback function for all the elements in an array. The return value of
@@ -282,18 +271,7 @@ interface BigInt64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> 
      * instead of an array value.
      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: bigint, currentIndex: number, array: BigInt64Array<TArrayBuffer>) => U, initialValue: U): U;
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result, and is provided as an
-     * argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
-     * the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an
-     * argument instead of an array value.
-     */
-    reduceRight(callbackfn: (previousValue: bigint, currentValue: bigint, currentIndex: number, array: BigInt64Array<TArrayBuffer>) => bigint): bigint;
+    // L: no overload without an initial value: on an empty list it throws
 
     /**
      * Calls the specified callback function for all the elements in an array, in descending order.
@@ -546,18 +524,7 @@ interface BigUint64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike>
      * If thisArg is omitted, undefined is used as the this value.
      */
     map(callbackfn: (value: bigint, index: number, array: BigUint64Array<TArrayBuffer>) => bigint, thisArg?: any): BigUint64Array<ArrayBuffer>;
-
-    /**
-     * Calls the specified callback function for all the elements in an array. The return value of
-     * the callback function is the accumulated result, and is provided as an argument in the next
-     * call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the
-     * callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an argument
-     * instead of an array value.
-     */
-    reduce(callbackfn: (previousValue: bigint, currentValue: bigint, currentIndex: number, array: BigUint64Array<TArrayBuffer>) => bigint): bigint;
+    // L: no overload without an initial value: on an empty list it throws
 
     /**
      * Calls the specified callback function for all the elements in an array. The return value of
@@ -570,18 +537,7 @@ interface BigUint64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike>
      * instead of an array value.
      */
     reduce<U>(callbackfn: (previousValue: U, currentValue: bigint, currentIndex: number, array: BigUint64Array<TArrayBuffer>) => U, initialValue: U): U;
-
-    /**
-     * Calls the specified callback function for all the elements in an array, in descending order.
-     * The return value of the callback function is the accumulated result, and is provided as an
-     * argument in the next call to the callback function.
-     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
-     * the callbackfn function one time for each element in the array.
-     * @param initialValue If initialValue is specified, it is used as the initial value to start
-     * the accumulation. The first call to the callbackfn function provides this value as an
-     * argument instead of an array value.
-     */
-    reduceRight(callbackfn: (previousValue: bigint, currentValue: bigint, currentIndex: number, array: BigUint64Array<TArrayBuffer>) => bigint): bigint;
+    // L: no overload without an initial value: on an empty list it throws
 
     /**
      * Calls the specified callback function for all the elements in an array, in descending order.
