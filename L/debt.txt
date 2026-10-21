@@ -43,15 +43,20 @@ effects
   catalog has no witness for it. Whether the core takes a Date at all, or only what the shell's adapter parsed
   out of one, is undecided.
 
+writes
+- The accessor mechanism has no L code. Its witnesses are proved by TypeScript's TS2339 on the read, which shows
+  the read got the declared type, not that getFlowTypeOfAccessExpression gave it.
+- Iterators and generators are the state the core can still change: next() advances one, and every getter or
+  function that reads one can return something new. RegExp's exec and test write lastIndex on a regex with the g
+  or y flag. Neither is a write the checker sees, and no rule closes them.
+- The ban is the core's. The shell can still change an object it handed the core, between a check and an await
+  (flow-await-interleave in the catalog), since narrowing a property path survives the await.
+
 call-signature
 - Not built, so chk-call-narrowed-function.ts is open: the release and the lab both call a Function with no
   signature, and Node throws when it holds a constructor. Nobody has measured how much real code calls a value
   typed Function.
 
-write-into-an-object
-- The accessor-not-narrowed mechanism has no L code. Its witness is proved by TypeScript's TS2339 and a
-  fragment of the message, which shows the read got the wider type, not that getFlowTypeOfAccessExpression
-  gave it.
 
 lab
 - TypeScript's own test suite has never been run on the lab. Its baselines would change wherever L does, so

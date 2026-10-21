@@ -1,3 +1,4 @@
+// L: the core changes no object in place, so this file declares nothing that does.
 declare namespace Reflect {
     /**
      * Calls the function with the specified object as the this value
@@ -26,23 +27,6 @@ declare namespace Reflect {
         newTarget?: new (...args: any) => any,
     ): R;
     function construct(target: Function, argumentsList: ArrayLike<any>, newTarget?: Function): any;
-
-    /**
-     * Adds a property to an object, or modifies attributes of an existing property.
-     * @param target Object on which to add or modify the property. This can be a native JavaScript object
-     *        (that is, a user-defined object or a built in object) or a DOM object.
-     * @param propertyKey The property name.
-     * @param attributes Descriptor for the property. It can be for a data property or an accessor property.
-     */
-    function defineProperty(target: object, propertyKey: PropertyKey, attributes: PropertyDescriptor & ThisType<any>): boolean;
-
-    /**
-     * Removes a property from an object, equivalent to `delete target[propertyKey]`,
-     * except it won't throw if `target[propertyKey]` is non-configurable.
-     * @param target Object from which to remove the own property.
-     * @param propertyKey The property name.
-     */
-    function deleteProperty(target: object, propertyKey: PropertyKey): boolean;
 
     /**
      * Gets the property of target, equivalent to `target[propertyKey]` when `receiver === target`.
@@ -93,34 +77,4 @@ declare namespace Reflect {
      * @param target Object that contains the own properties.
      */
     function ownKeys(target: object): (string | symbol)[];
-
-    /**
-     * Prevents the addition of new properties to an object.
-     * @param target Object to make non-extensible.
-     * @return Whether the object has been made non-extensible.
-     */
-    function preventExtensions(target: object): boolean;
-
-    /**
-     * Sets the property of target, equivalent to `target[propertyKey] = value` when `receiver === target`.
-     * @param target Object that contains the property on itself or in its prototype chain.
-     * @param propertyKey Name of the property.
-     * @param receiver The reference to use as the `this` value in the setter function,
-     *        if `target[propertyKey]` is an accessor property.
-     */
-    function set<T extends object, P extends PropertyKey>(
-        target: T,
-        propertyKey: P,
-        value: P extends keyof T ? T[P] : any,
-        receiver?: any,
-    ): boolean;
-    function set(target: object, propertyKey: PropertyKey, value: any, receiver?: any): boolean;
-
-    /**
-     * Sets the prototype of a specified object o to object proto or null.
-     * @param target The object to change its prototype.
-     * @param proto The value of the new prototype or null.
-     * @return Whether setting the prototype was successful.
-     */
-    function setPrototypeOf(target: object, proto: object | null): boolean;
 }

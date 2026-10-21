@@ -1,5 +1,6 @@
 /// <reference lib="es2020.bigint" />
 
+// L: the core changes no object in place, so this file declares nothing that does.
 interface Atomics {
     /**
      * A non-blocking, asynchronous version of wait which is usable on the main thread.
@@ -36,13 +37,6 @@ interface SharedArrayBuffer {
      * [MDN](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer/maxByteLength)
      */
     get maxByteLength(): number;
-
-    /**
-     * Grows the SharedArrayBuffer to the specified size (in bytes).
-     *
-     * [MDN](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer/grow)
-     */
-    grow(newByteLength?: number): void;
 }
 
 interface SharedArrayBufferConstructor {

@@ -4026,14 +4026,6 @@
         "category": "Error",
         "code": 2883
     },
-    "A value of type '{0}' could be written into this position, which holds '{1}'.": {
-        "category": "Error",
-        "code": 2890
-    },
-    "'{0}' can be written through, so its type argument '{1}' cannot be widened to '{2}'.": {
-        "category": "Error",
-        "code": 2891
-    },
     "'{0}' must be initialized where it is declared. In L, every binding is assigned once.": {
         "category": "Error",
         "code": 2892
@@ -4041,10 +4033,6 @@
     "Cannot assign to '{0}' because all bindings are constant in L.": {
         "category": "Error",
         "code": 2893
-    },
-    "Property '{0}' is required, and the target could delete it.": {
-        "category": "Error",
-        "code": 2894
     },
     "This asserts the value is present without checking it. L has no non-null assertions.": {
         "category": "Error",
@@ -4077,6 +4065,10 @@
     "L has no '{0}'. A function takes what it needs as a parameter.": {
         "category": "Error",
         "code": 2903
+    },
+    "This changes an object in place. L builds a new value instead.": {
+        "category": "Error",
+        "code": 2904
     },
 
     "Import declaration '{0}' is using private name '{1}'.": {

@@ -1,12 +1,5 @@
+// L: the core changes no object in place, so this file declares nothing that does.
 interface Map<K, V> {
-    /**
-     * Removes all elements from the Map.
-     */
-    clear(): void;
-    /**
-     * @returns true if an element in the Map existed and has been removed, or false if the element does not exist.
-     */
-    delete(key: K): boolean;
     /**
      * Executes a provided function once per each key/value pair in the Map, in insertion order.
      */
@@ -20,10 +13,6 @@ interface Map<K, V> {
      * @returns boolean indicating whether an element with the specified key exists or not.
      */
     has(key: K): boolean;
-    /**
-     * Adds a new element with a specified key and value to the Map. If an element with the same key already exists, the element will be updated.
-     */
-    set(key: K, value: V): this;
     /**
      * @returns the number of elements in the Map.
      */
@@ -46,11 +35,6 @@ interface ReadonlyMap<K, V> {
 
 interface WeakMap<K extends WeakKey, V> {
     /**
-     * Removes the specified element from the WeakMap.
-     * @returns true if the element was successfully removed, or false if it was not present.
-     */
-    delete(key: K): boolean;
-    /**
      * @returns a specified element.
      */
     get(key: K): V | undefined;
@@ -58,11 +42,6 @@ interface WeakMap<K extends WeakKey, V> {
      * @returns a boolean indicating whether an element with the specified key exists or not.
      */
     has(key: K): boolean;
-    /**
-     * Adds a new element with a specified key and value.
-     * @param key Must be an object or symbol.
-     */
-    set(key: K, value: V): this;
 }
 
 interface WeakMapConstructor {
@@ -72,19 +51,6 @@ interface WeakMapConstructor {
 declare var WeakMap: WeakMapConstructor;
 
 interface Set<T> {
-    /**
-     * Appends a new element with a specified value to the end of the Set.
-     */
-    add(value: T): this;
-    /**
-     * Removes all elements from the Set.
-     */
-    clear(): void;
-    /**
-     * Removes a specified value from the Set.
-     * @returns Returns true if an element in the Set existed and has been removed, or false if the element does not exist.
-     */
-    delete(value: T): boolean;
     /**
      * Executes a provided function once per each value in the Set object, in insertion order.
      */
@@ -112,15 +78,6 @@ interface ReadonlySet<T> {
 }
 
 interface WeakSet<T extends WeakKey> {
-    /**
-     * Appends a new value to the end of the WeakSet.
-     */
-    add(value: T): this;
-    /**
-     * Removes the specified element from the WeakSet.
-     * @returns Returns true if the element existed and has been removed, or false if the element does not exist.
-     */
-    delete(value: T): boolean;
     /**
      * @returns a boolean indicating whether a value exists in the WeakSet or not.
      */

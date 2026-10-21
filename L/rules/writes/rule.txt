@@ -1,0 +1,114 @@
+writes
+kind: soundness
+
+Claim. If the lab accepts a program, it changes no object in place: it assigns to no property or element, deletes
+nothing, and calls no method that changes what it is called on. So a value's type, once checked, stays true for
+every name that holds the value, and a wider name can't store anything a narrower one doesn't expect.
+
+Counterexample in plain TypeScript. TypeScript relates a writable position in one direction only: string[] passes
+as (string | number)[], { value: string } as { value: string | number }, a required property as an optional or
+indexed one, and a readonly property as a writable one. Through the wider name a number goes into the array, a
+number into the field, the property is deleted, or the readonly one is overwritten, and every name that still
+says the narrower type is wrong. Each witness is such a program, accepted by the release.
+
+The core builds a new value with the change instead. With nothing written, a wider name is only a weaker
+description of the same value, so TypeScript's own relation, covariant arrays and all, is sound for values, and
+the fork's earlier answer, a relation where a writable position relates both ways, is gone (see changes.txt).
+
+Obligation 1, a write: TS2904
+  Statement. No expression assigns to a property or an element, with =, a compound assignment, ++ or --, a
+  destructuring target or a for-in or for-of target, and none deletes one.
+  Mechanism. checkReferenceExpression, which checks every assignment target, reports TS2904 on a property or
+  element access, and checkDeleteExpression reports it on every delete.
+  Why it suffices. Every assignment target goes through checkReferenceExpression, and every delete through
+  checkDeleteExpression, so no write into an object is accepted.
+  Witnesses:
+    flow-setter-assign.ts                  a setter assigned, then the property read as what was assigned
+    rel-index-signature-delete.ts          a required property deleted by key through a wider name
+    rel-object-aliased-literal.ts          a literal bound to a name, widened, and written through the wider name
+    rel-object-index-signature.ts          a new key stored through a wider index signature
+    rel-object-optional-property.ts        undefined stored through a wider optional property
+    rel-object-property.ts                 a number stored through a wider property
+    rel-readonly-alias.ts                  a readonly property written through a mutable alias
+    rel-readonly-through-index-signature.ts a readonly property overwritten by key through an index signature
+    rel-tuple-element.ts                   a number stored in a tuple's element through a wider name
+    rule-delete.ts                         a required property deleted through a wider optional one
+  Rejected sound code, because the core changes no object in place:
+    delete-own-optional.ts                 a property the value's own type says is optional, deleted
+    field-narrowing.ts                     a field assigned, which narrows it
+    fresh-object-literal.ts                a fresh object literal written through a wider type
+    fresh-tuple-literal.ts                 a fresh tuple literal written through a wider type
+    optional-into-optional.ts              an optional property widened into an optional one, deleted
+  Controls:
+    call-site-rest-arguments.ts            arguments matched against a tuple rest parameter
+    callback-parameter-wider-writable.ts   a comparer whose parameter's field is optional, handed required ones
+    concat-library-declaration.ts          an array passed to concat, which takes a ConcatArray of a wider type
+    context-sensitive-argument.ts          an object literal argument holding a context-sensitive function
+    field-check.ts                         a check on a readonly field, which narrows it
+    fresh-literal-index-signature.ts       a fresh object literal against an index signature in a union
+    fresh-literal-union-expected-type.ts   a fresh array literal whose expected type is a union
+    function-result-copy.ts                slice()'s result passed where a wider list is taken
+    generator-widened.ts                   a generator widened
+    handler-past-three-overloads.ts        a handler whose request's field is optional, past four overloads
+    iterator-widened.ts                    an iterator widened
+    iterator-wider-return.ts               an iterator viewed with a wider return type
+    library-list-named-exactly.ts          a library's maybe-missing list, named with exactly its type
+    library-mapped-partial.ts              a Date passed to TypeORM's mapped copy of an entity
+    library-phantom-fields.ts              a schema with zod's writable phantom fields, widened
+    map-as-readonly-map.ts                 a Map viewed as a ReadonlyMap with readonly values
+    match-all-callback.ts                  a library callback whose parameter is a mutable array
+    mutable-as-readonly.ts                 a mutable array viewed as readonly
+    narrower-writable-field.ts             a record whose field is narrower than the view's writable one
+    parameter-typed-mutable-only-reads.ts  a parameter typed unknown[], handed strings
+    readonly-object-into-writable-type.ts  a readonly object passed where its field is writable
+    readonly-property.ts                   a readonly property widened
+    readonly-set-widened.ts                a ReadonlySet widened
+    readonly-tuple.ts                      a readonly tuple widened
+    readonly-widened.ts                    a readonly array widened
+    rest-parameter-tuple.ts                a function value whose rest parameter is a tuple
+    type-level-array-extends.ts            a type-level question about arrays
+    type-level-object-extends.ts           a type-level question about an object
+    type-level-tuple-wrapper.ts            a type-level question about tuples
+
+Obligation 2, a deleted method: TS2339 (TypeScript's code)
+  Statement. The library declares no method that changes what it is called on: an array's push, pop, shift,
+  unshift, splice, sort, reverse, fill and copyWithin; a typed array's set, fill, sort, reverse and copyWithin;
+  a Map's set, delete, clear, getOrInsert and getOrInsertComputed; a Set's add, delete and clear; a WeakMap's
+  and a WeakSet's; a Date's setters; a DataView's setters; an ArrayBuffer's resize and transfers.
+  Mechanism. src/lib deletes each declaration, so a call reports TS2339.
+  Why it suffices. A method is called through the declaration its type has, and the deletion leaves none.
+  Witnesses:
+    rel-array-aliased-literal.ts           an array literal bound to a name, widened, and pushed into
+    rel-array-argument.ts                  an array pushed into through a parameter's wider name
+    rel-array-covariance.ts                string[] widened to (string | number)[] and pushed into
+    rel-array-generic-call.ts              an array pushed into through a generic call's wider type
+    rel-array-nested-property.ts           an array inside a property, widened and pushed into
+    rel-array-return.ts                    an array returned as a wider one and pushed into
+  Rejected sound code, because the core changes no object in place:
+    fresh-literal.ts                       a fresh array literal pushed into through a wider type
+    nested-fresh-literals.ts               each row of a literal pushed into through a wider type
+    same-element-type.ts                   an array pushed into through a name of the same type
+
+Obligation 3, a deleted function a later library would have: TS2550 (TypeScript's code)
+  Statement. Neither Object nor Reflect has a function that changes its argument: Object.assign, defineProperty,
+  defineProperties and setPrototypeOf, and Reflect's set, defineProperty, deleteProperty, setPrototypeOf and
+  preventExtensions. DisposableStack and AsyncDisposableStack have no constructor.
+  Mechanism. src/lib deletes each declaration. TypeScript reports TS2550 for one it knows from a library
+  version, as Object.assign, and TS2339 for the rest.
+  Why it suffices. The same as obligation 2.
+  Witnesses:
+    lib-object-assign-prototype.ts         Object.assign copies none of a Map's methods
+
+Obligation 4, an accessor is not narrowed: TS2339 (TypeScript's code)
+  Statement. A check on an accessor, or an assignment to one, doesn't narrow what later reads of it return.
+  With nothing written, a getter can still read state that changes between reads: an iterator it advances.
+  Mechanism. getFlowTypeOfAccessExpression gives an accessor's read its declared type, so a member the narrower
+  type has and the declared one lacks reports TS2339.
+  Why it suffices. Every property read's flow type comes from getFlowTypeOfAccessExpression, and an accessor's is
+  never narrowed.
+  Witnesses:
+    flow-alias-getter.ts                   the same, through a condition aliased in a const
+    flow-getter.ts                         a getter narrowed, then read again after its iterator advanced
+    flow-setter-assign.ts                  a setter assigned, then the property read as what was assigned
+  Rejected sound code, because nothing in a getter's type says two reads agree:
+    getter-returning-stored-state.ts       a getter that always returns the same value

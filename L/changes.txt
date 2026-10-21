@@ -2,13 +2,13 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds thirteen diagnostics, changes the checker, adds one internal type flag, declares readonly the
-new objects and collections the library hands out where a mutable type would make a read-only view invariant,
-deletes every effect from the ES library, and corrects the library's declarations that lie about what the engine
-does. The parser, binder, emitter, transformers, language service, command line and compiler options are
-unchanged, and no test baseline has been updated. L's rules have no compiler option: they are always on. Each
-change in code carries a comment that starts `// L:`, in checker.ts, types.ts and the lib, so `grep -rn '// L:'
-src` finds them. The entries() changes in dom.generated.d.ts, webworker.generated.d.ts, es2020.bigint.d.ts and
+things: it adds eleven diagnostics, changes the checker, adds one internal type flag, declares readonly the new
+objects and collections the library hands out, deletes from the ES library every effect and every method that
+changes an object in place, and corrects the library's declarations that lie about what the engine does. The
+parser, binder, emitter, transformers, language service, command line and compiler options are unchanged, and no
+test baseline has been updated. L's rules have no compiler option: they are always on. Each change in code
+carries a comment that starts `// L:`, in checker.ts, types.ts and the lib, so `grep -rn '// L:' src` finds
+them. The entries() changes in dom.generated.d.ts, webworker.generated.d.ts, es2020.bigint.d.ts and
 es2025.float16.d.ts carry no comment of their own.
 
 When a commit changes src/, this file changes with it.
@@ -16,19 +16,14 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Thirteen new errors, TS2890 to TS2903 without TS2897, each the code of one rule's mechanism in
-L/rules/<rule>/rule.txt. TS2897 was definite-assignment's, which the class ban made unreachable.
+Eleven new errors, from TS2892 to TS2904, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
+rules and TS2897 to definite-assignment.
 
-  TS2890  write-into-an-object, mutable-array-or-tuple
-          A value of type '{0}' could be written into this position, which holds '{1}'.
-  TS2891  mutable-array-or-tuple
-          '{0}' can be written through, so its type argument '{1}' cannot be widened to '{2}'.
   TS2892  immutable-bindings
           '{0}' must be initialized where it is declared. In L, every binding is assigned once.
   TS2893  immutable-bindings
           Cannot assign to '{0}' because all bindings are constant in L.
-  TS2894  delete
-          Property '{0}' is required, and the target could delete it.
   TS2895  non-null-assertion
           This asserts the value is present without checking it. L has no non-null assertions.
   TS2896  type-assertion
@@ -47,6 +42,8 @@ L/rules/<rule>/rule.txt. TS2897 was definite-assignment's, which the class ban m
           L has no classes. A function that returns a record takes a class's place.
   TS2903  classes
           L has no '{0}'. A function takes what it needs as a parameter.
+  TS2904  writes
+          This changes an object in place. L builds a new value instead.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -63,57 +60,43 @@ any (soundness: TS2898, TS2900; 8ac4d727f, 2adfd653a, 29e19bf5e, f0cb8e20c)
 - getUnionType returns uncheckedType instead of unknownType for a union that holds it. addTypeToUnion marks such a
   union with the new internal flag TypeFlags.IncludesUnchecked, which types.ts defines as Reserved3.
 - getNonNullableType leaves uncheckedType as it is: taking out null and undefined checks nothing else.
-- isSimpleTypeRelatedTo: under valueAssignableRelation (see the next rule), a source of type any relates only to
-  unknown or a union of undefined, null and {}, and anywhere else reports TS2898. An uncheckedType source that
-  fails to relate reports TS2898 as well.
+- valueAssignableRelation is a new relation, with its own cache: assignability for a value flowing into a slot,
+  where an any is rejected. assignableRelation still answers every type-level question: conditional types,
+  constraints and inference, where an any is no value. The checker uses valueAssignableRelation where values
+  flow: checkTypeAssignableToAndOptionallyElaborate, which checks initializers, assignments, returns,
+  properties, for-of, satisfies and yield; chooseOverload's assignability pass; resolveCall's reports of
+  argument errors; and the check behind the hint that a call would have succeeded against an overload's
+  implementation. isSimpleTypeRelatedTo, hasExcessProperties and the T[K] target in structuredTypeRelatedToWorker
+  treat it as they treat assignableRelation, two conditional types' check types relate under assignableRelation,
+  and reportRelationError's internal assertion checks against the relation that failed.
+- chooseOverload: the pass that skips arguments judges stand-ins for them, so it relates under
+  assignableRelation, and the overload the subtype pass picks must also accept its arguments under
+  valueAssignableRelation. resolveCall: past three failed overloads, the error reports the overload that
+  type-level assignability accepts, the one only the value relation rejected, instead of the last.
+- isSimpleTypeRelatedTo: under valueAssignableRelation, a source of type any relates only to unknown or a union of
+  undefined, null and {}, and anywhere else reports TS2898. An uncheckedType source that fails to relate reports
+  TS2898 as well.
 - errorOrUnchecked and headedIfUnchecked are new: where the rejected type is uncheckedType, they put TS2900 at
   the head of the error's chain. They are used in getPropertyTypeForIndexType (the property doesn't exist),
   checkNonNullTypeWithReporter (the value is of type unknown), invocationError (the value isn't callable),
   resolveInstanceofExpression (the right side isn't a function) and reportTypeNotIterableError.
 
-mutable-array-or-tuple and write-into-an-object (soundness: TS2890, TS2891, and TypeScript's own TS2339;
-931689677, 8b384c9e3, 89beff3af, fadc61c80, e5795182f, 3b5956834)
-- valueAssignableRelation is a new relation, with its own cache and its own variance cache (valueVariances).
-  It is assignability for a value flowing into a slot, where a writable position must relate both ways.
-  assignableRelation still answers every type-level question: conditional types, constraints and inference.
-- Where values flow, the checker uses valueAssignableRelation: checkTypeAssignableToAndOptionallyElaborate,
-  which checks initializers, assignments, returns, properties, for-of, satisfies and yield; chooseOverload's
-  assignability pass; resolveCall's reports of argument errors; and the check behind the hint that a call
-  would have succeeded against an overload's implementation.
-- isPropertySymbolTypeRelated: a writable target property must also relate back to the source (relatedBack,
-  TS2890), unless the source is a fresh object literal, an array literal or JSX attributes, which nothing else
-  holds (isUnaliasedLiteral). isWritablePosition says what is writable: a property or accessor that isn't
-  readonly. Methods are left out, so method bivariance stays. A target of type unknown or any no longer
-  accepts a writable position without the check.
-- membersRelatedToIndexInfo and indexInfoRelatedTo: a writable index signature relates both ways, under the
-  same exception for literals.
-- getVariances, getAliasVariances and getVariancesWorker take the relation and cache per relation. For values,
-  ReadonlyArray and readonly tuples are covariant, Array is measured like any other generic type, a mutable
-  tuple is invariant, and `in` and `out` annotations are measured instead of trusted.
-- structuredTypeRelatedToWorker: an array literal relates with type-level variances, since nothing else holds
-  it. relateVariances finds a type argument that is covariant as a type but invariant as a value, and
-  writableTypeArgument carries it to the TS2891 report. Two conditional types' check types relate as types,
-  under assignableRelation.
-- unionOrIntersectionRelatedTo: a fresh literal stays fresh while it is related to each member of a union.
-- isSimpleTypeRelatedTo, hasExcessProperties and the T[K] target in structuredTypeRelatedToWorker treat
-  valueAssignableRelation the way they treat assignableRelation: a number relates to a numeric enum, excess
-  properties are checked, and T[K] relates through its write constraint.
-- Argument lists: argumentList and the new SignatureCheckMode.FreshArguments relate a rest parameter's list as
-  readonly, because every call builds a new list. signatureRelatedTo sets the mode under the value relation,
-  compareSignaturesRelated passes it to callbacks, and getSignatureApplicabilityError applies it to spread
-  arguments.
-- chooseOverload: the pass that skips arguments judges stand-ins for them, so it relates under
-  assignableRelation. The overload the subtype pass picks must also accept its arguments under
-  valueAssignableRelation.
-- resolveCall: past three failed overloads, the error reports the overload that type-level assignability
-  accepts, the one only the write rule rejected, instead of the last.
-- reportRelationError: an internal assertion checks against the relation that failed, not assignability.
-- getFlowTypeOfAccessExpression: an accessor is no longer narrowed, since its getter needn't return what was
-  checked or assigned. The read keeps its declared type, and TypeScript's own TS2339 rejects what follows.
-
-delete (soundness: TS2894; 2c957793d)
-- mayBeDeleted is new: where a writable optional property or a writable index signature lets the target delete a
-  property, the source's property must be optional too.
+writes (soundness: TS2904, and TypeScript's own TS2339 and TS2550; the commit after cb6676137)
+- checkReferenceExpression, which checks every assignment target (=, a compound assignment, ++, --, a
+  destructuring target, a for-in or for-of target), reports TS2904 on a property or element access, and
+  checkDeleteExpression reports it on every delete.
+- getFlowTypeOfAccessExpression doesn't narrow an accessor (8b384c9e3), since a getter runs on every read and
+  can read an iterator it advances. The read keeps its declared type, and TypeScript's own TS2339 rejects what
+  follows.
+- The relation is TypeScript's again for writes. Before the ban, three rules (mutable-array-or-tuple,
+  write-into-an-object, delete) made a writable position relate both ways, from 931689677 to 2c957793d. With
+  nothing written, a wider name is only a weaker description of a value, so that machinery is deleted:
+  compareSignaturesRelated, unionOrIntersectionRelatedTo, signatureRelatedTo, isPropertySymbolTypeRelated,
+  propertyRelatedTo, membersRelatedToIndexInfo, indexInfoRelatedTo, typeRelatedToIndexInfo, getVariances,
+  getAliasVariances, getVariancesWorker and relateVariances are v6.0.3's text; argumentList,
+  relationGrantsWrites, isUnaliasedLiteral, mayBeDeleted, relatedBack, typeLevelVariances, isWritablePosition,
+  SignatureCheckMode.FreshArguments, valueVariances and TS2890, TS2891 and TS2894 are gone. What those rules
+  added for values that the any rule still needs is filed under any.
 
 immutable-bindings (soundness: TS2892, TS2893; dbe09f6e5, which called it policy until c6cb79ffc)
 - checkGrammarVariableDeclaration: a let or var declared without an initializer is TS2892. A for-in or for-of
@@ -148,9 +131,9 @@ optional-field is a specification only, and call-signature isn't built (its witn
 The library (src/lib; 89beff3af, comment in fb73bc43f)
 
 Each iterator result and each tuple a built-in entries() yields is a new object that nothing else holds, so the
-fork declares them readonly. Under the value relation a mutable tuple is invariant, and without this change
-sound code such as an Iterator<T, undefined> used as an Iterator<T, unknown>, or a Map used as a ReadonlyMap,
-would be rejected.
+fork declares them readonly. While the write rules made a mutable tuple invariant for values, this kept sound
+code such as an Iterator<T, undefined> used as an Iterator<T, unknown>, or a Map used as a ReadonlyMap, from
+being rejected. With writes banned that reason is gone, and the declarations stay because they are true.
 
 Under the esnext libraries three more types hand out new collections with mutable types: ConcatArray's slice(),
 an iterator's toArray(), and a ReadonlySet's union, intersection, difference and symmetricDifference. The value
@@ -216,6 +199,22 @@ stops compiling, which costs nothing L keeps.
 - An iterator's flatMap takes a callback that returns no string, which it throws on (es2025.iterator).
 - WeakMap and WeakSet keys are objects: WeakKeyTypes has no symbol, since a registered symbol throws as a key
   (es2023.collection).
+
+The library's writes (src/lib; the commit after cb6676137)
+
+The core changes no object in place, so the fork deletes every method and function in its ES library that does,
+and the rule writes holds the deletions. Each file the deletions touched opens with a `// L:` comment saying so.
+
+- Array: push, pop, shift, unshift, splice, sort and reverse (es5), fill and copyWithin (es2015.core).
+- Every typed array (es5, es2020.bigint, es2025.float16): set, fill, sort, reverse and copyWithin.
+- DataView's eleven setters (es5, es2020.bigint, es2025.float16), and Date's eight UTC setters (es5); the
+  local-time ones went with the effects.
+- Map's set, delete and clear, Set's add, delete and clear, WeakMap's set and delete and WeakSet's add and delete
+  (es2015.collection), and Map's and WeakMap's getOrInsert and getOrInsertComputed (esnext.collection).
+- Object.defineProperty and defineProperties (es5), Object.assign and setPrototypeOf (es2015.core), and Reflect's
+  set, defineProperty, deleteProperty, setPrototypeOf and preventExtensions (es2015.reflect).
+- ArrayBuffer's resize, transfer and transferToFixedLength (es2024.arraybuffer), SharedArrayBuffer's grow
+  (es2024.sharedmemory), and the DisposableStack and AsyncDisposableStack constructors (esnext.disposable).
 
 Outside src/
 

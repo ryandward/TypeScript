@@ -6,6 +6,7 @@
  * of bytes could not be allocated an exception is raised.
  */
 // L: the core performs no effects, so this file declares nothing that reads the machine's locale.
+// L: the core changes no object in place, so this file declares nothing that does.
 interface Float16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     /**
      * The size in bytes of each element in the array.
@@ -34,17 +35,6 @@ interface Float16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     at(index: number): number | undefined;
 
     /**
-     * Returns the this object after copying a section of the array identified by start and end
-     * to the same array starting at position target
-     * @param target If target is negative, it is treated as length+target where length is the
-     * length of the array.
-     * @param start If start is negative, it is treated as length+start. If end is negative, it
-     * is treated as length+end.
-     * @param end If not specified, length of the this object is used as its default value.
-     */
-    copyWithin(target: number, start: number, end?: number): this;
-
-    /**
      * Determines whether all the members of an array satisfy the specified test.
      * @param predicate A function that accepts up to three arguments. The every method calls
      * the predicate function for each element in the array until the predicate returns a value
@@ -53,16 +43,6 @@ interface Float16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     every(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
-     * @param value value to fill array section with
-     * @param start index to start filling the array at. If start is negative, it is treated as
-     * length+start where length is the length of the array.
-     * @param end index to stop filling the array at. If end is negative, it is treated as
-     * length+end.
-     */
-    fill(value: number, start?: number, end?: number): this;
 
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
@@ -222,18 +202,6 @@ interface Float16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
 
     /**
-     * Reverses the elements in an Array.
-     */
-    reverse(): this;
-
-    /**
-     * Sets a value or an array of values.
-     * @param array A typed or untyped array of values to set.
-     * @param offset The index in the current array at which the values are to be written.
-     */
-    set(array: ArrayLike<number>, offset?: number): void;
-
-    /**
      * Returns a section of an array.
      * @param start The beginning of the specified portion of the array.
      * @param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.
@@ -249,17 +217,6 @@ interface Float16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     some(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Sorts an array.
-     * @param compareFn Function used to determine the order of the elements. It is expected to return
-     * a negative value if first argument is less than second argument, zero if they're equal and a positive
-     * value otherwise. If omitted, the elements are sorted in ascending order.
-     * ```ts
-     * [11,2,22,1].sort((a, b) => a - b)
-     * ```
-     */
-    sort(compareFn?: (a: number, b: number) => number): this;
 
     /**
      * Gets a new Float16Array view of the ArrayBuffer store for this array, referencing the elements
@@ -390,12 +347,4 @@ interface DataView<TArrayBuffer extends ArrayBufferLike> {
      * @param littleEndian If false or undefined, a big-endian value should be read.
      */
     getFloat16(byteOffset: number, littleEndian?: boolean): number;
-
-    /**
-     * Stores an Float16 value at the specified byte offset from the start of the view.
-     * @param byteOffset The place in the buffer at which the value should be set.
-     * @param value The value to set.
-     * @param littleEndian If false or undefined, a big-endian value should be written.
-     */
-    setFloat16(byteOffset: number, value: number, littleEndian?: boolean): void;
 }

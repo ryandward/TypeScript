@@ -98,6 +98,16 @@ function diagnose(path) {
 
 const release = diagnose(RELEASE);
 const built = diagnose(LAB);
+
+// The core's library, checked whole by the lab with skipLibCheck off: a rule of the lab's that fires on a
+// declaration of the library breaks every core project that checks its libraries, and the cases never see it.
+function libraryDiagnostics() {
+  const ts = createRequire(import.meta.url)(LAB);
+  const program = ts.createProgram([CONSOLE], { strict: true, noUncheckedIndexedAccess: true, exactOptionalPropertyTypes: true,
+    noEmit: true, types: [], target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, lib: ['lib.esnext.d.ts'] });
+  return ts.getPreEmitDiagnostics(program).map((d) => `${d.file ? `${d.file.fileName.split(sep).pop()}: ` : ''}TS${d.code}: ${ts.flattenDiagnosticMessageText(d.messageText, ' ')}`);
+}
+const library = libraryDiagnostics();
 const lines = (ds) => [...new Set(ds.map((d) => d.line))].sort((a, b) => a - b);
 const head = (d) => `TS${d.chain[0].code}: ${d.chain[0].text}`;
 const same = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
@@ -211,6 +221,7 @@ const standing = (r) => {
 
 const out = ['# L lab: where each rule stands', ''];
 for (const g of [...release.global.map((d) => `the release: ${d}`), ...built.global.map((d) => `the lab: ${d}`)]) out.push(`Program diagnostic from ${g}`, '');
+for (const d of library) out.push(`The core's library doesn't compile under the lab: ${d}`, '');
 out.push('| Kind | Rule | Mechanisms | Standing | Witnesses closed | Witnesses open | Controls passing | Controls failing | Rejected as designed | Broken |');
 out.push('|---|---|---|---|---|---|---|---|---|---|');
 for (const r of rules) {
@@ -250,6 +261,6 @@ section('Rejected as designed', judged, 'rejected as designed', (c) => ` (${c.me
 section('Catalog: rejected by the lab, waiting for a rule to cite them', catalogued, 'rejected', (c) => ` (${codes(c)}): ${c.about}`);
 section('Catalog: open', catalogued, 'open', (c) => `: ${c.about}`);
 console.log(out.join('\n'));
-const fails = release.global.length || built.global.length || broken.length || staleDebt.length ||
+const fails = release.global.length || built.global.length || library.length || broken.length || staleDebt.length ||
   [...judged, ...catalogued].some((c) => c.status === 'broken' || c.status === 'failing');
 process.exit(fails ? 1 : 0);

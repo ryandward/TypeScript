@@ -7,6 +7,7 @@
 
 // L: the core performs no effects, so this file declares nothing that runs code from a string, draws a random
 // number, reads the clock or the machine's time zone, or reads the machine's locale.
+// L: the core changes no object in place, so this file declares nothing that does.
 declare var NaN: number;
 declare var Infinity: number;
 
@@ -168,21 +169,6 @@ interface ObjectConstructor {
      * @param properties JavaScript object that contains one or more property descriptors.
      */
     create(o: object | null, properties: PropertyDescriptorMap & ThisType<any>): any;
-
-    /**
-     * Adds a property to an object, or modifies attributes of an existing property.
-     * @param o Object on which to add or modify the property. This can be a native JavaScript object (that is, a user-defined object or a built in object) or a DOM object.
-     * @param p The property name.
-     * @param attributes Descriptor for the property. It can be for a data property or an accessor property.
-     */
-    defineProperty<T>(o: T, p: PropertyKey, attributes: PropertyDescriptor & ThisType<any>): T;
-
-    /**
-     * Adds one or more properties to an object, and/or modifies attributes of existing properties.
-     * @param o Object on which to add or modify the properties. This can be a native JavaScript object or a DOM object.
-     * @param properties JavaScript object that contains one or more descriptor objects. Each descriptor object describes a data property or an accessor property.
-     */
-    defineProperties<T>(o: T, properties: PropertyDescriptorMap & ThisType<any>): T;
 
     /**
      * Prevents the modification of attributes of existing properties, and prevents the addition of new properties.
@@ -749,55 +735,6 @@ interface Date {
     getUTCSeconds(): number;
     /** Gets the milliseconds of a Date object using Universal Coordinated Time (UTC). */
     getUTCMilliseconds(): number;
-    /**
-     * Sets the date and time value in the Date object.
-     * @param time A numeric value representing the number of elapsed milliseconds since midnight, January 1, 1970 GMT.
-     */
-    setTime(time: number): number;
-    /**
-     * Sets the milliseconds value in the Date object using Universal Coordinated Time (UTC).
-     * @param ms A numeric value equal to the millisecond value.
-     */
-    setUTCMilliseconds(ms: number): number;
-    /**
-     * Sets the seconds value in the Date object using Universal Coordinated Time (UTC).
-     * @param sec A numeric value equal to the seconds value.
-     * @param ms A numeric value equal to the milliseconds value.
-     */
-    setUTCSeconds(sec: number, ms?: number): number;
-    /**
-     * Sets the minutes value in the Date object using Universal Coordinated Time (UTC).
-     * @param min A numeric value equal to the minutes value.
-     * @param sec A numeric value equal to the seconds value.
-     * @param ms A numeric value equal to the milliseconds value.
-     */
-    setUTCMinutes(min: number, sec?: number, ms?: number): number;
-    /**
-     * Sets the hours value in the Date object using Universal Coordinated Time (UTC).
-     * @param hours A numeric value equal to the hours value.
-     * @param min A numeric value equal to the minutes value.
-     * @param sec A numeric value equal to the seconds value.
-     * @param ms A numeric value equal to the milliseconds value.
-     */
-    setUTCHours(hours: number, min?: number, sec?: number, ms?: number): number;
-    /**
-     * Sets the numeric day of the month in the Date object using Universal Coordinated Time (UTC).
-     * @param date A numeric value equal to the day of the month.
-     */
-    setUTCDate(date: number): number;
-    /**
-     * Sets the month value in the Date object using Universal Coordinated Time (UTC).
-     * @param month A numeric value equal to the month. The value for January is 0, and other month values follow consecutively.
-     * @param date A numeric value representing the day of the month. If it is not supplied, the value from a call to the getUTCDate method is used.
-     */
-    setUTCMonth(month: number, date?: number): number;
-    /**
-     * Sets the year value in the Date object using Universal Coordinated Time (UTC).
-     * @param year A numeric value equal to the year.
-     * @param month A numeric value equal to the month. The value for January is 0, and other month values follow consecutively. Must be supplied if numDate is supplied.
-     * @param date A numeric value equal to the day of the month.
-     */
-    setUTCFullYear(year: number, month?: number, date?: number): number;
     /** Returns a date converted to a string using Universal Coordinated Time (UTC). */
     toUTCString(): string;
     /** Returns a date as a string value in ISO format. */
@@ -1200,16 +1137,6 @@ interface Array<T> {
      */
     toString(): string;
     /**
-     * Removes the last element from an array and returns it.
-     * If the array is empty, undefined is returned and the array is not modified.
-     */
-    pop(): T | undefined;
-    /**
-     * Appends new elements to the end of an array, and returns the new length of the array.
-     * @param items New elements to add to the array.
-     */
-    push(...items: T[]): number;
-    /**
      * Combines two or more arrays.
      * This method returns a new array without modifying any existing arrays.
      * @param items Additional arrays and/or items to add to the end of the array.
@@ -1227,16 +1154,6 @@ interface Array<T> {
      */
     join(separator?: string): string;
     /**
-     * Reverses the elements in an array in place.
-     * This method mutates the array and returns a reference to the same array.
-     */
-    reverse(): T[];
-    /**
-     * Removes the first element from an array and returns it.
-     * If the array is empty, undefined is returned and the array is not modified.
-     */
-    shift(): T | undefined;
-    /**
      * Returns a copy of a section of an array.
      * For both start and end, a negative index can be used to indicate an offset from the end of the array.
      * For example, -2 refers to the second to last element of the array.
@@ -1246,41 +1163,6 @@ interface Array<T> {
      * If end is undefined, then the slice extends to the end of the array.
      */
     slice(start?: number, end?: number): T[];
-    /**
-     * Sorts an array in place.
-     * This method mutates the array and returns a reference to the same array.
-     * @param compareFn Function used to determine the order of the elements. It is expected to return
-     * a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
-     * value otherwise. If omitted, the elements are sorted in ascending, UTF-16 code unit order.
-     * ```ts
-     * [11,2,22,1].sort((a, b) => a - b)
-     * ```
-     */
-    sort(compareFn?: (a: T, b: T) => number): this;
-    /**
-     * Removes elements from an array and, if necessary, inserts new elements in their place, returning the deleted elements.
-     * @param start The zero-based location in the array from which to start removing elements.
-     * @param deleteCount The number of elements to remove. Omitting this argument will remove all elements from the start
-     * paramater location to end of the array. If value of this argument is either a negative number, zero, undefined, or a type
-     * that cannot be converted to an integer, the function will evaluate the argument as zero and not remove any elements.
-     * @returns An array containing the elements that were deleted.
-     */
-    splice(start: number, deleteCount?: number): T[];
-    /**
-     * Removes elements from an array and, if necessary, inserts new elements in their place, returning the deleted elements.
-     * @param start The zero-based location in the array from which to start removing elements.
-     * @param deleteCount The number of elements to remove. If value of this argument is either a negative number, zero,
-     * undefined, or a type that cannot be converted to an integer, the function will evaluate the argument as zero and
-     * not remove any elements.
-     * @param items Elements to insert into the array in place of the deleted elements.
-     * @returns An array containing the elements that were deleted.
-     */
-    splice(start: number, deleteCount: number, ...items: T[]): T[];
-    /**
-     * Inserts new elements at the start of an array, and returns the new length of the array.
-     * @param items Elements to insert at the start of the array.
-     */
-    unshift(...items: T[]): number;
     /**
      * Returns the index of the first occurrence of a value in an array, or -1 if it is not present.
      * @param searchElement The value to locate in the array.
@@ -1656,68 +1538,6 @@ interface DataView<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * @param littleEndian If false or undefined, a big-endian value should be read.
      */
     getUint32(byteOffset: number, littleEndian?: boolean): number;
-
-    /**
-     * Stores an Float32 value at the specified byte offset from the start of the view.
-     * @param byteOffset The place in the buffer at which the value should be set.
-     * @param value The value to set.
-     * @param littleEndian If false or undefined, a big-endian value should be written.
-     */
-    setFloat32(byteOffset: number, value: number, littleEndian?: boolean): void;
-
-    /**
-     * Stores an Float64 value at the specified byte offset from the start of the view.
-     * @param byteOffset The place in the buffer at which the value should be set.
-     * @param value The value to set.
-     * @param littleEndian If false or undefined, a big-endian value should be written.
-     */
-    setFloat64(byteOffset: number, value: number, littleEndian?: boolean): void;
-
-    /**
-     * Stores an Int8 value at the specified byte offset from the start of the view.
-     * @param byteOffset The place in the buffer at which the value should be set.
-     * @param value The value to set.
-     */
-    setInt8(byteOffset: number, value: number): void;
-
-    /**
-     * Stores an Int16 value at the specified byte offset from the start of the view.
-     * @param byteOffset The place in the buffer at which the value should be set.
-     * @param value The value to set.
-     * @param littleEndian If false or undefined, a big-endian value should be written.
-     */
-    setInt16(byteOffset: number, value: number, littleEndian?: boolean): void;
-
-    /**
-     * Stores an Int32 value at the specified byte offset from the start of the view.
-     * @param byteOffset The place in the buffer at which the value should be set.
-     * @param value The value to set.
-     * @param littleEndian If false or undefined, a big-endian value should be written.
-     */
-    setInt32(byteOffset: number, value: number, littleEndian?: boolean): void;
-
-    /**
-     * Stores an Uint8 value at the specified byte offset from the start of the view.
-     * @param byteOffset The place in the buffer at which the value should be set.
-     * @param value The value to set.
-     */
-    setUint8(byteOffset: number, value: number): void;
-
-    /**
-     * Stores an Uint16 value at the specified byte offset from the start of the view.
-     * @param byteOffset The place in the buffer at which the value should be set.
-     * @param value The value to set.
-     * @param littleEndian If false or undefined, a big-endian value should be written.
-     */
-    setUint16(byteOffset: number, value: number, littleEndian?: boolean): void;
-
-    /**
-     * Stores an Uint32 value at the specified byte offset from the start of the view.
-     * @param byteOffset The place in the buffer at which the value should be set.
-     * @param value The value to set.
-     * @param littleEndian If false or undefined, a big-endian value should be written.
-     */
-    setUint32(byteOffset: number, value: number, littleEndian?: boolean): void;
 }
 interface DataViewConstructor {
     readonly prototype: DataView<ArrayBufferLike>;
@@ -1751,17 +1571,6 @@ interface Int8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     readonly byteOffset: number;
 
     /**
-     * Returns the this object after copying a section of the array identified by start and end
-     * to the same array starting at position target
-     * @param target If target is negative, it is treated as length+target where length is the
-     * length of the array.
-     * @param start If start is negative, it is treated as length+start. If end is negative, it
-     * is treated as length+end.
-     * @param end If not specified, length of the this object is used as its default value.
-     */
-    copyWithin(target: number, start: number, end?: number): this;
-
-    /**
      * Determines whether all the members of an array satisfy the specified test.
      * @param predicate A function that accepts up to three arguments. The every method calls
      * the predicate function for each element in the array until the predicate returns a value
@@ -1770,16 +1579,6 @@ interface Int8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     every(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
-     * @param value value to fill array section with
-     * @param start index to start filling the array at. If start is negative, it is treated as
-     * length+start where length is the length of the array.
-     * @param end index to stop filling the array at. If end is negative, it is treated as
-     * length+end.
-     */
-    fill(value: number, start?: number, end?: number): this;
 
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
@@ -1888,18 +1687,6 @@ interface Int8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
 
     /**
-     * Reverses the elements in an Array.
-     */
-    reverse(): this;
-
-    /**
-     * Sets a value or an array of values.
-     * @param array A typed or untyped array of values to set.
-     * @param offset The index in the current array at which the values are to be written.
-     */
-    set(array: ArrayLike<number>, offset?: number): void;
-
-    /**
      * Returns a section of an array.
      * @param start The beginning of the specified portion of the array.
      * @param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.
@@ -1915,17 +1702,6 @@ interface Int8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     some(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Sorts an array.
-     * @param compareFn Function used to determine the order of the elements. It is expected to return
-     * a negative value if first argument is less than second argument, zero if they're equal and a positive
-     * value otherwise. If omitted, the elements are sorted in ascending order.
-     * ```ts
-     * [11,2,22,1].sort((a, b) => a - b)
-     * ```
-     */
-    sort(compareFn?: (a: number, b: number) => number): this;
 
     /**
      * Gets a new Int8Array view of the ArrayBuffer store for this array, referencing the elements
@@ -2006,17 +1782,6 @@ interface Uint8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     readonly byteOffset: number;
 
     /**
-     * Returns the this object after copying a section of the array identified by start and end
-     * to the same array starting at position target
-     * @param target If target is negative, it is treated as length+target where length is the
-     * length of the array.
-     * @param start If start is negative, it is treated as length+start. If end is negative, it
-     * is treated as length+end.
-     * @param end If not specified, length of the this object is used as its default value.
-     */
-    copyWithin(target: number, start: number, end?: number): this;
-
-    /**
      * Determines whether all the members of an array satisfy the specified test.
      * @param predicate A function that accepts up to three arguments. The every method calls
      * the predicate function for each element in the array until the predicate returns a value
@@ -2025,16 +1790,6 @@ interface Uint8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     every(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
-     * @param value value to fill array section with
-     * @param start index to start filling the array at. If start is negative, it is treated as
-     * length+start where length is the length of the array.
-     * @param end index to stop filling the array at. If end is negative, it is treated as
-     * length+end.
-     */
-    fill(value: number, start?: number, end?: number): this;
 
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
@@ -2143,18 +1898,6 @@ interface Uint8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
 
     /**
-     * Reverses the elements in an Array.
-     */
-    reverse(): this;
-
-    /**
-     * Sets a value or an array of values.
-     * @param array A typed or untyped array of values to set.
-     * @param offset The index in the current array at which the values are to be written.
-     */
-    set(array: ArrayLike<number>, offset?: number): void;
-
-    /**
      * Returns a section of an array.
      * @param start The beginning of the specified portion of the array.
      * @param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.
@@ -2170,17 +1913,6 @@ interface Uint8Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     some(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Sorts an array.
-     * @param compareFn Function used to determine the order of the elements. It is expected to return
-     * a negative value if first argument is less than second argument, zero if they're equal and a positive
-     * value otherwise. If omitted, the elements are sorted in ascending order.
-     * ```ts
-     * [11,2,22,1].sort((a, b) => a - b)
-     * ```
-     */
-    sort(compareFn?: (a: number, b: number) => number): this;
 
     /**
      * Gets a new Uint8Array view of the ArrayBuffer store for this array, referencing the elements
@@ -2261,17 +1993,6 @@ interface Uint8ClampedArray<TArrayBuffer extends ArrayBufferLike = ArrayBufferLi
     readonly byteOffset: number;
 
     /**
-     * Returns the this object after copying a section of the array identified by start and end
-     * to the same array starting at position target
-     * @param target If target is negative, it is treated as length+target where length is the
-     * length of the array.
-     * @param start If start is negative, it is treated as length+start. If end is negative, it
-     * is treated as length+end.
-     * @param end If not specified, length of the this object is used as its default value.
-     */
-    copyWithin(target: number, start: number, end?: number): this;
-
-    /**
      * Determines whether all the members of an array satisfy the specified test.
      * @param predicate A function that accepts up to three arguments. The every method calls
      * the predicate function for each element in the array until the predicate returns a value
@@ -2280,16 +2001,6 @@ interface Uint8ClampedArray<TArrayBuffer extends ArrayBufferLike = ArrayBufferLi
      * If thisArg is omitted, undefined is used as the this value.
      */
     every(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
-     * @param value value to fill array section with
-     * @param start index to start filling the array at. If start is negative, it is treated as
-     * length+start where length is the length of the array.
-     * @param end index to stop filling the array at. If end is negative, it is treated as
-     * length+end.
-     */
-    fill(value: number, start?: number, end?: number): this;
 
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
@@ -2398,18 +2109,6 @@ interface Uint8ClampedArray<TArrayBuffer extends ArrayBufferLike = ArrayBufferLi
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
 
     /**
-     * Reverses the elements in an Array.
-     */
-    reverse(): this;
-
-    /**
-     * Sets a value or an array of values.
-     * @param array A typed or untyped array of values to set.
-     * @param offset The index in the current array at which the values are to be written.
-     */
-    set(array: ArrayLike<number>, offset?: number): void;
-
-    /**
      * Returns a section of an array.
      * @param start The beginning of the specified portion of the array.
      * @param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.
@@ -2425,17 +2124,6 @@ interface Uint8ClampedArray<TArrayBuffer extends ArrayBufferLike = ArrayBufferLi
      * If thisArg is omitted, undefined is used as the this value.
      */
     some(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Sorts an array.
-     * @param compareFn Function used to determine the order of the elements. It is expected to return
-     * a negative value if first argument is less than second argument, zero if they're equal and a positive
-     * value otherwise. If omitted, the elements are sorted in ascending order.
-     * ```ts
-     * [11,2,22,1].sort((a, b) => a - b)
-     * ```
-     */
-    sort(compareFn?: (a: number, b: number) => number): this;
 
     /**
      * Gets a new Uint8ClampedArray view of the ArrayBuffer store for this array, referencing the elements
@@ -2516,17 +2204,6 @@ interface Int16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     readonly byteOffset: number;
 
     /**
-     * Returns the this object after copying a section of the array identified by start and end
-     * to the same array starting at position target
-     * @param target If target is negative, it is treated as length+target where length is the
-     * length of the array.
-     * @param start If start is negative, it is treated as length+start. If end is negative, it
-     * is treated as length+end.
-     * @param end If not specified, length of the this object is used as its default value.
-     */
-    copyWithin(target: number, start: number, end?: number): this;
-
-    /**
      * Determines whether all the members of an array satisfy the specified test.
      * @param predicate A function that accepts up to three arguments. The every method calls
      * the predicate function for each element in the array until the predicate returns a value
@@ -2535,16 +2212,6 @@ interface Int16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     every(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
-     * @param value value to fill array section with
-     * @param start index to start filling the array at. If start is negative, it is treated as
-     * length+start where length is the length of the array.
-     * @param end index to stop filling the array at. If end is negative, it is treated as
-     * length+end.
-     */
-    fill(value: number, start?: number, end?: number): this;
 
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
@@ -2652,18 +2319,6 @@ interface Int16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
 
     /**
-     * Reverses the elements in an Array.
-     */
-    reverse(): this;
-
-    /**
-     * Sets a value or an array of values.
-     * @param array A typed or untyped array of values to set.
-     * @param offset The index in the current array at which the values are to be written.
-     */
-    set(array: ArrayLike<number>, offset?: number): void;
-
-    /**
      * Returns a section of an array.
      * @param start The beginning of the specified portion of the array.
      * @param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.
@@ -2679,17 +2334,6 @@ interface Int16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     some(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Sorts an array.
-     * @param compareFn Function used to determine the order of the elements. It is expected to return
-     * a negative value if first argument is less than second argument, zero if they're equal and a positive
-     * value otherwise. If omitted, the elements are sorted in ascending order.
-     * ```ts
-     * [11,2,22,1].sort((a, b) => a - b)
-     * ```
-     */
-    sort(compareFn?: (a: number, b: number) => number): this;
 
     /**
      * Gets a new Int16Array view of the ArrayBuffer store for this array, referencing the elements
@@ -2770,17 +2414,6 @@ interface Uint16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     readonly byteOffset: number;
 
     /**
-     * Returns the this object after copying a section of the array identified by start and end
-     * to the same array starting at position target
-     * @param target If target is negative, it is treated as length+target where length is the
-     * length of the array.
-     * @param start If start is negative, it is treated as length+start. If end is negative, it
-     * is treated as length+end.
-     * @param end If not specified, length of the this object is used as its default value.
-     */
-    copyWithin(target: number, start: number, end?: number): this;
-
-    /**
      * Determines whether all the members of an array satisfy the specified test.
      * @param predicate A function that accepts up to three arguments. The every method calls
      * the predicate function for each element in the array until the predicate returns a value
@@ -2789,16 +2422,6 @@ interface Uint16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     every(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
-     * @param value value to fill array section with
-     * @param start index to start filling the array at. If start is negative, it is treated as
-     * length+start where length is the length of the array.
-     * @param end index to stop filling the array at. If end is negative, it is treated as
-     * length+end.
-     */
-    fill(value: number, start?: number, end?: number): this;
 
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
@@ -2907,18 +2530,6 @@ interface Uint16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
 
     /**
-     * Reverses the elements in an Array.
-     */
-    reverse(): this;
-
-    /**
-     * Sets a value or an array of values.
-     * @param array A typed or untyped array of values to set.
-     * @param offset The index in the current array at which the values are to be written.
-     */
-    set(array: ArrayLike<number>, offset?: number): void;
-
-    /**
      * Returns a section of an array.
      * @param start The beginning of the specified portion of the array.
      * @param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.
@@ -2934,17 +2545,6 @@ interface Uint16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     some(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Sorts an array.
-     * @param compareFn Function used to determine the order of the elements. It is expected to return
-     * a negative value if first argument is less than second argument, zero if they're equal and a positive
-     * value otherwise. If omitted, the elements are sorted in ascending order.
-     * ```ts
-     * [11,2,22,1].sort((a, b) => a - b)
-     * ```
-     */
-    sort(compareFn?: (a: number, b: number) => number): this;
 
     /**
      * Gets a new Uint16Array view of the ArrayBuffer store for this array, referencing the elements
@@ -3024,17 +2624,6 @@ interface Int32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     readonly byteOffset: number;
 
     /**
-     * Returns the this object after copying a section of the array identified by start and end
-     * to the same array starting at position target
-     * @param target If target is negative, it is treated as length+target where length is the
-     * length of the array.
-     * @param start If start is negative, it is treated as length+start. If end is negative, it
-     * is treated as length+end.
-     * @param end If not specified, length of the this object is used as its default value.
-     */
-    copyWithin(target: number, start: number, end?: number): this;
-
-    /**
      * Determines whether all the members of an array satisfy the specified test.
      * @param predicate A function that accepts up to three arguments. The every method calls
      * the predicate function for each element in the array until the predicate returns a value
@@ -3043,16 +2632,6 @@ interface Int32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     every(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
-     * @param value value to fill array section with
-     * @param start index to start filling the array at. If start is negative, it is treated as
-     * length+start where length is the length of the array.
-     * @param end index to stop filling the array at. If end is negative, it is treated as
-     * length+end.
-     */
-    fill(value: number, start?: number, end?: number): this;
 
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
@@ -3161,18 +2740,6 @@ interface Int32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
 
     /**
-     * Reverses the elements in an Array.
-     */
-    reverse(): this;
-
-    /**
-     * Sets a value or an array of values.
-     * @param array A typed or untyped array of values to set.
-     * @param offset The index in the current array at which the values are to be written.
-     */
-    set(array: ArrayLike<number>, offset?: number): void;
-
-    /**
      * Returns a section of an array.
      * @param start The beginning of the specified portion of the array.
      * @param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.
@@ -3188,17 +2755,6 @@ interface Int32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     some(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Sorts an array.
-     * @param compareFn Function used to determine the order of the elements. It is expected to return
-     * a negative value if first argument is less than second argument, zero if they're equal and a positive
-     * value otherwise. If omitted, the elements are sorted in ascending order.
-     * ```ts
-     * [11,2,22,1].sort((a, b) => a - b)
-     * ```
-     */
-    sort(compareFn?: (a: number, b: number) => number): this;
 
     /**
      * Gets a new Int32Array view of the ArrayBuffer store for this array, referencing the elements
@@ -3279,17 +2835,6 @@ interface Uint32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     readonly byteOffset: number;
 
     /**
-     * Returns the this object after copying a section of the array identified by start and end
-     * to the same array starting at position target
-     * @param target If target is negative, it is treated as length+target where length is the
-     * length of the array.
-     * @param start If start is negative, it is treated as length+start. If end is negative, it
-     * is treated as length+end.
-     * @param end If not specified, length of the this object is used as its default value.
-     */
-    copyWithin(target: number, start: number, end?: number): this;
-
-    /**
      * Determines whether all the members of an array satisfy the specified test.
      * @param predicate A function that accepts up to three arguments. The every method calls
      * the predicate function for each element in the array until the predicate returns a value
@@ -3298,16 +2843,6 @@ interface Uint32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     every(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
-     * @param value value to fill array section with
-     * @param start index to start filling the array at. If start is negative, it is treated as
-     * length+start where length is the length of the array.
-     * @param end index to stop filling the array at. If end is negative, it is treated as
-     * length+end.
-     */
-    fill(value: number, start?: number, end?: number): this;
 
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
@@ -3415,18 +2950,6 @@ interface Uint32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
 
     /**
-     * Reverses the elements in an Array.
-     */
-    reverse(): this;
-
-    /**
-     * Sets a value or an array of values.
-     * @param array A typed or untyped array of values to set.
-     * @param offset The index in the current array at which the values are to be written.
-     */
-    set(array: ArrayLike<number>, offset?: number): void;
-
-    /**
      * Returns a section of an array.
      * @param start The beginning of the specified portion of the array.
      * @param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.
@@ -3442,17 +2965,6 @@ interface Uint32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     some(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Sorts an array.
-     * @param compareFn Function used to determine the order of the elements. It is expected to return
-     * a negative value if first argument is less than second argument, zero if they're equal and a positive
-     * value otherwise. If omitted, the elements are sorted in ascending order.
-     * ```ts
-     * [11,2,22,1].sort((a, b) => a - b)
-     * ```
-     */
-    sort(compareFn?: (a: number, b: number) => number): this;
 
     /**
      * Gets a new Uint32Array view of the ArrayBuffer store for this array, referencing the elements
@@ -3533,17 +3045,6 @@ interface Float32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     readonly byteOffset: number;
 
     /**
-     * Returns the this object after copying a section of the array identified by start and end
-     * to the same array starting at position target
-     * @param target If target is negative, it is treated as length+target where length is the
-     * length of the array.
-     * @param start If start is negative, it is treated as length+start. If end is negative, it
-     * is treated as length+end.
-     * @param end If not specified, length of the this object is used as its default value.
-     */
-    copyWithin(target: number, start: number, end?: number): this;
-
-    /**
      * Determines whether all the members of an array satisfy the specified test.
      * @param predicate A function that accepts up to three arguments. The every method calls
      * the predicate function for each element in the array until the predicate returns a value
@@ -3552,16 +3053,6 @@ interface Float32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     every(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
-     * @param value value to fill array section with
-     * @param start index to start filling the array at. If start is negative, it is treated as
-     * length+start where length is the length of the array.
-     * @param end index to stop filling the array at. If end is negative, it is treated as
-     * length+end.
-     */
-    fill(value: number, start?: number, end?: number): this;
 
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
@@ -3670,18 +3161,6 @@ interface Float32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
 
     /**
-     * Reverses the elements in an Array.
-     */
-    reverse(): this;
-
-    /**
-     * Sets a value or an array of values.
-     * @param array A typed or untyped array of values to set.
-     * @param offset The index in the current array at which the values are to be written.
-     */
-    set(array: ArrayLike<number>, offset?: number): void;
-
-    /**
      * Returns a section of an array.
      * @param start The beginning of the specified portion of the array.
      * @param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.
@@ -3697,17 +3176,6 @@ interface Float32Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     some(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Sorts an array.
-     * @param compareFn Function used to determine the order of the elements. It is expected to return
-     * a negative value if first argument is less than second argument, zero if they're equal and a positive
-     * value otherwise. If omitted, the elements are sorted in ascending order.
-     * ```ts
-     * [11,2,22,1].sort((a, b) => a - b)
-     * ```
-     */
-    sort(compareFn?: (a: number, b: number) => number): this;
 
     /**
      * Gets a new Float32Array view of the ArrayBuffer store for this array, referencing the elements
@@ -3788,17 +3256,6 @@ interface Float64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     readonly byteOffset: number;
 
     /**
-     * Returns the this object after copying a section of the array identified by start and end
-     * to the same array starting at position target
-     * @param target If target is negative, it is treated as length+target where length is the
-     * length of the array.
-     * @param start If start is negative, it is treated as length+start. If end is negative, it
-     * is treated as length+end.
-     * @param end If not specified, length of the this object is used as its default value.
-     */
-    copyWithin(target: number, start: number, end?: number): this;
-
-    /**
      * Determines whether all the members of an array satisfy the specified test.
      * @param predicate A function that accepts up to three arguments. The every method calls
      * the predicate function for each element in the array until the predicate returns a value
@@ -3807,16 +3264,6 @@ interface Float64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     every(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
-     * @param value value to fill array section with
-     * @param start index to start filling the array at. If start is negative, it is treated as
-     * length+start where length is the length of the array.
-     * @param end index to stop filling the array at. If end is negative, it is treated as
-     * length+end.
-     */
-    fill(value: number, start?: number, end?: number): this;
 
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
@@ -3925,18 +3372,6 @@ interface Float64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: this) => U, initialValue: U): U;
 
     /**
-     * Reverses the elements in an Array.
-     */
-    reverse(): this;
-
-    /**
-     * Sets a value or an array of values.
-     * @param array A typed or untyped array of values to set.
-     * @param offset The index in the current array at which the values are to be written.
-     */
-    set(array: ArrayLike<number>, offset?: number): void;
-
-    /**
      * Returns a section of an array.
      * @param start The beginning of the specified portion of the array.
      * @param end The end of the specified portion of the array. This is exclusive of the element at the index 'end'.
@@ -3952,17 +3387,6 @@ interface Float64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
      * If thisArg is omitted, undefined is used as the this value.
      */
     some(predicate: (value: number, index: number, array: this) => unknown, thisArg?: any): boolean;
-
-    /**
-     * Sorts an array.
-     * @param compareFn Function used to determine the order of the elements. It is expected to return
-     * a negative value if first argument is less than second argument, zero if they're equal and a positive
-     * value otherwise. If omitted, the elements are sorted in ascending order.
-     * ```ts
-     * [11,2,22,1].sort((a, b) => a - b)
-     * ```
-     */
-    sort(compareFn?: (a: number, b: number) => number): this;
 
     /**
      * Gets a new Float64Array view of the ArrayBuffer store for this array, referencing the elements

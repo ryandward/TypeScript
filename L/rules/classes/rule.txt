@@ -49,7 +49,6 @@ Obligation 1, a class: TS2902
     flow-adjacent-field-order.ts       an initializer calls a method that reads a later field
     flow-instanceof-else.ts            instanceof's else branch drops a value of the class's type
     lib-call-unbound-this.ts           a method called through call with any this
-    lib-object-assign-prototype.ts     Object.assign copies no method from the prototype
     rel-this-unbound.ts                a method that reads this passed as a free callback
     rule-definite.ts                   a field asserted assigned that nothing assigns
   Rejected sound code, because the core has no classes:
@@ -83,7 +82,6 @@ Obligation 2, this or super: TS2903
     chk-this-before-super-arrow.ts     an arrow reads this before super() is called
     flow-adjacent-field-order.ts       an initializer calls a method that reads a later field
     lib-call-unbound-this.ts           a method called through call with any this
-    lib-object-assign-prototype.ts     Object.assign copies no method from the prototype
     rel-this-unbound.ts                a method that reads this passed as a free callback
   Rejected sound code, because the core has no classes:
     assigned-by-a-method.ts            a field a method the constructor calls assigns

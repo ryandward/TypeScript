@@ -1,6 +1,7 @@
 /// <reference lib="es2020.intl" />
 
 // L: the core performs no effects, so this file declares nothing that reads the machine's locale.
+// L: the core changes no object in place, so this file declares nothing that does.
 interface BigIntToLocaleStringOptions {
     /**
      * The locale matching algorithm to use.The default is "best fit". For information about this option, see the {@link https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation Intl page}.
@@ -139,17 +140,6 @@ interface BigInt64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> 
     /** The offset in bytes of the array. */
     readonly byteOffset: number;
 
-    /**
-     * Returns the this object after copying a section of the array identified by start and end
-     * to the same array starting at position target
-     * @param target If target is negative, it is treated as length+target where length is the
-     * length of the array.
-     * @param start If start is negative, it is treated as length+start. If end is negative, it
-     * is treated as length+end.
-     * @param end If not specified, length of the this object is used as its default value.
-     */
-    copyWithin(target: number, start: number, end?: number): this;
-
     /** Yields index, value pairs for every entry in the array. */
     entries(): ArrayIterator<readonly [number, bigint]>;
 
@@ -162,16 +152,6 @@ interface BigInt64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> 
      * If thisArg is omitted, undefined is used as the this value.
      */
     every(predicate: (value: bigint, index: number, array: BigInt64Array<TArrayBuffer>) => boolean, thisArg?: any): boolean;
-
-    /**
-     * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
-     * @param value value to fill array section with
-     * @param start index to start filling the array at. If start is negative, it is treated as
-     * length+start where length is the length of the array.
-     * @param end index to stop filling the array at. If end is negative, it is treated as
-     * length+end.
-     */
-    fill(value: bigint, start?: number, end?: number): this;
 
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
@@ -285,16 +265,6 @@ interface BigInt64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> 
      */
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: bigint, currentIndex: number, array: BigInt64Array<TArrayBuffer>) => U, initialValue: U): U;
 
-    /** Reverses the elements in the array. */
-    reverse(): this;
-
-    /**
-     * Sets a value or an array of values.
-     * @param array A typed or untyped array of values to set.
-     * @param offset The index in the current array at which the values are to be written.
-     */
-    set(array: ArrayLike<bigint>, offset?: number): void;
-
     /**
      * Returns a section of an array.
      * @param start The beginning of the specified portion of the array.
@@ -311,12 +281,6 @@ interface BigInt64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> 
      * If thisArg is omitted, undefined is used as the this value.
      */
     some(predicate: (value: bigint, index: number, array: BigInt64Array<TArrayBuffer>) => boolean, thisArg?: any): boolean;
-
-    /**
-     * Sorts the array.
-     * @param compareFn The function used to determine the order of the elements. If omitted, the elements are sorted in ascending order.
-     */
-    sort(compareFn?: (a: bigint, b: bigint) => number | bigint): this;
 
     /**
      * Gets a new BigInt64Array view of the ArrayBuffer store for this array, referencing the elements
@@ -405,17 +369,6 @@ interface BigUint64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike>
     /** The offset in bytes of the array. */
     readonly byteOffset: number;
 
-    /**
-     * Returns the this object after copying a section of the array identified by start and end
-     * to the same array starting at position target
-     * @param target If target is negative, it is treated as length+target where length is the
-     * length of the array.
-     * @param start If start is negative, it is treated as length+start. If end is negative, it
-     * is treated as length+end.
-     * @param end If not specified, length of the this object is used as its default value.
-     */
-    copyWithin(target: number, start: number, end?: number): this;
-
     /** Yields index, value pairs for every entry in the array. */
     entries(): ArrayIterator<readonly [number, bigint]>;
 
@@ -428,16 +381,6 @@ interface BigUint64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike>
      * If thisArg is omitted, undefined is used as the this value.
      */
     every(predicate: (value: bigint, index: number, array: BigUint64Array<TArrayBuffer>) => boolean, thisArg?: any): boolean;
-
-    /**
-     * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
-     * @param value value to fill array section with
-     * @param start index to start filling the array at. If start is negative, it is treated as
-     * length+start where length is the length of the array.
-     * @param end index to stop filling the array at. If end is negative, it is treated as
-     * length+end.
-     */
-    fill(value: bigint, start?: number, end?: number): this;
 
     /**
      * Returns the elements of an array that meet the condition specified in a callback function.
@@ -551,16 +494,6 @@ interface BigUint64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike>
      */
     reduceRight<U>(callbackfn: (previousValue: U, currentValue: bigint, currentIndex: number, array: BigUint64Array<TArrayBuffer>) => U, initialValue: U): U;
 
-    /** Reverses the elements in the array. */
-    reverse(): this;
-
-    /**
-     * Sets a value or an array of values.
-     * @param array A typed or untyped array of values to set.
-     * @param offset The index in the current array at which the values are to be written.
-     */
-    set(array: ArrayLike<bigint>, offset?: number): void;
-
     /**
      * Returns a section of an array.
      * @param start The beginning of the specified portion of the array.
@@ -577,12 +510,6 @@ interface BigUint64Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike>
      * If thisArg is omitted, undefined is used as the this value.
      */
     some(predicate: (value: bigint, index: number, array: BigUint64Array<TArrayBuffer>) => boolean, thisArg?: any): boolean;
-
-    /**
-     * Sorts the array.
-     * @param compareFn The function used to determine the order of the elements. If omitted, the elements are sorted in ascending order.
-     */
-    sort(compareFn?: (a: bigint, b: bigint) => number | bigint): this;
 
     /**
      * Gets a new BigUint64Array view of the ArrayBuffer store for this array, referencing the elements
@@ -670,20 +597,4 @@ interface DataView<TArrayBuffer extends ArrayBufferLike> {
      * @param littleEndian If false or undefined, a big-endian value should be read.
      */
     getBigUint64(byteOffset: number, littleEndian?: boolean): bigint;
-
-    /**
-     * Stores a BigInt64 value at the specified byte offset from the start of the view.
-     * @param byteOffset The place in the buffer at which the value should be set.
-     * @param value The value to set.
-     * @param littleEndian If false or undefined, a big-endian value should be written.
-     */
-    setBigInt64(byteOffset: number, value: bigint, littleEndian?: boolean): void;
-
-    /**
-     * Stores a BigUint64 value at the specified byte offset from the start of the view.
-     * @param byteOffset The place in the buffer at which the value should be set.
-     * @param value The value to set.
-     * @param littleEndian If false or undefined, a big-endian value should be written.
-     */
-    setBigUint64(byteOffset: number, value: bigint, littleEndian?: boolean): void;
 }

@@ -2,6 +2,7 @@
 /// <reference lib="es2015.iterable" />
 /// <reference lib="es2018.asynciterable" />
 
+// L: the core changes no object in place, so this file declares nothing that does.
 interface SymbolConstructor {
     /**
      * A method that is used to release resources held by an object. Called by the semantics of the `using` statement.
@@ -99,7 +100,6 @@ interface DisposableStackConstructor {
     new (): DisposableStack;
     readonly prototype: DisposableStack;
 }
-declare var DisposableStack: DisposableStackConstructor;
 
 interface AsyncDisposableStack {
     /**
@@ -166,7 +166,6 @@ interface AsyncDisposableStackConstructor {
     new (): AsyncDisposableStack;
     readonly prototype: AsyncDisposableStack;
 }
-declare var AsyncDisposableStack: AsyncDisposableStackConstructor;
 
 interface IteratorObject<T, TReturn, TNext> extends Disposable {
 }

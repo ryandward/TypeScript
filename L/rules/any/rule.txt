@@ -36,7 +36,6 @@ Obligation 1, assignability: TS2898
     lib-array-isarray-any.ts           the same any[], through a ternary
     rel-any-declared-promise.ts        a function declared to return Promise<any>, awaited into an interface
     lib-then-json-parse.ts             then(JSON.parse) infers Promise<any>
-    lib-map-no-typeargs.ts             new Map() is Map<any, any>, so values() yields any
     lib-object-values-interface.ts     Object.values on an interface returns any[]
     lib-promise-any-errors.ts          AggregateError.errors is any[]
     lib-generator-tnext-any.ts         yield is any when Generator's TNext is left to its default

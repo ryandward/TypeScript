@@ -1,4 +1,5 @@
 // L: the core performs no effects, so this file declares nothing that reads the machine's locale.
+// L: the core changes no object in place, so this file declares nothing that does.
 interface Array<T> {
     /**
      * Returns the value of the first element in the array where predicate is true, and undefined
@@ -22,27 +23,6 @@ interface Array<T> {
      * predicate. If it is not provided, undefined is used instead.
      */
     findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): number;
-
-    /**
-     * Changes all array elements from `start` to `end` index to a static `value` and returns the modified array
-     * @param value value to fill array section with
-     * @param start index to start filling the array at. If start is negative, it is treated as
-     * length+start where length is the length of the array.
-     * @param end index to stop filling the array at. If end is negative, it is treated as
-     * length+end.
-     */
-    fill(value: T, start?: number, end?: number): this;
-
-    /**
-     * Returns the this object after copying a section of the array identified by start and end
-     * to the same array starting at position target
-     * @param target If target is negative, it is treated as length+target where length is the
-     * length of the array.
-     * @param start If start is negative, it is treated as length+start. If end is negative, it
-     * is treated as length+end.
-     * @param end If not specified, length of the this object is used as its default value.
-     */
-    copyWithin(target: number, start: number, end?: number): this;
 }
 
 interface ArrayConstructor {
@@ -258,40 +238,6 @@ interface NumberConstructor {
 }
 
 interface ObjectConstructor {
-    /**
-     * Copy the values of all of the enumerable own properties from one or more source objects to a
-     * target object. Returns the target object.
-     * @param target The target object to copy to.
-     * @param source The source object from which to copy properties.
-     */
-    assign<T extends {}, U>(target: T, source: U): T & U;
-
-    /**
-     * Copy the values of all of the enumerable own properties from one or more source objects to a
-     * target object. Returns the target object.
-     * @param target The target object to copy to.
-     * @param source1 The first source object from which to copy properties.
-     * @param source2 The second source object from which to copy properties.
-     */
-    assign<T extends {}, U, V>(target: T, source1: U, source2: V): T & U & V;
-
-    /**
-     * Copy the values of all of the enumerable own properties from one or more source objects to a
-     * target object. Returns the target object.
-     * @param target The target object to copy to.
-     * @param source1 The first source object from which to copy properties.
-     * @param source2 The second source object from which to copy properties.
-     * @param source3 The third source object from which to copy properties.
-     */
-    assign<T extends {}, U, V, W>(target: T, source1: U, source2: V, source3: W): T & U & V & W;
-
-    /**
-     * Copy the values of all of the enumerable own properties from one or more source objects to a
-     * target object. Returns the target object.
-     * @param target The target object to copy to.
-     * @param sources One or more source objects from which to copy properties
-     */
-    assign(target: object, ...sources: any[]): any;
 
     /**
      * Returns an array of all symbol properties found directly on object o.
@@ -311,13 +257,6 @@ interface ObjectConstructor {
      * @param value2 The second value.
      */
     is(value1: any, value2: any): boolean;
-
-    /**
-     * Sets the prototype of a specified object o to object proto or null. Returns the object o.
-     * @param o The object to change its prototype.
-     * @param proto The value of the new prototype or null.
-     */
-    setPrototypeOf(o: any, proto: object | null): any;
 }
 
 interface ReadonlyArray<T> {
