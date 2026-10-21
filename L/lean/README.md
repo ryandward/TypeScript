@@ -65,7 +65,7 @@ value, and five evaluations show it takes the branch V8 would.
 
 `typeof x === "function"` refines nothing, because a class is a function and calling one
 throws. TypeScript narrows to `Function` and calls it with no signature. `mutants/funCall` is that
-rule, refuted by calling a class, and TypeScript and L both accept the program (L/call-signature).
+rule, refuted by calling a class, and TypeScript and L both accept the program (L/rules/call-signature).
 
 These are tests the calculus can state, not TypeScript's narrowing. TypeScript narrows in steps
 (`object | null`, then `object`, then `object & Record<"l", unknown>`) and lets `in` look into an
@@ -85,7 +85,7 @@ array; whether its steps compose to these refinements is a claim about `checker.
 | TS2901 | instanceof-constructor's witness, `value instanceof make` with `make` an arrow function, which TypeScript accepts and L rejects | instOfCallable: TypeScript accepts any function on the right, because every function type inherits Function's `[Symbol.hasInstance](value: any): boolean`; refuted by `({}) instanceof (() => 1)` |
 | TS2900 | chk-new-any | **not covered**: no constructors |
 | controls | narrowed-before-use, unknown-checked | `ifStr`, `ifNum` |
-| (open) | L/call-signature: `typeof value === "function"`, then `value()` on a class | funCall: TypeScript narrows to `Function` and calls it with no signature; refuted by calling `ctor` |
+| (open) | L/rules/call-signature: `typeof value === "function"`, then `value()` on a class | funCall: TypeScript narrows to `Function` and calls it with no signature; refuted by calling `ctor` |
 | TS2898 | direct `any` → `T` | subDown.direct |
 | TS2898 | rel-any-nested-array, lib-array-isarray-any, lib-new-array-any, lib-object-values-interface, lib-promise-any-errors (`errors: any[]` → `readonly Error[]`) | subDown.nested-array (`Subty.arr`) |
 | TS2898 | lib-promise-catch-annotated, lib-promise-any-errors (catch parameter annotated `AggregateError`) | subDown.callback-param (`Subty.arrow`) |

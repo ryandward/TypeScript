@@ -149,7 +149,7 @@ theorem ifFunThen {Γ i e₁ e₂ τ} (h : HasType Γ (.ifFun i e₁ e₂) τ) :
 
 /-- Calling an unknown after `typeof value === "function"` is untypable: the test learns nothing a
     call can use, because a class is a function too. This is mutants/funCall's counterexample, which
-    TypeScript and L accept (L/call-signature). -/
+    TypeScript and L accept (L/rules/call-signature). -/
 example : ¬ ∃ τ, HasType [] (.app (.lam .top (.ifFun 0 (.app (.var 0) .nul) .nul)) .ctor) τ := by
   rintro ⟨τ, h⟩
   obtain ⟨_, _, hf, _⟩ := appNeedsArrow h

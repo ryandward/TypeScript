@@ -14,7 +14,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Twelve new errors, TS2890 to TS2901, each the code of one rule's mechanism in L/<rule>/rule.txt.
+Twelve new errors, TS2890 to TS2901, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
 
   TS2890  write-into-an-object, mutable-array-or-tuple
           A value of type '{0}' could be written into this position, which holds '{1}'.
@@ -162,4 +162,4 @@ Outside src/
 
 - README.md says what the fork is. Microsoft's README moved to README.upstream.md (5cc49e510).
 - The 19 files under .github are gone: the CI workflows, the CodeQL config and Dependabot (877bb9b85).
-- L/ is new: the lab, with a folder per rule, the tracker, compare.mjs, debt.txt, this file, and lean/.
+- L/ is new: the lab, with rules/, catalog/, lean/, tools/, debt.txt and this file.
