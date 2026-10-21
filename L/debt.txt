@@ -53,6 +53,19 @@ writes
   as flow-await-interleave's Object.assign did inside the core, since narrowing a property path survives the
   await.
 
+ambient-declarations
+- The lab has no case for a declaration file of the program's own, or for @ts-nocheck: the tracker compiles one
+  .ts file per case. Both were checked by hand when the bans went in (a .d.ts with declare const under
+  skipLibCheck, and a @ts-nocheck file whose own error then surfaced).
+- A declaration file that says `/// <reference no-default-lib="true"/>` counts as a default library, so its
+  declarations are taken as the library's. That is how the library's own files mark themselves, so nothing
+  tells a program's file that does it from one of them.
+- A function a script declares under a library global's name merges with the library's declaration as its
+  implementation, and isn't judged.
+
+directives
+- The compiler option noCheck still skips the checker for the whole program, as a directive would for a file.
+
 call-signature
 - Not built, so chk-call-narrowed-function.ts is open: the release and the lab both call a Function with no
   signature, and Node throws when it holds a constructor. Nobody has measured how much real code calls a value

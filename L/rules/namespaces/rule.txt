@@ -1,0 +1,20 @@
+namespaces
+kind: soundness
+
+Claim. If the lab accepts a program, it declares no namespace of its own, so nothing reads a namespace's export
+before the block that assigns it has run.
+
+Counterexample in plain TypeScript. A namespace's blocks run in the order they're written, and merged blocks share
+one object. The checker lets the first block call a function the second block declares, and that function reads
+an export the second block hasn't assigned yet.
+
+Obligation 1, a namespace: TS2906
+  Statement. Outside the library, no namespace or internal module is declared, unless it is ambient, which
+  ambient-declarations rejects.
+  Mechanism. checkModuleDeclaration reports TS2906 on every module declaration that isn't ambient, in a file that
+  isn't a default library.
+  Why it suffices. Every namespace is a module declaration, and checkModuleDeclaration checks each one.
+  Witnesses:
+    chk-namespace-merge-order.ts       the first block calls a function that reads the second block's export
+  Controls:
+    module-exports.ts                  a module's own exports in a namespace's place

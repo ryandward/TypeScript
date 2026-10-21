@@ -1,0 +1,43 @@
+ambient-declarations
+kind: soundness
+
+Claim. If the lab accepts a program, every value its types say exists is one the program makes or the library
+declares: outside the library nothing is declared without an implementation, and nothing adds to a declaration
+of the library's.
+
+Counterexample in plain TypeScript. declare const, declare function and declare global say a value exists, and an
+interface a script declares merges into the library's String; the checker takes each at its word. Nothing
+implements them, so Node throws a ReferenceError or a TypeError at the first use. Each witness is such a program.
+
+The boundary is TypeScript's own classification of the program's files: a file the program loads as a default
+library is the library, and every other file, a declaration file included, is the program's. skipLibCheck now
+skips only the default library, so a declaration file of the program's own is checked like any other.
+
+Obligation 1, an ambient declaration: TS2905
+  Statement. Outside the library, no variable, function, class, enum or namespace is declared without an
+  implementation, whether with declare or at a declaration file's top level.
+  Mechanism. checkSourceElementWorker reports TS2905 on every outermost ambient value declaration
+  (isAmbientValueDeclaration) in a file that isn't a default library (inDefaultLibrary), at its declare keyword.
+  skipTypeCheckingWorker skips only default library files under skipLibCheck.
+  Why it suffices. checkSourceElementWorker checks every statement, and a value is ambient only through declare or
+  a declaration file. An interface or a type alias declares no value, and stays.
+  Witnesses:
+    chk-declare-const.ts               declare const, read
+    chk-declare-function.ts            declare function, called
+    chk-declare-global.ts              declare global adds a method to String
+  Rejected sound code, because the core has no host:
+    ambient-declaration.ts             declare var for a global Node provides
+  Controls:
+    own-interface.ts                   an interface of the program's own, and the library's values
+
+Obligation 2, a library declaration added to: TS2910
+  Statement. Outside the library, no interface merges into one the library declares.
+  Mechanism. checkInterfaceDeclaration reports TS2910 when the interface's merged symbol has a declaration in a
+  default library file.
+  Why it suffices. checkInterfaceDeclaration checks every interface, however it merges: through declare global,
+  or as a script's own declaration of a global name. A namespace that merges into one of the library's is
+  rejected by namespaces, or by obligation 1 when it is ambient. A function a script declares under a library
+  global's name isn't judged; see debt.txt.
+  Witnesses:
+    chk-declare-global.ts              the String interface inside declare global
+    chk-script-global-augment.ts       a script's own interface String

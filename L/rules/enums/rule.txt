@@ -1,0 +1,21 @@
+enums
+kind: soundness
+
+Claim. If the lab accepts a program, it declares no enum of its own, so no enum is read before its declaration
+has run, and no number passes as a member of a numeric enum.
+
+Counterexample in plain TypeScript. An enum compiles to a variable assigned where the enum is declared, and a
+function hoisted above it reads it as undefined. And isSimpleTypeRelatedTo relates every number to every numeric
+enum, for bit flags, so a number no member has passes as one.
+
+Obligation 1, an enum: TS2907
+  Statement. Outside the library, no enum is declared, unless it is ambient, which ambient-declarations rejects.
+  Mechanism. checkEnumDeclarationWorker reports TS2907 on every enum that isn't ambient, in a file that isn't a
+  default library.
+  Why it suffices. Every enum is checked there. With none in the program, and none in the library, the
+  numeric-enum shortcut in isSimpleTypeRelatedTo has no target.
+  Witnesses:
+    chk-tdz-enum.ts                    a hoisted function reads an enum before it is declared
+    rel-numeric-enum.ts                a number no member has passes as a numeric enum
+  Controls:
+    literal-union.ts                   a union of literals in an enum's place

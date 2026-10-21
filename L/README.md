@@ -63,8 +63,9 @@ cites it; and a rejection counts only when a diagnostic on that line carries tha
 Each case is compiled in a program of its own, so a global that one case declares can't reach another, under L's
 options (strict, noUncheckedIndexedAccess and exactOptionalPropertyTypes) and the way the core is compiled:
 against the esnext library with its effects deleted (see rules/effects), with no DOM, no Node and no @types.
-tools/console.d.ts gives each case console.log, the one host function, to show a value with. Node runs the
-JavaScript the 6.0.3 release emits for the case, since the lab doesn't change what is emitted.
+tools/console.d.ts gives each case console.log, the one host function, to show a value with; the tracker serves
+it as part of the library, since a declaration file of the program's own would be judged as the program's. Node
+runs the JavaScript the 6.0.3 release emits for the case, since the lab doesn't change what is emitted.
 
 ## The catalog
 

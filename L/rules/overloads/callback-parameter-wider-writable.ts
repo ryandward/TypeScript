@@ -1,9 +1,9 @@
-// control: A comparer whose parameter has an optional field is handed values whose field is required. With nothing
-// deleted, the wider type only reads.
+// rejected sound code: A function with two overloads, each true of its body, sorting values whose optional field
+// the comparer only reads. It can't go wrong, but L has no overloads.
 interface Mapped { generated: number; source?: string }
 interface SourceMapped extends Mapped { source: string }
-function dedupe(array: readonly string[]): readonly string[];
-function dedupe<T>(array: readonly T[], equal: (a: T, b: T) => boolean): readonly T[];
+function dedupe(array: readonly string[]): readonly string[]; // rejected here: TS2908
+function dedupe<T>(array: readonly T[], equal: (a: T, b: T) => boolean): readonly T[]; // rejected here: TS2908
 function dedupe<T>(array: readonly T[], equal?: (a: T, b: T) => boolean): readonly T[] {
   return array.filter((x, i) => {
     const previous = array[i - 1];

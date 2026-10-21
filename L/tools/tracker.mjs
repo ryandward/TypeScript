@@ -17,7 +17,7 @@
 //
 // Each case is compiled in a program of its own, so a global one case declares can't reach another, under L's catalog
 // options (strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes) and the esnext library, the way the core is
-// compiled: no DOM, no Node and no @types. console.d.ts gives each case console.log to show a value with. Every case
+// compiled: no DOM, no Node and no @types. The library also carries console.d.ts, so a case can show a value. Every case
 // is a module, except one whose name says it is a script. Node runs what the release emits for the case, so a case may
 // use syntax Node's type stripping refuses, such as an enum or a parameter property.
 import { spawnSync } from 'node:child_process';
@@ -63,8 +63,30 @@ const ruleCaseNames = new Map(readRules(RULES).flatMap((r) => tsIn(r.dir).map((n
 
 const named = (file, word) => file.split(sep).pop().includes(word);
 
-// The diagnostics one compiler gives every case, by file: each with its line and its whole chain, flattened. The
-// library files are parsed once and shared by every case's program.
+// A compiler host for one compiler. Its library carries console.log (tools/console.d.ts), the one host function a case
+// may call, as part of lib.es5.d.ts, which every library level loads: a declaration file of the program's own would
+// be the program's, and the core has no ambient declarations. Library files are parsed once. LIBRARY_ROOT is an empty
+// module, to compile the library with and nothing else.
+const CONSOLE_TEXT = readFileSync(CONSOLE, 'utf8');
+const LIBRARY_ROOT = join(lab, 'tools', 'library-root.ts');
+function hostFor(ts, options) {
+  const host = ts.createCompilerHost(options);
+  const libDir = host.getDefaultLibLocation();
+  const es5 = `${libDir}/lib.es5.d.ts`;
+  const libs = new Map();
+  const read = host.getSourceFile;
+  host.getSourceFile = (fileName, version, ...rest) => {
+    if (fileName === LIBRARY_ROOT) return ts.createSourceFile(fileName, 'export {};\n', version);
+    if (!fileName.startsWith(libDir)) return read(fileName, version, ...rest);
+    if (!libs.has(fileName)) {
+      libs.set(fileName, fileName === es5 ? ts.createSourceFile(fileName, `${ts.sys.readFile(fileName)}\n${CONSOLE_TEXT}`, version) : read(fileName, version, ...rest));
+    }
+    return libs.get(fileName);
+  };
+  return host;
+}
+
+// The diagnostics one compiler gives every case, by file: each with its line and its whole chain, flattened.
 function diagnose(path) {
   const ts = createRequire(import.meta.url)(path);
   const options = (file) => ({
@@ -72,21 +94,13 @@ function diagnose(path) {
     target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, lib: ['lib.esnext.d.ts'],
     moduleDetection: named(file, 'script') ? ts.ModuleDetectionKind.Legacy : ts.ModuleDetectionKind.Force,
   });
-  const host = ts.createCompilerHost(options(''));
-  const libDir = host.getDefaultLibLocation();
-  const libs = new Map();
-  const read = host.getSourceFile;
-  host.getSourceFile = (fileName, ...rest) => {
-    if (!fileName.startsWith(libDir)) return read(fileName, ...rest);
-    if (!libs.has(fileName)) libs.set(fileName, read(fileName, ...rest));
-    return libs.get(fileName);
-  };
+  const host = hostFor(ts, options(''));
   const flatten = (m) => [{ code: m.code, text: m.messageText }, ...(m.next ?? []).flatMap(flatten)];
   const byFile = new Map();
   const global = [];
   for (const c of everyCase) {
     const found = [];
-    for (const d of ts.getPreEmitDiagnostics(ts.createProgram([c.file, CONSOLE], options(c.file), host))) {
+    for (const d of ts.getPreEmitDiagnostics(ts.createProgram([c.file], options(c.file), host))) {
       const chain = typeof d.messageText === 'string' ? [{ code: d.code, text: d.messageText }] : flatten(d.messageText);
       if (d.file && d.file.fileName === c.file) found.push({ line: d.file.getLineAndCharacterOfPosition(d.start).line + 1, chain });
       else global.push(`TS${chain[0].code}: ${chain[0].text}`);
@@ -103,8 +117,9 @@ const built = diagnose(LAB);
 // declaration of the library breaks every core project that checks its libraries, and the cases never see it.
 function libraryDiagnostics() {
   const ts = createRequire(import.meta.url)(LAB);
-  const program = ts.createProgram([CONSOLE], { strict: true, noUncheckedIndexedAccess: true, exactOptionalPropertyTypes: true,
-    noEmit: true, types: [], target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, lib: ['lib.esnext.d.ts'] });
+  const options = { strict: true, noUncheckedIndexedAccess: true, exactOptionalPropertyTypes: true,
+    noEmit: true, types: [], target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, lib: ['lib.esnext.d.ts'] };
+  const program = ts.createProgram([LIBRARY_ROOT], options, hostFor(ts, options));
   return ts.getPreEmitDiagnostics(program).map((d) => `${d.file ? `${d.file.fileName.split(sep).pop()}: ` : ''}TS${d.code}: ${ts.flattenDiagnosticMessageText(d.messageText, ' ')}`);
 }
 const library = libraryDiagnostics();

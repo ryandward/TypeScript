@@ -21,7 +21,6 @@ Obligation 1, binding without an initializer: TS2892
   Witnesses:
     chk-captured-let.ts                the declaration without a value
   Controls:
-    ambient-declaration.ts             declare var describes a global that already exists
     catch-binding.ts                   a catch variable, bound by the throw
     for-of-binding.ts                  a for-of variable, bound by the loop
 

@@ -82,6 +82,7 @@ import {
     classOrConstructorParameterIsDecorated,
     ClassStaticBlockDeclaration,
     clear,
+    CommentDirectiveType,
     compareComparableValues,
     compareDiagnostics,
     comparePaths,
@@ -2592,6 +2593,18 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
 
     function headedIfUnchecked(type: Type, chain: DiagnosticMessageChain): DiagnosticMessageChain {
         return type === uncheckedType ? chainDiagnosticMessages(chain, Diagnostics.This_value_is_any_which_nothing_has_checked_so_L_reads_it_as_unknown) : chain;
+    }
+
+    // L: a file the program loads as a default library is the library. Every other file is the program's own.
+    function inDefaultLibrary(node: Node): boolean {
+        return host.isSourceFileDefaultLibrary(getSourceFileOfNode(node));
+    }
+
+    // L: a statement that declares a value with no implementation: an ambient variable, function, class, enum or
+    // namespace, outermost in its ambient context, as `declare` or a declaration file's top level makes one.
+    function isAmbientValueDeclaration(node: Node): boolean {
+        return (isVariableStatement(node) || isFunctionDeclaration(node) || isClassDeclaration(node) || isEnumDeclaration(node) || isModuleDeclaration(node)) &&
+            !!(node.flags & NodeFlags.Ambient) && (isSourceFile(node.parent) || !(node.parent.flags & NodeFlags.Ambient));
     }
 
     function errorAndMaybeSuggestAwait(
@@ -44284,6 +44297,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function checkFunctionDeclaration(node: FunctionDeclaration): void {
+        // L: an overload is a signature the body is never checked against.
+        if (!node.body && !(node.flags & NodeFlags.Ambient) && !inDefaultLibrary(node)) {
+            error(node.name ?? node, Diagnostics.Nothing_checks_this_overload_against_the_function_s_body_L_has_no_overloads_Colon_a_function_has_one_signature);
+        }
         addLazyDiagnostic(checkFunctionDeclarationDiagnostics);
 
         function checkFunctionDeclarationDiagnostics() {
@@ -47892,6 +47909,13 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function checkInterfaceDeclaration(node: InterfaceDeclaration) {
+        // L: an interface merged into one of the library's adds members to values that nothing in the program implements.
+        if (!inDefaultLibrary(node)) {
+            const merged = getSymbolOfDeclaration(node);
+            if (some(merged.declarations, inDefaultLibrary)) {
+                error(node.name, Diagnostics.This_adds_to_the_library_s_declaration_of_0_which_nothing_in_this_program_implements, symbolToString(merged));
+            }
+        }
         // Grammar checking
         if (!checkGrammarModifiers(node)) checkGrammarInterfaceDeclaration(node);
         if (!allowBlockDeclarations(node.parent)) {
@@ -48121,6 +48145,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function checkEnumDeclarationWorker(node: EnumDeclaration) {
+        // L: an enum is read before its declaration has run, and a number passes as any member of a numeric one.
+        if (!(node.flags & NodeFlags.Ambient) && !inDefaultLibrary(node)) {
+            error(node.name, Diagnostics.L_has_no_enums_A_union_of_literals_takes_an_enum_s_place);
+        }
         // Grammar checking
         checkGrammarModifiers(node);
 
@@ -48218,6 +48246,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function checkModuleDeclaration(node: ModuleDeclaration) {
+        // L: a namespace's blocks run in the order they're written, and a merged one can be read before a later block has run.
+        if (!(node.flags & NodeFlags.Ambient) && !inDefaultLibrary(node)) {
+            error(node.name, Diagnostics.L_has_no_namespaces_A_module_s_exports_take_a_namespace_s_place);
+        }
         if (node.body) {
             checkSourceElement(node.body);
             if (!isGlobalScopeAugmentation(node)) {
@@ -49143,6 +49175,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             return;
         }
 
+        // L: outside the library, an ambient declaration promises a value that nothing in the program implements.
+        if (isAmbientValueDeclaration(node) && !inDefaultLibrary(node)) {
+            error(find(getModifiers(node as HasModifiers), m => m.kind === SyntaxKind.DeclareKeyword) ?? getNameOfDeclaration(node as Declaration) ?? node, Diagnostics.This_promises_a_value_that_nothing_in_this_program_implements_Outside_the_library_L_has_no_ambient_declarations);
+        }
+
         if (canHaveJSDoc(node)) {
             forEach(node.jsDoc, ({ comment, tags }) => {
                 checkJSDocCommentWorker(comment);
@@ -49661,6 +49698,13 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
 
             // Grammar checking
             checkGrammarSourceFile(node);
+
+            // L: a directive that suppresses or skips the checker's findings hides them, so the program's own files have none.
+            if (!host.isSourceFileDefaultLibrary(node)) {
+                forEach(node.commentDirectives, d => diagnostics.add(createFileDiagnostic(node, d.range.pos, d.range.end - d.range.pos, Diagnostics._0_hides_what_the_checker_found_L_has_no_directives_that_suppress_or_skip_its_checks, d.type === CommentDirectiveType.ExpectError ? "@ts-expect-error" : "@ts-ignore")));
+                const noCheck = node.checkJsDirective;
+                if (noCheck && !noCheck.enabled) diagnostics.add(createFileDiagnostic(node, noCheck.pos, noCheck.end - noCheck.pos, Diagnostics._0_hides_what_the_checker_found_L_has_no_directives_that_suppress_or_skip_its_checks, "@ts-nocheck"));
+            }
 
             clear(potentialThisCollisions);
             clear(potentialNewTargetCollisions);

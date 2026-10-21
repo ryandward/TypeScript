@@ -3,5 +3,5 @@ const picked: Color = pick();
 function pick(): Color {
   return Color.Red;
 }
-enum Color { Red = "red", Green = "green" }
+enum Color { Red = "red", Green = "green" } // rejected here: TS2907
 console.log(picked, Color.Green);

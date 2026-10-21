@@ -1,0 +1,19 @@
+directives
+kind: soundness
+
+Claim. If the lab accepts a program, nothing in it hides what the checker found.
+
+Counterexample in plain TypeScript. @ts-expect-error and @ts-ignore drop the errors on the line after them, and
+@ts-nocheck drops every error in its file. The witness assigns a number to a string under @ts-expect-error.
+
+Obligation 1, a directive: TS2909
+  Statement. Outside the library, no file has a @ts-expect-error, @ts-ignore or @ts-nocheck directive.
+  Mechanism. checkSourceFileWorker reports TS2909 at every comment directive the parser recorded, and at a
+  @ts-nocheck. canIncludeBindAndCheckDiagnostics no longer lets @ts-nocheck skip a TypeScript file, so the file
+  is checked and its directive reported.
+  Why it suffices. The parser records every directive in a file, and these three are the only ones that drop the
+  checker's diagnostics.
+  Witnesses:
+    rule-directive.ts                  @ts-expect-error over a number assigned to a string
+  Controls:
+    directive-text.ts                  a directive's words in a string and in a comment that isn't one

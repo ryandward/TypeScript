@@ -4070,6 +4070,30 @@
         "category": "Error",
         "code": 2904
     },
+    "This promises a value that nothing in this program implements. Outside the library, L has no ambient declarations.": {
+        "category": "Error",
+        "code": 2905
+    },
+    "L has no namespaces. A module's exports take a namespace's place.": {
+        "category": "Error",
+        "code": 2906
+    },
+    "L has no enums. A union of literals takes an enum's place.": {
+        "category": "Error",
+        "code": 2907
+    },
+    "Nothing checks this overload against the function's body. L has no overloads: a function has one signature.": {
+        "category": "Error",
+        "code": 2908
+    },
+    "'{0}' hides what the checker found. L has no directives that suppress or skip its checks.": {
+        "category": "Error",
+        "code": 2909
+    },
+    "This adds to the library's declaration of '{0}', which nothing in this program implements.": {
+        "category": "Error",
+        "code": 2910
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

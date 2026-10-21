@@ -2,21 +2,22 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds eleven diagnostics, changes the checker, adds one internal type flag, declares readonly the new
-objects and collections the library hands out, deletes from the ES library every effect and every method that
-changes an object in place, and corrects the library's declarations that lie about what the engine does. The
-parser, binder, emitter, transformers, language service, command line and compiler options are unchanged, and no
-test baseline has been updated. L's rules have no compiler option: they are always on. Each change in code
-carries a comment that starts `// L:`, in checker.ts, types.ts and the lib, so `grep -rn '// L:' src` finds
-them. The entries() changes in dom.generated.d.ts, webworker.generated.d.ts, es2020.bigint.d.ts and
-es2025.float16.d.ts carry no comment of their own.
+things: it adds seventeen diagnostics, changes the checker and two functions in utilities.ts that decide which
+files are checked, adds one internal type flag, declares readonly the new objects and collections the library
+hands out, deletes from the ES library every effect and every method that changes an object in place, and
+corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
+transformers, language service, command line and compiler options are unchanged, and no test baseline has been
+updated. L's rules have no compiler option: they are always on. Each change in code carries a comment that
+starts `// L:`, in checker.ts, types.ts and the lib, so `grep -rn '// L:' src` finds them. The entries() changes
+in dom.generated.d.ts, webworker.generated.d.ts, es2020.bigint.d.ts and es2025.float16.d.ts carry no comment of
+their own.
 
 When a commit changes src/, this file changes with it.
 
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Eleven new errors, from TS2892 to TS2904, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+Seventeen new errors, from TS2892 to TS2910, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
 The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
 rules and TS2897 to definite-assignment.
 
@@ -44,6 +45,20 @@ rules and TS2897 to definite-assignment.
           L has no '{0}'. A function takes what it needs as a parameter.
   TS2904  writes
           This changes an object in place. L builds a new value instead.
+  TS2905  ambient-declarations
+          This promises a value that nothing in this program implements. Outside the library, L has no ambient
+          declarations.
+  TS2906  namespaces
+          L has no namespaces. A module's exports take a namespace's place.
+  TS2907  enums
+          L has no enums. A union of literals takes an enum's place.
+  TS2908  overloads
+          Nothing checks this overload against the function's body. L has no overloads: a function has one
+          signature.
+  TS2909  directives
+          '{0}' hides what the checker found. L has no directives that suppress or skip its checks.
+  TS2910  ambient-declarations
+          This adds to the library's declaration of '{0}', which nothing in this program implements.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -123,6 +138,23 @@ type-guard-or-assertion-function (soundness: TS2899; af679072f)
 instanceof-constructor (soundness: TS2901; 08fd6afb1)
 - resolveInstanceofExpression no longer takes Function's own Symbol.hasInstance as the right side's method, and
   reports TS2901 unless every member of the right side's apparent type has a construct signature.
+
+ambient-declarations, namespaces, enums, overloads and directives (soundness: TS2905 to TS2910; the commit after
+588e05775)
+- inDefaultLibrary is new: a node is the library's when the program loaded its file as a default library
+  (host.isSourceFileDefaultLibrary), TypeScript's own classification of a program's files. Every other file,
+  a declaration file included, is the program's, and the bans judge only the program's.
+- checkSourceElementWorker reports TS2905 on the outermost ambient declaration of a value
+  (isAmbientValueDeclaration: a variable, function, class, enum or namespace, under declare or at a declaration
+  file's top level).
+- checkInterfaceDeclaration reports TS2910 when an interface's merged symbol has a declaration in the library.
+- checkModuleDeclaration reports TS2906 on a namespace that isn't ambient, checkEnumDeclarationWorker TS2907 on
+  an enum that isn't, and checkFunctionDeclaration TS2908 on a function declaration with no body that isn't.
+- checkSourceFileWorker reports TS2909 at each @ts-expect-error and @ts-ignore the parser recorded, and at a
+  @ts-nocheck.
+- In utilities.ts, skipTypeCheckingWorker skips only default library files under skipLibCheck, so a declaration
+  file of the program's own is checked, and canIncludeBindAndCheckDiagnostics no longer lets @ts-nocheck skip a
+  TypeScript file.
 
 Rules with no checker change: effects and library-declarations are built in the library alone (below),
 optional-field is a specification only, and call-signature isn't built (its witness is open; see debt.txt).

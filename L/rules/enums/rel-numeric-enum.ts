@@ -1,5 +1,5 @@
 // witness: isSimpleTypeRelatedTo: `number` is assignable to any numeric enum (bit-flag carve-out).
-enum Level { Low, High }
+enum Level { Low, High } // rejected here: TS2907
 const handlers: { readonly [K in Level]: () => string } = {
   [Level.Low]: () => 'low',
   [Level.High]: () => 'high',

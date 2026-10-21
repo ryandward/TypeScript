@@ -1,0 +1,27 @@
+overloads
+kind: soundness
+
+Claim. If the lab accepts a program, every function it declares has one signature, and its body is checked
+against that signature.
+
+Counterexample in plain TypeScript. An overload is checked against the implementation's signature, not its body.
+isImplementationCompatibleWithOverload lets their return types relate in either direction, so an implementation
+returning unknown can back an overload that promises a number. And a parameter an overload widens is never
+checked against what the body does with it.
+
+Obligation 1, an overload: TS2908
+  Statement. Outside the library, no function declaration has a signature without a body, unless it is ambient,
+  which ambient-declarations rejects.
+  Mechanism. checkFunctionDeclaration reports TS2908 on every function declaration with no body that isn't
+  ambient, in a file that isn't a default library.
+  Why it suffices. An overload is a function declaration without a body, and a method's overloads need a class,
+  which classes rejects. A value given a type with several call signatures is checked against each, by the
+  relation.
+  Witnesses:
+    chk-overload-return.ts             the body returns a number where an overload promises a string
+    rel-overload-impl-return.ts        an implementation returning unknown backs an overload promising a number
+  Rejected sound code, because L has no overloads:
+    callback-parameter-wider-writable.ts  two overloads, each true of the body
+    handler-past-three-overloads.ts    four overloads, each true of the body
+  Controls:
+    one-signature.ts                   one signature over a union of inputs

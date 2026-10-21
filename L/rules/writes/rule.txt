@@ -41,7 +41,6 @@ Obligation 1, a write: TS2904
     optional-into-optional.ts              an optional property widened into an optional one, deleted
   Controls:
     call-site-rest-arguments.ts            arguments matched against a tuple rest parameter
-    callback-parameter-wider-writable.ts   a comparer whose parameter's field is optional, handed required ones
     concat-library-declaration.ts          an array passed to concat, which takes a ConcatArray of a wider type
     context-sensitive-argument.ts          an object literal argument holding a context-sensitive function
     field-check.ts                         a check on a readonly field, which narrows it
@@ -49,7 +48,6 @@ Obligation 1, a write: TS2904
     fresh-literal-union-expected-type.ts   a fresh array literal whose expected type is a union
     function-result-copy.ts                slice()'s result passed where a wider list is taken
     generator-widened.ts                   a generator widened
-    handler-past-three-overloads.ts        a handler whose request's field is optional, past four overloads
     iterator-widened.ts                    an iterator widened
     iterator-wider-return.ts               an iterator viewed with a wider return type
     library-list-named-exactly.ts          a library's maybe-missing list, named with exactly its type

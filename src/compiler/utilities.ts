@@ -10419,7 +10419,8 @@ function skipTypeCheckingWorker(
 ) {
     // If skipLibCheck is enabled, skip reporting errors if file is a declaration file.
     // If skipDefaultLibCheck is enabled, skip reporting errors if file is a lib.
-    return (options.skipLibCheck && sourceFile.isDeclarationFile ||
+    // L: only the default library is skipped. A declaration file of the program's own is the program's, and is checked.
+    return (options.skipLibCheck && host.isSourceFileDefaultLibrary(sourceFile) ||
         options.skipDefaultLibCheck && host.isSourceFileDefaultLibrary(sourceFile)) ||
         (!ignoreNoCheck && options.noCheck) ||
         host.isSourceOfProjectReferenceRedirect(sourceFile.fileName) ||
@@ -10428,12 +10429,13 @@ function skipTypeCheckingWorker(
 
 /** @internal */
 export function canIncludeBindAndCheckDiagnostics(sourceFile: SourceFile, options: CompilerOptions): boolean {
-    if (!!sourceFile.checkJsDirective && sourceFile.checkJsDirective.enabled === false) return false;
+    // L: @ts-nocheck skips no TypeScript file; the checker rejects the directive instead.
     if (
         sourceFile.scriptKind === ScriptKind.TS ||
         sourceFile.scriptKind === ScriptKind.TSX ||
         sourceFile.scriptKind === ScriptKind.External
     ) return true;
+    if (!!sourceFile.checkJsDirective && sourceFile.checkJsDirective.enabled === false) return false;
 
     const isJs = sourceFile.scriptKind === ScriptKind.JS || sourceFile.scriptKind === ScriptKind.JSX;
     const isCheckJs = isJs && isCheckJsEnabledForFile(sourceFile, options);
