@@ -157,7 +157,7 @@ ambient-declarations, namespaces, enums, overloads and directives (soundness: TS
   file of the program's own is checked, and canIncludeBindAndCheckDiagnostics no longer lets @ts-nocheck skip a
   TypeScript file.
 
-parameters and void (soundness: TS2911, and TypeScript's own TS2322 and TS2339; the commit after ba06984f4)
+parameters and void (soundness: TS2911, and TypeScript's own TS2322 and TS2339; f0d53de57)
 - compareSignaturesRelated relates every parameter contravariantly, whatever declared the target (a function, a
   method, a method signature or a constructor) and whatever strictFunctionTypes says; strictVariance, the
   declaration kind it read and the bivariant comparisons are gone. A callback's signature is related in
@@ -263,7 +263,7 @@ and the rule writes holds the deletions. Each file the deletions touched opens w
 - ArrayBuffer's resize, transfer and transferToFixedLength (es2024.arraybuffer), SharedArrayBuffer's grow
   (es2024.sharedmemory), and the DisposableStack and AsyncDisposableStack constructors (esnext.disposable).
 
-The library's members the strict relation can't type (src/lib; the commit after ba06984f4)
+The library's members the strict relation can't type (src/lib; f0d53de57)
 
 With every parameter related one way, two parts of the library no longer compiled, and the core uses neither:
 
