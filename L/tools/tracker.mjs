@@ -16,8 +16,8 @@
 // case should move into that rule's folder, marked and cited.
 //
 // Each case is compiled in a program of its own, so a global one case declares can't reach another, under L's catalog
-// options (strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes) and the es2022 and DOM libraries. A case whose
-// name says esnext gets the esnext libraries, and every case is a module, except one whose name says it is a script. Node runs what the release emits for the case, so a case may
+// options (strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes) and the esnext and DOM libraries. Every case
+// is a module, except one whose name says it is a script. Node runs what the release emits for the case, so a case may
 // use syntax Node's type stripping refuses, such as an enum or a parameter property.
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -67,7 +67,7 @@ function diagnose(path) {
   const ts = createRequire(import.meta.url)(path);
   const options = (file) => ({
     strict: true, noUncheckedIndexedAccess: true, exactOptionalPropertyTypes: true, noEmit: true, skipLibCheck: true, types: [],
-    target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, lib: [named(file, 'esnext') ? 'lib.esnext.d.ts' : 'lib.es2022.d.ts', 'lib.dom.d.ts'],
+    target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, lib: ['lib.esnext.d.ts', 'lib.dom.d.ts'],
     moduleDetection: named(file, 'script') ? ts.ModuleDetectionKind.Legacy : ts.ModuleDetectionKind.Force,
   });
   const host = ts.createCompilerHost(options(''));

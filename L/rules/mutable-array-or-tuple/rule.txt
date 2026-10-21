@@ -31,7 +31,9 @@ Obligation 2, write-induced invariance: TS2891
   Mechanism. Under valueAssignableRelation, getVariances measures Array instead of using arrayVariances. Its
   writable index signature makes T invariant there, and relateVariances reports the failure as TS2891, naming
   the type argument. An array literal, or a rest parameter's argument list, relates with the type-level
-  variances, since nothing else holds it. src/lib declares the built-in entries() tuples readonly.
+  variances, since nothing else holds it. src/lib declares readonly the built-in entries() tuples and the new
+  collections that ConcatArray's slice(), an iterator's toArray() and a ReadonlySet's set operations hand out, so
+  the types that hand them out stay covariant.
   Why it suffices. Every value flow relates an array's type argument through the variance measured for that
   relation, so an element type can't widen in a slot that can be written through.
   Witnesses:
@@ -51,9 +53,11 @@ Obligation 2, write-induced invariance: TS2891
     library-list-named-exactly.ts      a library's list, named with exactly the type it was given
     match-all-callback.ts              a library callback whose parameter is a mutable array
     type-level-array-extends.ts        a type-level question about arrays
+    concat-library-declaration.ts      an array passed to concat, which takes a ConcatArray of a wider type
+    readonly-set-widened.ts            a ReadonlySet widened
+    iterator-widened.ts                an iterator widened
+    generator-widened.ts               a generator widened
   Rejected sound code, because the type grants the write, whatever the code does:
     parameter-typed-mutable-only-reads.ts  the parameter only reads, but its type is a mutable array
   Rejected sound code, because nothing in a function result's type says no other name holds it:
     function-result-copy.ts            slice() returns a new array
-  Rejected sound code, because the library's declaration grants a write it never makes:
-    concat-library-declaration.ts      ConcatArray.slice() is declared to return a mutable array

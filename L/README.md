@@ -52,17 +52,16 @@ A case's first line says what it is for:
 
 A witness's name says what it gets past, as in L-hooks' catalog: rel- the type relation, flow- narrowing,
 chk- other checks, lib- library declarations, and rule- a program that crashes only when its rule is
-bypassed. A name also sets how the case is compiled: one with esnext in it gets the esnext libraries instead of
-es2022, and one with script in it is compiled as a script instead of a module.
+bypassed. A case with script in its name is compiled as a script instead of a module.
 
 A line the lab must reject ends with a marker naming the L code of the mechanism that rejects it, as in
 `// rejected here: TS2894`. The tracker holds each rule's folder to its proof: every case is cited under the
 obligations it supports, in the role its first line claims; every marker names the code of an obligation that
 cites it; and a rejection counts only when a diagnostic on that line carries that code.
 
-Each case is compiled in a program of its own, so a global that one case declares can't reach another, under
-L's options: strict, noUncheckedIndexedAccess and exactOptionalPropertyTypes. Node runs the JavaScript the
-6.0.3 release emits for the case, since the lab doesn't change what is emitted.
+Each case is compiled in a program of its own, so a global that one case declares can't reach another, under L's
+options (strict, noUncheckedIndexedAccess and exactOptionalPropertyTypes) and the esnext and DOM libraries. Node
+runs the JavaScript the 6.0.3 release emits for the case, since the lab doesn't change what is emitted.
 
 ## The catalog
 

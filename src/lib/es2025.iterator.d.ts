@@ -79,7 +79,7 @@ declare global {
         /**
          * Creates a new array from the values yielded by this iterator.
          */
-        toArray(): T[];
+        toArray(): readonly T[]; // L: readonly, so the iterator that hands it out stays covariant for values
 
         /**
          * Performs the specified action for each element in the iterator.

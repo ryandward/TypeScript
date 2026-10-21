@@ -1,13 +1,14 @@
 Changes to TypeScript 6.0.3
 
-Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of commit f11d9971a.
-`git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes four things: it adds twelve
-diagnostics, changes the checker, adds one internal type flag, and makes the library's iterator results and
-entry tuples readonly. The parser, binder, emitter, transformers, language service, command line and compiler
-options are unchanged, and no test baseline has been updated. L's rules have no compiler option: they are always
-on. Each change in code carries a comment that starts `// L:`, 40 in checker.ts, 1 in types.ts and 1 at the head
-of the lib changes in es2015.iterable.d.ts, so `grep -rn '// L:' src` finds them. The lib changes in the other
-four lib files carry no comment of their own.
+Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
+changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes four
+things: it adds twelve diagnostics, changes the checker, adds one internal type flag, and declares readonly the
+new objects and collections the library hands out where a mutable type would make a read-only view invariant.
+The parser, binder, emitter, transformers, language service, command line and compiler options are unchanged,
+and no test baseline has been updated. L's rules have no compiler option: they are always on. Each change in
+code carries a comment that starts `// L:`: 40 in checker.ts, 1 in types.ts, and 4 in the lib, one at the head
+of the entries() changes in es2015.iterable.d.ts and one at each later lib change, so `grep -rn '// L:' src`
+finds them. The entries() changes in the other four lib files carry no comment of their own.
 
 When a commit changes src/, this file changes with it.
 
@@ -145,12 +146,23 @@ fork declares them readonly. Under the value relation a mutable tuple is invaria
 sound code such as an Iterator<T, undefined> used as an Iterator<T, unknown>, or a Map used as a ReadonlyMap,
 would be rejected.
 
+Under the esnext libraries three more types hand out new collections with mutable types: ConcatArray's slice(),
+an iterator's toArray(), and a ReadonlySet's union, intersection, difference and symmetricDifference. The value
+relation measured ConcatArray, every iterator and generator, and ReadonlySet as invariant because of them, so a
+Map couldn't be viewed as a ReadonlyMap with readonly values, nor a ReadonlySet or an iterator widened. They are
+declared readonly too (the commit after 7b79308fd), and the cost is code that writes into the new collection,
+which L doesn't write.
+
+- es5.d.ts: ConcatArray's slice() returns a readonly array.
 - es2015.iterable.d.ts: IteratorYieldResult's and IteratorReturnResult's done and value are readonly. These yield
   readonly tuples: entries() of Array, ReadonlyArray, Set and ReadonlySet; [Symbol.iterator]() and entries() of
   Map and ReadonlyMap; entries() of Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array,
   Int32Array, Uint32Array, Float32Array and Float64Array.
 - es2020.bigint.d.ts: entries() of BigInt64Array and BigUint64Array.
 - es2025.float16.d.ts: entries() of Float16Array.
+- es2025.iterator.d.ts: an iterator's toArray() returns a readonly array.
+- es2025.collection.d.ts: ReadonlySet's union, intersection, difference and symmetricDifference return a
+  ReadonlySet.
 - dom.generated.d.ts: entries() of CSSNumericArray, CSSTransformValue, CSSUnparsedValue, DOMTokenList, NodeList
   and NodeListOf; the iterator and entries() of FormData, Headers, URLSearchParams, MediaKeyStatusMap and
   StylePropertyMapReadOnly; the async iterator and entries() of FileSystemDirectoryHandle.
