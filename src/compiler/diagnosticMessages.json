@@ -4098,6 +4098,10 @@
         "category": "Error",
         "code": 2911
     },
+    "'{0}' is declared below this read. L reads a binding only below its declaration, so nothing can run the read before the binding exists.": {
+        "category": "Error",
+        "code": 2912
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

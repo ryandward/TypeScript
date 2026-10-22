@@ -2601,6 +2601,16 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         return host.isSourceFileDefaultLibrary(getSourceFileOfNode(node));
     }
 
+    // L: a read of a binding declared further down the same file, outside the declaration itself. A const read inside a
+    // function runs whenever the function does, and a function declaration is hoisted, so either read can run before the
+    // binding exists. Requiring every such read to follow its declaration makes a module run in the order it's written.
+    function isReadBeforeDeclaration(node: Identifier, declaration: Declaration): boolean {
+        const ordered = isFunctionDeclaration(declaration) ||
+            (isVariableDeclaration(declaration) || isBindingElement(declaration)) && !!(getCombinedNodeFlags(declaration) & NodeFlags.BlockScoped);
+        return ordered && !(declaration.flags & NodeFlags.Ambient) && !inDefaultLibrary(declaration) && !isPartOfTypeQuery(node) &&
+            getSourceFileOfNode(declaration) === getSourceFileOfNode(node) && node.end <= declaration.pos;
+    }
+
     // L: a statement that declares a value with no implementation: an ambient variable, function, class, enum or
     // namespace, outermost in its ambient context, as `declare` or a declaration file's top level makes one.
     function isAmbientValueDeclaration(node: Node): boolean {
@@ -31158,6 +31168,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         const localOrExportSymbol = getExportSymbolOfValueSymbolIfExported(symbol);
         let declaration = localOrExportSymbol.valueDeclaration;
         const immediateDeclaration = declaration;
+
+        // L: nothing reads a binding before its declaration, so nothing can run the read before the binding exists.
+        if (declaration && isReadBeforeDeclaration(node, declaration)) {
+            error(node, Diagnostics._0_is_declared_below_this_read_L_reads_a_binding_only_below_its_declaration_so_nothing_can_run_the_read_before_the_binding_exists, idText(node));
+        }
 
         // If the identifier is declared in a binding pattern for which we're currently computing the implied type and the
         // reference occurs with the same binding pattern, return the non-inferrable any type. This for example occurs in

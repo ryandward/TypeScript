@@ -18,3 +18,11 @@ Obligation 1, a namespace: TS2906
     chk-namespace-merge-order.ts       the first block calls a function that reads the second block's export
   Controls:
     module-exports.ts                  a module's own exports in a namespace's place
+
+Obligation 2, a read before its declaration: TS2912
+  Statement. No read of a binding comes before its declaration (see initialization-order).
+  Mechanism. checkIdentifier reports TS2912 on the read of the hoisted function that reaches the second block's
+  export before that block has run.
+  Why it suffices. initialization-order's argument: the function can't run before its own declaration.
+  Witnesses:
+    chk-namespace-merge-order.ts           the function is called above its declaration

@@ -3,7 +3,7 @@
 // declaration.
 const twice = <T,>(f: (x: T) => T, x: T): T => f(f(x));
 function step<T>(x: T): T {
-  console.log(later.length); // ReferenceError: Cannot access 'later' before initialization
+  console.log(later.length); // ReferenceError: Cannot access 'later' before initialization // rejected here: TS2912
   return x;
 }
 console.log(twice(step<number>, 1));

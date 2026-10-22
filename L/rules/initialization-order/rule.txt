@@ -1,0 +1,53 @@
+initialization-order
+kind: soundness
+
+Claim. If the lab accepts a program, no read of a binding runs before the binding exists: every read of a const or
+of a function declaration comes after its declaration in the file, or inside the declaration itself.
+
+Counterexample in plain TypeScript. isBlockScopedNameDeclaredBeforeUse counts every read inside a function as
+deferred, so a function may read a const declared below it, and nothing checks when the function runs. An alias, an
+object holding the function, a getter, an implicit toString or valueOf, a tagged template, map, new Map or an
+instantiation expression can each run it before the const's declaration, and a function declaration, hoisted, can be
+called from any line. Each witness is such a program, and Node throws a ReferenceError.
+
+Holding reads to the order of the file closes every route at once, without following a single call: a function
+that reads a const is declared after it, and nothing reads the function before the function's own declaration,
+so nothing runs it before the const exists. A function may read itself inside its own declaration, since it is
+running only once it exists, and two functions that call each other live in one record, which each reads inside
+its own declaration.
+
+Obligation 1, a read before its declaration: TS2912
+  Statement. No identifier reads a const, or a function declaration, declared further down the same file, unless the
+  read is inside the declaration itself. A read in a type position runs nothing, and stays.
+  Mechanism. checkIdentifier reports TS2912 when isReadBeforeDeclaration holds: the symbol's value declaration is a
+  function declaration, or a block-scoped variable or binding element, in the same file and outside the library, and
+  the read ends before the declaration begins.
+  Why it suffices. Every read of a name as a value goes through checkIdentifier. A module's statements run in order,
+  so a const exists once its declaration has run; a read inside a function runs when the function does, and the
+  function can only be reached after its own declaration, which comes after the const.
+  Witnesses:
+    chk-tdz-alias.ts                       an alias of the function calls it
+    chk-tdz-concat-tostring.ts             + with a string runs an object's toString
+    chk-tdz-destructured-binding.ts        the const is declared by a destructuring pattern
+    chk-tdz-destructured-function.ts       the function, taken out of an object by destructuring, is called
+    chk-tdz-getter.ts                      reading a getter runs it
+    chk-tdz-hoisted-fn.ts                  a hoisted function declaration is called above the const
+    chk-tdz-instantiated-function.ts       an instantiation expression of the function runs at once
+    chk-tdz-instantiated-member.ts         an instantiation expression on a member of the const
+    chk-tdz-instantiated-reach.ts          an instantiation expression hands the function to a call
+    chk-tdz-instantiation-id.ts            an instantiation expression of a generic const
+    chk-tdz-map-callback.ts                map runs the function it is handed
+    chk-tdz-new-iterable.ts                new Map runs an iterator's next
+    chk-tdz-object-reference.ts            the function is called through an object that holds it
+    chk-tdz-satisfies.ts                   a satisfies expression around the read
+    chk-tdz-tagged-template.ts             a tagged template runs its tag
+    chk-tdz-template-tostring.ts           a template literal runs an object's toString
+    chk-tdz-unary-valueof.ts               unary + runs an object's valueOf
+    flow-adjacent-tdz.ts                   a function reads a const, and is called above it
+  Rejected sound code, because every read follows its declaration:
+    hoisted-call.ts                        a function declaration called above its line, reading nothing later
+    mutual-recursion-functions.ts          two function declarations that call each other
+  Controls:
+    ordered-reads.ts                       a const and a function declaration, each read below its declaration
+    self-recursion.ts                      a function that reads itself inside its own declaration
+    mutual-recursion-record.ts             two functions that call each other through one record

@@ -104,3 +104,11 @@ Obligation 4, a deleted apply, call or bind: TS2339 (TypeScript's code)
   Why it suffices. A method is called through the declaration its type has, and the deletion leaves none.
   Witnesses:
     lib-call-unbound-this.ts           a method called through call with any this
+
+Obligation 5, a read before its declaration: TS2912
+  Statement. No read of a binding comes before its declaration (see initialization-order).
+  Mechanism. checkIdentifier reports TS2912 on the read of the hoisted function that reaches the class before
+  the class is declared.
+  Why it suffices. initialization-order's argument: the function can't run before its own declaration.
+  Witnesses:
+    chk-tdz-class.ts                       the function is called above its declaration

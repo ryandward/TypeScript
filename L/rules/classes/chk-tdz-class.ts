@@ -1,5 +1,5 @@
 // witness: A function called before a class declaration has run constructs the class in its temporal dead zone.
-const made: Widget = build();
+const made: Widget = build(); // rejected here: TS2912
 function build(): Widget {
   return new Widget("a");
 }

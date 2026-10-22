@@ -2,7 +2,7 @@
 // const declared below it, and new Map runs an iterator whose next reads it before the declaration.
 const it: Iterable<readonly [string, number]> = {
   [Symbol.iterator]: (): Iterator<readonly [string, number]> => ({
-    next: (): IteratorResult<readonly [string, number]> => ({ done: true, value: ['a', later] }), // ReferenceError: Cannot access 'later' before initialization
+    next: (): IteratorResult<readonly [string, number]> => ({ done: true, value: ['a', later] }), // ReferenceError: Cannot access 'later' before initialization // rejected here: TS2912
   }),
 };
 const m = new Map(it);

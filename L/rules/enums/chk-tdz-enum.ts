@@ -1,5 +1,5 @@
 // witness: A function called before an enum declaration has run reads the enum, which is still undefined.
-const picked: Color = pick();
+const picked: Color = pick(); // rejected here: TS2912
 function pick(): Color {
   return Color.Red;
 }

@@ -74,6 +74,10 @@ parameters
 - Inference (inferFromSignature) still records method positions as bivariant. It chooses type arguments; the
   relation then checks them one way.
 
+initialization-order
+- The rule sees one file. A cycle of imports runs one module's code before another's has finished, so a binding
+  imported from a module that hasn't run yet is read before it exists (L-hooks' other-self-import-tdz).
+
 call-signature
 - Not built, so chk-call-narrowed-function.ts is open: the release and the lab both call a Function with no
   signature, and Node throws when it holds a constructor. Nobody has measured how much real code calls a value
