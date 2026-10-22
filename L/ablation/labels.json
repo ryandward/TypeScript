@@ -1,0 +1,3265 @@
+{
+ "src/compiler/checker.ts#0": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#1": [
+  {
+   "label": "void.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#10": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#100": [
+  {
+   "label": "open-record.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#101": [
+  {
+   "label": "open-record.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#102": [
+  {
+   "label": "writes.4",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#103": [
+  {
+   "label": "writes.4",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#104": [
+  {
+   "label": "width.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#105": [
+  {
+   "label": "width.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#106": [
+  {
+   "label": "void.2",
+   "lines": [
+    1,
+    4
+   ],
+   "mode": "drop"
+  },
+  {
+   "label": "width.1",
+   "lines": [
+    5,
+    18
+   ],
+   "mode": "replace"
+  }
+ ],
+ "src/compiler/checker.ts#107": [
+  {
+   "label": "width.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#108": [
+  {
+   "label": "any.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#109": [
+  {
+   "label": "any.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#11": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#110": [
+  {
+   "label": "any.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#111": [
+  {
+   "label": "any.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#112": [
+  {
+   "label": "any.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#113": [
+  {
+   "label": "any.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#114": [
+  {
+   "label": "any.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#115": [
+  {
+   "label": "any.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#116": [
+  {
+   "label": "any.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#117": [
+  {
+   "label": "any.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#118": [
+  {
+   "label": "call-signature.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#119": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#12": [
+  {
+   "label": "tuples.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#120": [
+  {
+   "label": "instanceof-constructor.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#121": [
+  {
+   "label": "instanceof-constructor.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#122": [
+  {
+   "label": "type-assertion.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#123": [
+  {
+   "label": "non-null-assertion.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#124": [
+  {
+   "label": "call-signature.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#125": [
+  {
+   "label": "call-signature.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#126": [
+  {
+   "label": "writes.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#127": [
+  {
+   "label": "writes.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#128": [
+  {
+   "label": "records.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#129": [
+  {
+   "label": "arity.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#13": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#130": [
+  {
+   "label": "arity.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#131": [
+  {
+   "label": "arity.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#132": [
+  {
+   "label": "any.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#133": [
+  {
+   "label": "type-guard-or-assertion-function.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#134": [
+  {
+   "label": "overloads.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#135": [
+  {
+   "label": "records.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#136": [
+  {
+   "label": "any.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#137": [
+  {
+   "label": "classes.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#138": [
+  {
+   "label": "ambient-declarations.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#139": [
+  {
+   "label": "enums.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#14": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#140": [
+  {
+   "label": "namespaces.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#141": [
+  {
+   "label": "ambient-declarations.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#142": [
+  {
+   "label": "directives.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#143": [
+  {
+   "label": "immutable-bindings.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#15": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#16": [
+  {
+   "label": "open-record.1",
+   "lines": [
+    1,
+    3
+   ],
+   "mode": "drop"
+  },
+  {
+   "label": "receivers.1",
+   "lines": [
+    4,
+    6
+   ],
+   "mode": "drop"
+  }
+ ],
+ "src/compiler/checker.ts#17": [
+  {
+   "label": "open-record.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#18": [
+  {
+   "label": "any.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#19": [
+  {
+   "label": "open-record.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#2": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#20": [
+  {
+   "label": "open-record.5",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#21": [
+  {
+   "label": "records.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#22": [
+  {
+   "label": "records.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#23": [
+  {
+   "label": "records.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#24": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#25": [
+  {
+   "label": "any.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#26": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#27": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#28": [
+  {
+   "label": "arity.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#29": [
+  {
+   "label": "parameters.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#3": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#30": [
+  {
+   "label": "parameters.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#31": [
+  {
+   "label": "parameters.2",
+   "lines": [
+    1,
+    2
+   ],
+   "mode": "text",
+   "text": [
+    "            const declaredTargetType = i === restIndex ? getRestOrAnyTypeAtPosition(target, i) : tryGetTypeAtPosition(target, i);"
+   ]
+  },
+  {
+   "label": "any.3",
+   "lines": [
+    3,
+    6
+   ],
+   "mode": "text",
+   "text": [
+    "            const targetTypeIsAny = false;",
+    "            const targetType = declaredTargetType;"
+   ]
+  }
+ ],
+ "src/compiler/checker.ts#32": [
+  {
+   "label": "parameters.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#33": [
+  {
+   "label": "any.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#34": [
+  {
+   "label": "any.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#35": [
+  {
+   "label": "arity.1",
+   "lines": [
+    1,
+    9
+   ],
+   "mode": "drop"
+  },
+  {
+   "label": "parameters.2",
+   "lines": [
+    10,
+    22
+   ],
+   "mode": "drop"
+  }
+ ],
+ "src/compiler/checker.ts#36": [
+  {
+   "label": "any.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#37": [
+  {
+   "label": "any.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#38": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#39": [
+  {
+   "label": "width.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#4": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#40": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#41": [
+  {
+   "label": "narrowing.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#42": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#43": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#44": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#45": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#46": [
+  {
+   "label": "generic-relations.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#47": [
+  {
+   "label": "generic-relations.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#48": [
+  {
+   "label": "generic-relations.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#49": [
+  {
+   "label": "generic-relations.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#5": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#50": [
+  {
+   "label": "generic-relations.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#51": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#52": [
+  {
+   "label": "generic-relations.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#53": [
+  {
+   "label": "generic-relations.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#54": [
+  {
+   "label": "generic-relations.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#55": [
+  {
+   "label": "width.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#56": [
+  {
+   "label": "narrowing.1",
+   "lines": [
+    1,
+    10
+   ],
+   "mode": "drop"
+  },
+  {
+   "label": "width.1",
+   "lines": [
+    11,
+    20
+   ],
+   "mode": "drop"
+  }
+ ],
+ "src/compiler/checker.ts#57": [
+  {
+   "label": "generic-relations.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#58": [
+  {
+   "label": "generic-relations.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#59": [
+  {
+   "label": "generic-relations.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#6": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#60": [
+  {
+   "label": "records.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#61": [
+  {
+   "label": "width.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#62": [
+  {
+   "label": "generic-relations.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#63": [
+  {
+   "label": "generic-relations.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#64": [
+  {
+   "label": "width.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#65": [
+  {
+   "label": "width.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#66": [
+  {
+   "label": "generic-relations.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#67": [
+  {
+   "label": "generic-relations.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#68": [
+  {
+   "label": "generic-relations.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#69": [
+  {
+   "label": "generic-relations.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#7": [
+  {
+   "label": "records.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#70": [
+  {
+   "label": "generic-relations.3",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#71": [
+  {
+   "label": "any.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#72": [
+  {
+   "label": "narrowing.7",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#73": [
+  {
+   "label": "number-strings.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#74": [
+  {
+   "label": "narrowing.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#75": [
+  {
+   "label": "narrowing.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#76": [
+  {
+   "label": "narrowing.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#77": [
+  {
+   "label": "narrowing.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#78": [
+  {
+   "label": "narrowing.4",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#79": [
+  {
+   "label": "narrowing.4",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#8": [
+  {
+   "label": "any.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#80": [
+  {
+   "label": "narrowing.6",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#81": [
+  {
+   "label": "narrowing.7",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#82": [
+  {
+   "label": "void.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#83": [
+  {
+   "label": "narrowing.8",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#84": [
+  {
+   "label": "narrowing.8",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#85": [
+  {
+   "label": "narrowing.8",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#86": [
+  {
+   "label": "narrowing.6",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#87": [
+  {
+   "label": "narrowing.5",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#88": [
+  {
+   "label": "narrowing.5",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#89": [
+  {
+   "label": "initialization-order.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#9": [
+  {
+   "label": "any.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#90": [
+  {
+   "label": "immutable-bindings.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#91": [
+  {
+   "label": "classes.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#92": [
+  {
+   "label": "classes.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#93": [
+  {
+   "label": "prototypes.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#94": [
+  {
+   "label": "records.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#95": [
+  {
+   "label": "records.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#96": [
+  {
+   "label": "any.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#97": [
+  {
+   "label": "any.2",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/checker.ts#98": [
+  {
+   "label": "open-record.1",
+   "lines": [
+    1,
+    1
+   ],
+   "mode": "drop"
+  },
+  {
+   "label": "receivers.1",
+   "lines": [
+    2,
+    4
+   ],
+   "mode": "drop"
+  }
+ ],
+ "src/compiler/checker.ts#99": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/types.ts#0": [
+  {
+   "label": "infra",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/utilities.ts#0": [
+  {
+   "label": "ambient-declarations.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/utilities.ts#1": [
+  {
+   "label": "directives.1",
+   "mode": "full"
+  }
+ ],
+ "src/compiler/utilities.ts#2": [
+  {
+   "label": "directives.1",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#0": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#1": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#10": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#11": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#12": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#13": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#14": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#2": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#3": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#4": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#5": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#6": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#7": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#8": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/dom.generated.d.ts#9": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.collection.d.ts#0": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.collection.d.ts#1": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.collection.d.ts#10": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.collection.d.ts#11": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.collection.d.ts#2": [
+  {
+   "label": "writes.3",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.collection.d.ts#3": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.collection.d.ts#4": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.collection.d.ts#5": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.collection.d.ts#6": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.collection.d.ts#7": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.collection.d.ts#8": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.collection.d.ts#9": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#1": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#10": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#11": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#12": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#13": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#14": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#15": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#16": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#2": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#3": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#4": [
+  {
+   "label": "writes.3",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#5": [
+  {
+   "label": "writes.3",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#6": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#7": [
+  {
+   "label": "library-declarations.7",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#8": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.core.d.ts#9": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.generator.d.ts#0": [
+  {
+   "label": "parameters.1",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.generator.d.ts#1": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.generator.d.ts#2": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#0": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#1": [
+  {
+   "label": "parameters.1",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#10": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#11": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#12": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#13": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#14": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#15": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#16": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#17": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#18": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#19": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#2": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#20": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#21": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#22": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#23": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#3": [
+  {
+   "label": "parameters.1",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#4": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#5": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#6": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#7": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#8": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.iterable.d.ts#9": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.promise.d.ts#0": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.proxy.d.ts#0": [
+  {
+   "label": "library-declarations.3",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.reflect.d.ts#0": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.reflect.d.ts#1": [
+  {
+   "label": "prototypes.3",
+   "lines": [
+    1,
+    0
+   ],
+   "mode": "replace",
+   "old": [
+    1,
+    13
+   ]
+  },
+  {
+   "label": "writes.3",
+   "lines": [
+    1,
+    0
+   ],
+   "mode": "replace",
+   "old": [
+    14,
+    30
+   ]
+  },
+  {
+   "label": "open-record.4",
+   "lines": [
+    1,
+    0
+   ],
+   "mode": "replace",
+   "old": [
+    31,
+    44
+   ]
+  }
+ ],
+ "src/lib/es2015.reflect.d.ts#2": [
+  {
+   "label": "writes.3",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.symbol.d.ts#0": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.symbol.wellknown.d.ts#0": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2015.symbol.wellknown.d.ts#1": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2016.intl.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2017.intl.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2017.intl.d.ts#1": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2017.intl.d.ts#2": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2017.sharedmemory.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2017.sharedmemory.d.ts#1": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2017.sharedmemory.d.ts#2": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2017.sharedmemory.d.ts#3": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2018.asyncgenerator.d.ts#0": [
+  {
+   "label": "parameters.1",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2018.asyncgenerator.d.ts#1": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2018.asyncgenerator.d.ts#2": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2018.asynciterable.d.ts#0": [
+  {
+   "label": "parameters.1",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2018.intl.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2018.intl.d.ts#1": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2018.intl.d.ts#2": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2018.promise.d.ts#0": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2018.regexp.d.ts#0": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2018.regexp.d.ts#1": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2019.intl.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#1": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#10": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#11": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#12": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#13": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#14": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#15": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#16": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#17": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#18": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#19": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#2": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#20": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#21": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#3": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#4": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#5": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#6": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#7": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#8": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.bigint.d.ts#9": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.date.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.date.d.ts#1": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.intl.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.intl.d.ts#1": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.intl.d.ts#2": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.number.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.number.d.ts#1": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.promise.d.ts#0": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.promise.d.ts#1": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.promise.d.ts#2": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.promise.d.ts#3": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.string.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2020.string.d.ts#1": [
+  {
+   "label": "library-declarations.7",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2021.intl.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2021.intl.d.ts#1": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2021.intl.d.ts#2": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2021.promise.d.ts#0": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2021.string.d.ts#0": [
+  {
+   "label": "library-declarations.7",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2021.string.d.ts#1": [
+  {
+   "label": "library-declarations.7",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2021.weakref.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2021.weakref.d.ts#1": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2021.weakref.d.ts#2": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2021.weakref.d.ts#3": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2021.weakref.d.ts#4": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2022.intl.d.ts#0": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2022.intl.d.ts#1": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2022.intl.d.ts#2": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2022.regexp.d.ts#0": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2023.collection.d.ts#0": [
+  {
+   "label": "library-declarations.8",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2023.intl.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2023.intl.d.ts#1": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2023.intl.d.ts#2": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2024.arraybuffer.d.ts#0": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2024.arraybuffer.d.ts#1": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2024.arraybuffer.d.ts#2": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2024.object.d.ts#0": [
+  {
+   "label": "library-declarations.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2024.sharedmemory.d.ts#0": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2024.sharedmemory.d.ts#1": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.collection.d.ts#0": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.collection.d.ts#1": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.collection.d.ts#2": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.collection.d.ts#3": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.collection.d.ts#4": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.float16.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.float16.d.ts#1": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.float16.d.ts#10": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.float16.d.ts#2": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.float16.d.ts#3": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.float16.d.ts#4": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.float16.d.ts#5": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.float16.d.ts#6": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.float16.d.ts#7": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.float16.d.ts#8": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.float16.d.ts#9": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.intl.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.intl.d.ts#1": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.intl.d.ts#2": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.iterator.d.ts#0": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.iterator.d.ts#1": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.iterator.d.ts#2": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.iterator.d.ts#3": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es2025.iterator.d.ts#4": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#1": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#10": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#100": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#101": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#102": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#103": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#104": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#105": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#106": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#107": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#108": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#109": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#11": [
+  {
+   "label": "library-declarations.1",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#110": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#111": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#112": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#113": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#114": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#115": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#116": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#117": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#118": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#119": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#12": [
+  {
+   "label": "classes.4",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#120": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#121": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#122": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#123": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#124": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#125": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#126": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#127": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#128": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#129": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#13": [
+  {
+   "label": "classes.4",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#130": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#131": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#132": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#133": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#134": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#135": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#136": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#137": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#138": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#139": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#14": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#140": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#141": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#142": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#143": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#144": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#145": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#15": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#16": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#17": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#18": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#19": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#2": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#20": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#21": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#22": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#23": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#24": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#25": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#26": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#27": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#28": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#29": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#3": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#30": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#31": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#32": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#33": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#34": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#35": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#36": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#37": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#38": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#39": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#4": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#40": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#41": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#42": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#43": [
+  {
+   "label": "library-declarations.7",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#44": [
+  {
+   "label": "library-declarations.7",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#45": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#46": [
+  {
+   "label": "library-declarations.9",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#47": [
+  {
+   "label": "library-declarations.9",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#48": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#49": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#5": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#50": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#51": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#52": [
+  {
+   "label": "library-declarations.9",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#53": [
+  {
+   "label": "library-declarations.9",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#54": [
+  {
+   "label": "library-declarations.9",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#55": [
+  {
+   "label": "library-declarations.9",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#56": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#57": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#58": [
+  {
+   "label": "library-declarations.4",
+   "lines": [
+    1,
+    1
+   ],
+   "mode": "replace",
+   "old": [
+    1,
+    6
+   ]
+  },
+  {
+   "label": "any.2",
+   "lines": [
+    2,
+    2
+   ],
+   "mode": "replace",
+   "old": [
+    7,
+    7
+   ]
+  },
+  {
+   "label": "prototypes.2",
+   "lines": [
+    3,
+    2
+   ],
+   "mode": "replace",
+   "old": [
+    8,
+    8
+   ]
+  }
+ ],
+ "src/lib/es5.d.ts#59": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#6": [
+  {
+   "label": "writes.3",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#60": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#61": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#62": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#63": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#64": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#65": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#66": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#67": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#68": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#69": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#7": [
+  {
+   "label": "classes.4",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#70": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#71": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#72": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#73": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#74": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#75": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#76": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#77": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#78": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#79": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#8": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#80": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#81": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#82": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#83": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#84": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#85": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#86": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#87": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#88": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#89": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#9": [
+  {
+   "label": "library-declarations.1",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#90": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#91": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#92": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#93": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#94": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#95": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#96": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#97": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#98": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/es5.d.ts#99": [
+  {
+   "label": "library-declarations.5",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.array.d.ts#0": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.array.d.ts#1": [
+  {
+   "label": "library-declarations.6",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.collection.d.ts#0": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.collection.d.ts#1": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.collection.d.ts#2": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.disposable.d.ts#0": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.disposable.d.ts#1": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.disposable.d.ts#2": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.disposable.d.ts#3": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.disposable.d.ts#4": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.disposable.d.ts#5": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.disposable.d.ts#6": [
+  {
+   "label": "complete",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.intl.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.intl.d.ts#1": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.intl.d.ts#2": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#0": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#1": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#10": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#11": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#12": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#13": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#14": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#15": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#16": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#17": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#2": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#3": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#4": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#5": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#6": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#7": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#8": [
+  {
+   "label": "effects",
+   "mode": "full"
+  }
+ ],
+ "src/lib/esnext.temporal.d.ts#9": [
+  {
+   "label": "prototypes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/webworker.generated.d.ts#0": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/webworker.generated.d.ts#1": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/webworker.generated.d.ts#10": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/webworker.generated.d.ts#2": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/webworker.generated.d.ts#3": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/webworker.generated.d.ts#4": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/webworker.generated.d.ts#5": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/webworker.generated.d.ts#6": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/webworker.generated.d.ts#7": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/webworker.generated.d.ts#8": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ],
+ "src/lib/webworker.generated.d.ts#9": [
+  {
+   "label": "writes.2",
+   "mode": "full"
+  }
+ ]
+}

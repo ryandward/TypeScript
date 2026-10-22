@@ -1,0 +1,3722 @@
+[
+{
+"file": "dom.generated.d.ts",
+"line": 44500,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, CSSNumericValue]>;",
+"add": "entries(): ArrayIterator<readonly [number, CSSNumericValue]>;",
+"ndel": 1
+},
+{
+"file": "dom.generated.d.ts",
+"line": 44515,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, CSSTransformComponent]>;",
+"add": "entries(): ArrayIterator<readonly [number, CSSTransformComponent]>;",
+"ndel": 1
+},
+{
+"file": "dom.generated.d.ts",
+"line": 44522,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, CSSUnparsedSegment]>;",
+"add": "entries(): ArrayIterator<readonly [number, CSSUnparsedSegment]>;",
+"ndel": 1
+},
+{
+"file": "dom.generated.d.ts",
+"line": 44574,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, string]>;",
+"add": "entries(): ArrayIterator<readonly [number, string]>;",
+"ndel": 1
+},
+{
+"file": "dom.generated.d.ts",
+"line": 44598,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "[Symbol.iterator](): FormDataIterator<[string, FormDataEntryValue]>;",
+"add": "[Symbol.iterator](): FormDataIterator<readonly [string, FormDataEntryValue]>;",
+"ndel": 1
+},
+{
+"file": "dom.generated.d.ts",
+"line": 44600,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): FormDataIterator<[string, FormDataEntryValue]>;",
+"add": "entries(): FormDataIterator<readonly [string, FormDataEntryValue]>;",
+"ndel": 1
+},
+{
+"file": "dom.generated.d.ts",
+"line": 44697,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "[Symbol.iterator](): HeadersIterator<[string, string]>;",
+"add": "[Symbol.iterator](): HeadersIterator<readonly [string, string]>;",
+"ndel": 1
+},
+{
+"file": "dom.generated.d.ts",
+"line": 44699,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): HeadersIterator<[string, string]>;",
+"add": "entries(): HeadersIterator<readonly [string, string]>;",
+"ndel": 1
+},
+{
+"file": "dom.generated.d.ts",
+"line": 44754,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "[Symbol.iterator](): MediaKeyStatusMapIterator<[BufferSource, MediaKeyStatus]>;",
+"add": "[Symbol.iterator](): MediaKeyStatusMapIterator<readonly [BufferSource, MediaKeyStatus]>;",
+"ndel": 2
+},
+{
+"file": "dom.generated.d.ts",
+"line": 44796,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, Node]>;",
+"add": "entries(): ArrayIterator<readonly [number, Node]>;",
+"ndel": 1
+},
+{
+"file": "dom.generated.d.ts",
+"line": 44806,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, TNode]>;",
+"add": "entries(): ArrayIterator<readonly [number, TNode]>;",
+"ndel": 1
+},
+{
+"file": "dom.generated.d.ts",
+"line": 44870,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "[Symbol.iterator](): StylePropertyMapReadOnlyIterator<[string, Iterable<CSSStyleValue>]>;",
+"add": "[Symbol.iterator](): StylePropertyMapReadOnlyIterator<readonly [string, Iterable<CSSStyleV",
+"ndel": 2
+},
+{
+"file": "dom.generated.d.ts",
+"line": 44929,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "[Symbol.iterator](): URLSearchParamsIterator<[string, string]>;",
+"add": "[Symbol.iterator](): URLSearchParamsIterator<readonly [string, string]>;",
+"ndel": 1
+},
+{
+"file": "dom.generated.d.ts",
+"line": 44931,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): URLSearchParamsIterator<[string, string]>;",
+"add": "entries(): URLSearchParamsIterator<readonly [string, string]>;",
+"ndel": 1
+},
+{
+"file": "dom.generated.d.ts",
+"line": 45096,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "[Symbol.asyncIterator](): FileSystemDirectoryHandleAsyncIterator<[string, FileSystemDirect",
+"add": "[Symbol.asyncIterator](): FileSystemDirectoryHandleAsyncIterator<readonly [string, FileSys",
+"ndel": 2
+},
+{
+"file": "es2015.collection.d.ts",
+"line": 1,
+"label": "writes.2",
+"why": "in-place block",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "",
+"add": "// L: the core changes no object in place, so this file declares nothing that does.",
+"ndel": 0
+},
+{
+"file": "es2015.collection.d.ts",
+"line": 2,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 8
+},
+{
+"file": "es2015.collection.d.ts",
+"line": 15,
+"label": "writes.3",
+"why": "Object or Reflect mutator",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 4
+},
+{
+"file": "es2015.collection.d.ts",
+"line": 24,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: Map<any, any>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2015.collection.d.ts",
+"line": 28,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "V is declared covariant: a ReadonlyMap hands its values out and takes none in.",
+"del": "interface ReadonlyMap<K, V> {",
+"add": "// L: V is declared covariant: a ReadonlyMap hands its values out and takes none in.",
+"ndel": 1
+},
+{
+"file": "es2015.collection.d.ts",
+"line": 36,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "V is declared covariant: a ReadonlyMap hands its values out and takes none in.",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es2015.collection.d.ts",
+"line": 44,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "V is declared covariant: a ReadonlyMap hands its values out and takes none in.",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es2015.collection.d.ts",
+"line": 48,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "V is declared covariant: a ReadonlyMap hands its values out and takes none in.",
+"del": "readonly prototype: WeakMap<WeakKey, any>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2015.collection.d.ts",
+"line": 52,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "V is declared covariant: a ReadonlyMap hands its values out and takes none in.",
+"del": "/**",
+"add": "",
+"ndel": 13
+},
+{
+"file": "es2015.collection.d.ts",
+"line": 68,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "V is declared covariant: a ReadonlyMap hands its values out and takes none in.",
+"del": "readonly prototype: Set<any>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2015.collection.d.ts",
+"line": 78,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "V is declared covariant: a ReadonlyMap hands its values out and takes none in.",
+"del": "/**",
+"add": "",
+"ndel": 9
+},
+{
+"file": "es2015.collection.d.ts",
+"line": 86,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "V is declared covariant: a ReadonlyMap hands its values out and takes none in.",
+"del": "readonly prototype: WeakSet<WeakKey>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2015.core.d.ts",
+"line": 1,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 0
+},
+{
+"file": "es2015.core.d.ts",
+"line": 25,
+"label": "writes.2",
+"why": "in-place block",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "",
+"add": "",
+"ndel": 23
+},
+{
+"file": "es2015.core.d.ts",
+"line": 33,
+"label": "library-declarations.6",
+"why": "result as wide as the engine",
+"L": "an array-like's places may hold nothing",
+"del": "from<T>(arrayLike: ArrayLike<T>): T[];",
+"add": "from<T>(arrayLike: ArrayLike<T>): (T | undefined)[]; // L: an array-like's places may hold",
+"ndel": 1
+},
+{
+"file": "es2015.core.d.ts",
+"line": 41,
+"label": null,
+"why": "",
+"L": "the same",
+"del": "from<T, U>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => U, thisArg?: any): U[];",
+"add": "from<T, U>(arrayLike: ArrayLike<T>, mapfn: (v: T | undefined, k: number) => U, thisArg?: a",
+"ndel": 1
+},
+{
+"file": "es2015.core.d.ts",
+"line": 240,
+"label": "writes.3",
+"why": "Object or Reflect mutator",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 34
+},
+{
+"file": "es2015.core.d.ts",
+"line": 259,
+"label": "writes.3",
+"why": "Object or Reflect mutator",
+"L": "",
+"del": "",
+"add": "",
+"ndel": 7
+},
+{
+"file": "es2015.core.d.ts",
+"line": 284,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es2015.core.d.ts",
+"line": 478,
+"label": "library-declarations.7",
+"why": "argument the engine accepts",
+"L": "a template's raw is own and not enumerable, so the engine's object isn't a recor",
+"del": "raw(template: { raw: readonly string[] | ArrayLike<string>; }, ...substitutions: any[]): s",
+"add": "raw(template: TemplateStringsArray | { raw: readonly string[] | ArrayLike<string>; }, ...s",
+"ndel": 1
+},
+{
+"file": "es2015.core.d.ts",
+"line": 481,
+"label": "effects",
+"why": "effect",
+"L": "a template's raw is own and not enumerable, so the engine's object isn't a recor",
+"del": "toLocaleString(locales: string | string[], options?: Intl.NumberFormatOptions): string;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2015.core.d.ts",
+"line": 484,
+"label": "effects",
+"why": "effect",
+"L": "a template's raw is own and not enumerable, so the engine's object isn't a recor",
+"del": "toLocaleString(locales: string | string[], options?: Intl.NumberFormatOptions): string;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2015.core.d.ts",
+"line": 487,
+"label": "effects",
+"why": "effect",
+"L": "a template's raw is own and not enumerable, so the engine's object isn't a recor",
+"del": "toLocaleString(locales: string | string[], options?: Intl.NumberFormatOptions): string;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2015.core.d.ts",
+"line": 490,
+"label": "effects",
+"why": "effect",
+"L": "a template's raw is own and not enumerable, so the engine's object isn't a recor",
+"del": "toLocaleString(locales: string | string[], options?: Intl.NumberFormatOptions): string;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2015.core.d.ts",
+"line": 493,
+"label": "effects",
+"why": "effect",
+"L": "a template's raw is own and not enumerable, so the engine's object isn't a recor",
+"del": "toLocaleString(locales: string | string[], options?: Intl.NumberFormatOptions): string;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2015.core.d.ts",
+"line": 496,
+"label": "effects",
+"why": "effect",
+"L": "a template's raw is own and not enumerable, so the engine's object isn't a recor",
+"del": "toLocaleString(locales: string | string[], options?: Intl.NumberFormatOptions): string;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2015.core.d.ts",
+"line": 499,
+"label": "effects",
+"why": "effect",
+"L": "a template's raw is own and not enumerable, so the engine's object isn't a recor",
+"del": "toLocaleString(locales: string | string[], options?: Intl.NumberFormatOptions): string;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2015.core.d.ts",
+"line": 502,
+"label": "effects",
+"why": "effect",
+"L": "a template's raw is own and not enumerable, so the engine's object isn't a recor",
+"del": "toLocaleString(locales: string | string[], options?: Intl.NumberFormatOptions): string;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2015.core.d.ts",
+"line": 505,
+"label": "effects",
+"why": "effect",
+"L": "a template's raw is own and not enumerable, so the engine's object isn't a recor",
+"del": "toLocaleString(locales: string | string[], options?: Intl.NumberFormatOptions): string;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2015.generator.d.ts",
+"line": 6,
+"label": "parameters.1",
+"why": "iterator return and throw",
+"L": "return and throw are the iterator's, taking never: a TReturn taken in would make",
+"del": "return(value: TReturn): IteratorResult<T, TReturn>;",
+"add": "// L: return and throw are the iterator's, taking never: a TReturn taken in would make TRe",
+"ndel": 2
+},
+{
+"file": "es2015.generator.d.ts",
+"line": 28,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "return and throw are the iterator's, taking never: a TReturn taken in would make",
+"del": "/**",
+"add": "",
+"ndel": 4
+},
+{
+"file": "es2015.generator.d.ts",
+"line": 49,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "return and throw are the iterator's, taking never: a TReturn taken in would make",
+"del": "/**",
+"add": "",
+"ndel": 4
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 11,
+"label": "writes.2",
+"why": "readonly result",
+"L": "iterator results and built-in entries() tuples are readonly, since each is new a",
+"del": "interface IteratorYieldResult<TYield> {",
+"add": "// L: iterator results and built-in entries() tuples are readonly, since each is new and n",
+"ndel": 9
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 29,
+"label": "parameters.1",
+"why": "iterator return and throw",
+"L": "return and throw stay declared, so for-of, which calls return when a loop breaks",
+"del": "return?(value?: TReturn): IteratorResult<T, TReturn>;",
+"add": "// L: return and throw stay declared, so for-of, which calls return when a loop breaks, ne",
+"ndel": 2
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 49,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "return and throw stay declared, so for-of, which calls return when a loop breaks",
+"del": "interface IteratorObject<T, TReturn = unknown, TNext = unknown> extends Iterator<T, TRetur",
+"add": "interface IteratorObject<out T, TReturn = unknown, TNext = unknown> extends Iterator<T, TR",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 70,
+"label": "parameters.1",
+"why": "iterator return and throw",
+"L": "return and throw stay declared, so for-of, which calls return when a loop breaks",
+"del": "entries(): ArrayIterator<[number, T]>;",
+"add": "entries(): ArrayIterator<readonly [number, T]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 88,
+"label": null,
+"why": "",
+"L": "an array-like goes to es2015.core's from, whose places may hold nothing",
+"del": "from<T>(iterable: Iterable<T> | ArrayLike<T>): T[];",
+"add": "from<T>(iterable: Iterable<T>): T[]; // L: an array-like goes to es2015.core's from, whose",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 96,
+"label": null,
+"why": "",
+"L": "the same",
+"del": "from<T, U>(iterable: Iterable<T> | ArrayLike<T>, mapfn: (v: T, k: number) => U, thisArg?: ",
+"add": "from<T, U>(iterable: Iterable<T>, mapfn: (v: T, k: number) => U, thisArg?: any): U[]; // L",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 121,
+"label": "writes.2",
+"why": "readonly result",
+"L": "a string is no Iterable, since no primitive is a value of an object type, so fro",
+"del": "entries(): ArrayIterator<[number, T]>;",
+"add": "entries(): ArrayIterator<readonly [number, T]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 145,
+"label": "writes.2",
+"why": "readonly result",
+"L": "a string is no Iterable, since no primitive is a value of an object type, so fro",
+"del": "[Symbol.iterator](): MapIterator<[K, V]>;",
+"add": "[Symbol.iterator](): MapIterator<readonly [K, V]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 150,
+"label": "writes.2",
+"why": "readonly result",
+"L": "a string is no Iterable, since no primitive is a value of an object type, so fro",
+"del": "entries(): MapIterator<[K, V]>;",
+"add": "entries(): MapIterator<readonly [K, V]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 163,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "",
+"del": "interface ReadonlyMap<K, V> {",
+"add": "interface ReadonlyMap<K, out V> {",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 165,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "[Symbol.iterator](): MapIterator<[K, V]>;",
+"add": "[Symbol.iterator](): MapIterator<readonly [K, V]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 170,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): MapIterator<[K, V]>;",
+"add": "entries(): MapIterator<readonly [K, V]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 205,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): SetIterator<[T, T]>;",
+"add": "entries(): SetIterator<readonly [T, T]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 225,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): SetIterator<[T, T]>;",
+"add": "entries(): SetIterator<readonly [T, T]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 248,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "",
+"del": "interface Promise<T> {}",
+"add": "interface Promise<out T> {}",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 283,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, number]>;",
+"add": "entries(): ArrayIterator<readonly [number, number]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 320,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, number]>;",
+"add": "entries(): ArrayIterator<readonly [number, number]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 357,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, number]>;",
+"add": "entries(): ArrayIterator<readonly [number, number]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 393,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, number]>;",
+"add": "entries(): ArrayIterator<readonly [number, number]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 430,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, number]>;",
+"add": "entries(): ArrayIterator<readonly [number, number]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 467,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, number]>;",
+"add": "entries(): ArrayIterator<readonly [number, number]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 504,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, number]>;",
+"add": "entries(): ArrayIterator<readonly [number, number]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 541,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, number]>;",
+"add": "entries(): ArrayIterator<readonly [number, number]>;",
+"ndel": 1
+},
+{
+"file": "es2015.iterable.d.ts",
+"line": 578,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, number]>;",
+"add": "entries(): ArrayIterator<readonly [number, number]>;",
+"ndel": 1
+},
+{
+"file": "es2015.promise.d.ts",
+"line": 1,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es2015.proxy.d.ts",
+"line": 110,
+"label": "library-declarations.3",
+"why": "Proxy",
+"L": "no Proxy: every read of one runs its handler, which may return anything",
+"del": "declare var Proxy: ProxyConstructor;",
+"add": "// L: no Proxy: every read of one runs its handler, which may return anything",
+"ndel": 1
+},
+{
+"file": "es2015.reflect.d.ts",
+"line": 1,
+"label": "writes.2",
+"why": "in-place block",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "",
+"add": "// L: the core changes no object in place, so this file declares nothing that does.",
+"ndel": 0
+},
+{
+"file": "es2015.reflect.d.ts",
+"line": 16,
+"label": "prototypes.3",
+"why": "newTarget",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 44
+},
+{
+"file": "es2015.reflect.d.ts",
+"line": 52,
+"label": "writes.3",
+"why": "Object or Reflect mutator",
+"L": "",
+"del": "",
+"add": "",
+"ndel": 30
+},
+{
+"file": "es2015.symbol.d.ts",
+"line": 1,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es2015.symbol.wellknown.d.ts",
+"line": 157,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "",
+"del": "interface Promise<T> {",
+"add": "interface Promise<out T> {",
+"ndel": 1
+},
+{
+"file": "es2015.symbol.wellknown.d.ts",
+"line": 210,
+"label": "library-declarations.6",
+"why": "result as wide as the engine",
+"L": "a capture group that took no part splices in undefined",
+"del": "[Symbol.split](string: string, limit?: number): string[];",
+"add": "[Symbol.split](string: string, limit?: number): (string | undefined)[]; // L: a capture gr",
+"ndel": 1
+},
+{
+"file": "es2016.intl.d.ts",
+"line": 1,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "declare namespace Intl {",
+"add": "",
+"ndel": 13
+},
+{
+"file": "es2017.intl.d.ts",
+"line": 0,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "declare namespace Intl {",
+"add": "",
+"ndel": 14
+},
+{
+"file": "es2017.intl.d.ts",
+"line": 1,
+"label": null,
+"why": "",
+"L": "",
+"del": "type DateTimeFormatPartTypes = keyof DateTimeFormatPartTypesRegistry;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2017.intl.d.ts",
+"line": 3,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "interface DateTimeFormatPart {",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 9
+},
+{
+"file": "es2017.sharedmemory.d.ts",
+"line": 4,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that shares memory b",
+"del": "",
+"add": "// L: the core performs no effects, so this file declares nothing that shares memory betwe",
+"ndel": 0
+},
+{
+"file": "es2017.sharedmemory.d.ts",
+"line": 18,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "the core performs no effects, so this file declares nothing that shares memory b",
+"del": "readonly prototype: SharedArrayBuffer;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2017.sharedmemory.d.ts",
+"line": 21,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that shares memory b",
+"del": "declare var SharedArrayBuffer: SharedArrayBufferConstructor;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2017.sharedmemory.d.ts",
+"line": 114,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es2018.asyncgenerator.d.ts",
+"line": 6,
+"label": "parameters.1",
+"why": "iterator return and throw",
+"L": "return and throw are the iterator's, taking never: a TReturn taken in would make",
+"del": "return(value: TReturn | PromiseLike<TReturn>): Promise<IteratorResult<T, TReturn>>;",
+"add": "// L: return and throw are the iterator's, taking never: a TReturn taken in would make TRe",
+"ndel": 2
+},
+{
+"file": "es2018.asyncgenerator.d.ts",
+"line": 28,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "return and throw are the iterator's, taking never: a TReturn taken in would make",
+"del": "/**",
+"add": "",
+"ndel": 4
+},
+{
+"file": "es2018.asyncgenerator.d.ts",
+"line": 49,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "return and throw are the iterator's, taking never: a TReturn taken in would make",
+"del": "/**",
+"add": "",
+"ndel": 4
+},
+{
+"file": "es2018.asynciterable.d.ts",
+"line": 15,
+"label": "parameters.1",
+"why": "iterator return and throw",
+"L": "return and throw stay declared, so for-of, which calls return when a loop breaks",
+"del": "return?(value?: TReturn | PromiseLike<TReturn>): Promise<IteratorResult<T, TReturn>>;",
+"add": "// L: return and throw stay declared, so for-of, which calls return when a loop breaks, ne",
+"ndel": 2
+},
+{
+"file": "es2018.intl.d.ts",
+"line": 0,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "declare namespace Intl {",
+"add": "",
+"ndel": 4
+},
+{
+"file": "es2018.intl.d.ts",
+"line": 1,
+"label": null,
+"why": "",
+"L": "",
+"del": "interface PluralRulesOptions {",
+"add": "",
+"ndel": 9
+},
+{
+"file": "es2018.intl.d.ts",
+"line": 3,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "interface ResolvedPluralRulesOptions {",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 50
+},
+{
+"file": "es2018.promise.d.ts",
+"line": 4,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "",
+"del": "interface Promise<T> {",
+"add": "interface Promise<out T> {",
+"ndel": 1
+},
+{
+"file": "es2018.regexp.d.ts",
+"line": 3,
+"label": "library-declarations.6",
+"why": "result as wide as the engine",
+"L": "a group that took no part is undefined",
+"del": "[key: string]: string;",
+"add": "[key: string]: string | undefined; // L: a group that took no part is undefined",
+"ndel": 1
+},
+{
+"file": "es2018.regexp.d.ts",
+"line": 9,
+"label": "library-declarations.6",
+"why": "result as wide as the engine",
+"L": "a group that took no part is undefined",
+"del": "[key: string]: string;",
+"add": "[key: string]: string | undefined; // L: a group that took no part is undefined",
+"ndel": 1
+},
+{
+"file": "es2019.intl.d.ts",
+"line": 1,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "declare namespace Intl {",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 3,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 0
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 97,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/** Returns a string representation appropriate to the host environment's current locale. ",
+"add": "",
+"ndel": 3
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 105,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: BigInt;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 141,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 143,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, bigint]>;",
+"add": "entries(): ArrayIterator<readonly [number, bigint]>;",
+"ndel": 1
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 154,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 240,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 253,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 266,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/** Reverses the elements in the array. */",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 283,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 6
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 291,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/** Converts the array to a string by using the current locale. */",
+"add": "",
+"ndel": 3
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 307,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "readonly prototype: BigInt64Array<ArrayBufferLike>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 369,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 371,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, bigint]>;",
+"add": "entries(): ArrayIterator<readonly [number, bigint]>;",
+"ndel": 1
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 382,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 468,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 481,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 494,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/** Reverses the elements in the array. */",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 511,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 6
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 519,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/** Converts the array to a string by using the current locale. */",
+"add": "",
+"ndel": 3
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 535,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "readonly prototype: BigUint64Array<ArrayBufferLike>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2020.bigint.d.ts",
+"line": 596,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "",
+"add": "",
+"ndel": 22
+},
+{
+"file": "es2020.date.d.ts",
+"line": 3,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 0
+},
+{
+"file": "es2020.date.d.ts",
+"line": 4,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "/**",
+"add": "",
+"ndel": 20
+},
+{
+"file": "es2020.intl.d.ts",
+"line": 0,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/// <reference lib=\"es2018.intl\" />",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es2020.intl.d.ts",
+"line": 1,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 22
+},
+{
+"file": "es2020.intl.d.ts",
+"line": 3,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "/**",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 422
+},
+{
+"file": "es2020.number.d.ts",
+"line": 3,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 0
+},
+{
+"file": "es2020.number.d.ts",
+"line": 4,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "/**",
+"add": "",
+"ndel": 6
+},
+{
+"file": "es2020.promise.d.ts",
+"line": 1,
+"label": "complete",
+"why": "engine-built object declared as a type literal",
+"L": "a plain object the engine builds, with own enumerable data properties, is declar",
+"del": "interface PromiseFulfilledResult<T> {",
+"add": "// L: a plain object the engine builds, with own enumerable data properties, is declared a",
+"ndel": 1
+},
+{
+"file": "es2020.promise.d.ts",
+"line": 6,
+"label": null,
+"why": "",
+"L": "",
+"del": "}",
+"add": "};",
+"ndel": 1
+},
+{
+"file": "es2020.promise.d.ts",
+"line": 8,
+"label": "complete",
+"why": "engine-built object declared as a type literal",
+"L": "",
+"del": "interface PromiseRejectedResult {",
+"add": "type PromiseRejectedResult = {",
+"ndel": 1
+},
+{
+"file": "es2020.promise.d.ts",
+"line": 11,
+"label": null,
+"why": "",
+"L": "",
+"del": "}",
+"add": "};",
+"ndel": 1
+},
+{
+"file": "es2020.string.d.ts",
+"line": 5,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 0
+},
+{
+"file": "es2020.string.d.ts",
+"line": 12,
+"label": "library-declarations.7",
+"why": "argument the engine accepts",
+"L": "a RegExp without the g flag throws, so only a string, which matchAll makes globa",
+"del": "matchAll(regexp: RegExp): RegExpStringIterator<RegExpExecArray>;",
+"add": "matchAll(regexp: string): RegExpStringIterator<RegExpExecArray>; // L: a RegExp without th",
+"ndel": 15
+},
+{
+"file": "es2021.intl.d.ts",
+"line": 0,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "declare namespace Intl {",
+"add": "",
+"ndel": 4
+},
+{
+"file": "es2021.intl.d.ts",
+"line": 1,
+"label": null,
+"why": "",
+"L": "",
+"del": "interface DateTimeFormatOptions {",
+"add": "",
+"ndel": 7
+},
+{
+"file": "es2021.intl.d.ts",
+"line": 3,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "interface DateTimeRangeFormatPart extends DateTimeFormatPart {",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 135
+},
+{
+"file": "es2021.promise.d.ts",
+"line": 7,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: AggregateError;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2021.string.d.ts",
+"line": 7,
+"label": "library-declarations.7",
+"why": "argument the engine accepts",
+"L": "a RegExp without the g flag throws",
+"del": "replaceAll(searchValue: string | RegExp, replaceValue: string): string;",
+"add": "replaceAll(searchValue: string, replaceValue: string): string; // L: a RegExp without the ",
+"ndel": 1
+},
+{
+"file": "es2021.string.d.ts",
+"line": 14,
+"label": "library-declarations.7",
+"why": "argument the engine accepts",
+"L": "the same",
+"del": "replaceAll(searchValue: string | RegExp, replacer: (substring: string, ...args: any[]) => ",
+"add": "replaceAll(searchValue: string, replacer: (substring: string, ...args: any[]) => string): ",
+"ndel": 1
+},
+{
+"file": "es2021.weakref.d.ts",
+"line": 3,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that observes the ga",
+"del": "",
+"add": "// L: the core performs no effects, so this file declares nothing that observes the garbag",
+"ndel": 0
+},
+{
+"file": "es2021.weakref.d.ts",
+"line": 15,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "the core performs no effects, so this file declares nothing that observes the ga",
+"del": "readonly prototype: WeakRef<any>;",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es2021.weakref.d.ts",
+"line": 23,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that observes the ga",
+"del": "declare var WeakRef: WeakRefConstructor;",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es2021.weakref.d.ts",
+"line": 47,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "the core performs no effects, so this file declares nothing that observes the ga",
+"del": "readonly prototype: FinalizationRegistry<any>;",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es2021.weakref.d.ts",
+"line": 53,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that observes the ga",
+"del": "",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es2022.intl.d.ts",
+"line": 0,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "declare namespace Intl {",
+"add": "",
+"ndel": 12
+},
+{
+"file": "es2022.intl.d.ts",
+"line": 1,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 23
+},
+{
+"file": "es2022.intl.d.ts",
+"line": 3,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "interface ResolvedSegmenterOptions {",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 90
+},
+{
+"file": "es2022.regexp.d.ts",
+"line": 11,
+"label": "library-declarations.6",
+"why": "result as wide as the engine",
+"L": "a group that took no part is undefined",
+"del": "[key: string]: [number, number];",
+"add": "[key: string]: [number, number] | undefined; // L: a group that took no part is undefined",
+"ndel": 1
+},
+{
+"file": "es2023.collection.d.ts",
+"line": 1,
+"label": "library-declarations.8",
+"why": "key",
+"L": "no symbol keys: a registered symbol can't be one, and its type can't say whether",
+"del": "interface WeakKeyTypes {",
+"add": "// L: no symbol keys: a registered symbol can't be one, and its type can't say whether it ",
+"ndel": 3
+},
+{
+"file": "es2023.intl.d.ts",
+"line": 0,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "declare namespace Intl {",
+"add": "",
+"ndel": 6
+},
+{
+"file": "es2023.intl.d.ts",
+"line": 1,
+"label": null,
+"why": "",
+"L": "",
+"del": "interface NumberFormatOptionsSignDisplayRegistry {",
+"add": "",
+"ndel": 3
+},
+{
+"file": "es2023.intl.d.ts",
+"line": 3,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "interface NumberFormatRangePartTypeRegistry extends NumberFormatPartTypeRegistry {",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 35
+},
+{
+"file": "es2024.arraybuffer.d.ts",
+"line": 1,
+"label": "writes.2",
+"why": "in-place block",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "",
+"add": "// L: the core changes no object in place, so this file declares nothing that does.",
+"ndel": 0
+},
+{
+"file": "es2024.arraybuffer.d.ts",
+"line": 16,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 7
+},
+{
+"file": "es2024.arraybuffer.d.ts",
+"line": 22,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "",
+"add": "",
+"ndel": 14
+},
+{
+"file": "es2024.object.d.ts",
+"line": 2,
+"label": "library-declarations.2",
+"why": "Object.groupBy",
+"L": "no Object.groupBy: its result has no prototype, which its type can't say. Map.gr",
+"del": "/**",
+"add": "// L: no Object.groupBy: its result has no prototype, which its type can't say. Map.groupB",
+"ndel": 9
+},
+{
+"file": "es2024.sharedmemory.d.ts",
+"line": 3,
+"label": "writes.2",
+"why": "in-place block",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "",
+"add": "// L: the core changes no object in place, so this file declares nothing that does.",
+"ndel": 0
+},
+{
+"file": "es2024.sharedmemory.d.ts",
+"line": 39,
+"label": "writes.2",
+"why": "in-place block",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "",
+"add": "",
+"ndel": 7
+},
+{
+"file": "es2025.collection.d.ts",
+"line": 50,
+"label": null,
+"why": "",
+"L": "each result is a new set, so a ReadonlySet hands out none it can be written thro",
+"del": "",
+"add": "// L: each result is a new set, so a ReadonlySet hands out none it can be written through",
+"ndel": 0
+},
+{
+"file": "es2025.collection.d.ts",
+"line": 54,
+"label": null,
+"why": "",
+"L": "each result is a new set, so a ReadonlySet hands out none it can be written thro",
+"del": "union<U>(other: ReadonlySetLike<U>): Set<T | U>;",
+"add": "union<U>(other: ReadonlySetLike<U>): ReadonlySet<T | U>;",
+"ndel": 1
+},
+{
+"file": "es2025.collection.d.ts",
+"line": 58,
+"label": null,
+"why": "",
+"L": "each result is a new set, so a ReadonlySet hands out none it can be written thro",
+"del": "intersection<U>(other: ReadonlySetLike<U>): Set<T & U>;",
+"add": "intersection<U>(other: ReadonlySetLike<U>): ReadonlySet<T & U>;",
+"ndel": 1
+},
+{
+"file": "es2025.collection.d.ts",
+"line": 62,
+"label": null,
+"why": "",
+"L": "each result is a new set, so a ReadonlySet hands out none it can be written thro",
+"del": "difference<U>(other: ReadonlySetLike<U>): Set<T>;",
+"add": "difference<U>(other: ReadonlySetLike<U>): ReadonlySet<T>;",
+"ndel": 1
+},
+{
+"file": "es2025.collection.d.ts",
+"line": 66,
+"label": null,
+"why": "",
+"L": "each result is a new set, so a ReadonlySet hands out none it can be written thro",
+"del": "symmetricDifference<U>(other: ReadonlySetLike<U>): Set<T | U>;",
+"add": "symmetricDifference<U>(other: ReadonlySetLike<U>): ReadonlySet<T | U>;",
+"ndel": 1
+},
+{
+"file": "es2025.float16.d.ts",
+"line": 8,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 0
+},
+{
+"file": "es2025.float16.d.ts",
+"line": 36,
+"label": "writes.2",
+"why": "in-place block",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es2025.float16.d.ts",
+"line": 46,
+"label": "writes.2",
+"why": "in-place block",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "/**",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es2025.float16.d.ts",
+"line": 175,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es2025.float16.d.ts",
+"line": 189,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es2025.float16.d.ts",
+"line": 203,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 12
+},
+{
+"file": "es2025.float16.d.ts",
+"line": 220,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es2025.float16.d.ts",
+"line": 228,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es2025.float16.d.ts",
+"line": 270,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, number]>;",
+"add": "entries(): ArrayIterator<readonly [number, number]>;",
+"ndel": 1
+},
+{
+"file": "es2025.float16.d.ts",
+"line": 285,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: Float16Array<ArrayBufferLike>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2025.float16.d.ts",
+"line": 348,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "",
+"add": "",
+"ndel": 8
+},
+{
+"file": "es2025.intl.d.ts",
+"line": 0,
+"label": null,
+"why": "",
+"L": "",
+"del": "/// <reference lib=\"es2018.intl\" />",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es2025.intl.d.ts",
+"line": 1,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "declare namespace Intl {",
+"add": "",
+"ndel": 7
+},
+{
+"file": "es2025.intl.d.ts",
+"line": 3,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "/**",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 174
+},
+{
+"file": "es2025.iterator.d.ts",
+"line": 22,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "T is declared covariant. The predicate overloads of filter and find bound their ",
+"del": "interface IteratorObject<T, TReturn, TNext> {",
+"add": "// L: T is declared covariant. The predicate overloads of filter and find bound their S by",
+"ndel": 1
+},
+{
+"file": "es2025.iterator.d.ts",
+"line": 41,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "T is declared covariant. The predicate overloads of filter and find bound their ",
+"del": "filter<S extends T>(predicate: (value: T, index: number) => value is S): IteratorObject<S,",
+"add": "filter<U, S extends U>(this: IteratorObject<U, unknown, never>, predicate: (value: U, inde",
+"ndel": 1
+},
+{
+"file": "es2025.iterator.d.ts",
+"line": 65,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "no overload without an initial value: on an empty list it throws. The element ty",
+"del": "flatMap<U>(callback: (value: T, index: number) => Iterator<U, unknown, undefined> | Iterab",
+"add": "flatMap<U>(callback: (value: T, index: number) => Iterator<U, unknown, undefined> | (Itera",
+"ndel": 9
+},
+{
+"file": "es2025.iterator.d.ts",
+"line": 80,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "readonly, so the iterator that hands it out stays covariant for values",
+"del": "toArray(): T[];",
+"add": "toArray(): readonly T[]; // L: readonly, so the iterator that hands it out stays covariant",
+"ndel": 1
+},
+{
+"file": "es2025.iterator.d.ts",
+"line": 111,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "readonly, so the iterator that hands it out stays covariant for values",
+"del": "find<S extends T>(predicate: (value: T, index: number) => value is S): S | undefined;",
+"add": "find<U, S extends U>(this: IteratorObject<U, unknown, never>, predicate: (value: U, index:",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 8,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that runs code from ",
+"del": "",
+"add": "// L: the core performs no effects, so this file declares nothing that runs code from a st",
+"ndel": 0
+},
+{
+"file": "es5.d.ts",
+"line": 13,
+"label": "writes.2",
+"why": "in-place block",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "/**",
+"add": "",
+"ndel": 6
+},
+{
+"file": "es5.d.ts",
+"line": 89,
+"label": "complete",
+"why": "engine-built object declared as a type literal",
+"L": "a plain object the engine builds, with own enumerable data properties, is declar",
+"del": "interface PropertyDescriptor {",
+"add": "// L: a plain object the engine builds, with own enumerable data properties, is declared a",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 98,
+"label": "complete",
+"why": "engine-built object declared as a type literal",
+"L": "a plain object the engine builds, with own enumerable data properties, is declar",
+"del": "}",
+"add": "};",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 110,
+"label": "complete",
+"why": "engine-built object declared as a type literal",
+"L": "a plain object the engine builds, with own enumerable data properties, is declar",
+"del": "/** Returns a date converted to a string using the current locale. */",
+"add": "",
+"ndel": 3
+},
+{
+"file": "es5.d.ts",
+"line": 137,
+"label": "complete",
+"why": "engine-built object declared as a type literal",
+"L": "a plain object the engine builds, with own enumerable data properties, is declar",
+"del": "/** A reference to the prototype for a class of objects. */",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es5.d.ts",
+"line": 159,
+"label": "writes.3",
+"why": "Object or Reflect mutator",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 28
+},
+{
+"file": "es5.d.ts",
+"line": 224,
+"label": "classes.4",
+"why": "apply, call, bind",
+"L": "no apply, call or bind: each binds a this, and the core has none",
+"del": "/**",
+"add": "// L: no apply, call or bind: each binds a this, and the core has none",
+"ndel": 21
+},
+{
+"file": "es5.d.ts",
+"line": 228,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "no apply, call or bind: each binds a this, and the core has none",
+"del": "prototype: any;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 231,
+"label": "library-declarations.1",
+"why": "caller, arguments",
+"L": "no caller or arguments: reading either on a strict-mode function throws, and eve",
+"del": "// Non-standard extensions",
+"add": "// L: no caller or arguments: reading either on a strict-mode function throws, and every f",
+"ndel": 3
+},
+{
+"file": "es5.d.ts",
+"line": 240,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "no caller or arguments: reading either on a strict-mode function throws, and eve",
+"del": "readonly prototype: Function;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 242,
+"label": "library-declarations.1",
+"why": "caller, arguments",
+"L": "no caller or arguments: reading either on a strict-mode function throws, and eve",
+"del": "declare var Function: FunctionConstructor;",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es5.d.ts",
+"line": 254,
+"label": null,
+"why": "",
+"L": "no apply, call or bind: each binds a this, and the core has none",
+"del": "/**",
+"add": "// L: no apply, call or bind: each binds a this, and the core has none",
+"ndel": 34
+},
+{
+"file": "es5.d.ts",
+"line": 258,
+"label": null,
+"why": "",
+"L": "no apply, call or bind: each binds a this, and the core has none",
+"del": "/**",
+"add": "// L: no apply, call or bind: each binds a this, and the core has none",
+"ndel": 33
+},
+{
+"file": "es5.d.ts",
+"line": 302,
+"label": "effects",
+"why": "effect",
+"L": "no apply, call or bind: each binds a this, and the core has none",
+"del": "/**",
+"add": "",
+"ndel": 6
+},
+{
+"file": "es5.d.ts",
+"line": 342,
+"label": "library-declarations.6",
+"why": "result as wide as the engine",
+"L": "a capture group that took no part splices in undefined",
+"del": "split(separator: string | RegExp, limit?: number): string[];",
+"add": "split(separator: string, limit?: number): string[];",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 355,
+"label": "library-declarations.6",
+"why": "result as wide as the engine",
+"L": "a capture group that took no part splices in undefined",
+"del": "/** Converts all alphabetic characters to lowercase, taking into account the host environm",
+"add": "",
+"ndel": 3
+},
+{
+"file": "es5.d.ts",
+"line": 358,
+"label": "library-declarations.6",
+"why": "result as wide as the engine",
+"L": "a capture group that took no part splices in undefined",
+"del": "/** Returns a string where all alphabetic characters have been converted to uppercase, tak",
+"add": "",
+"ndel": 3
+},
+{
+"file": "es5.d.ts",
+"line": 382,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "a capture group that took no part splices in undefined",
+"del": "readonly prototype: String;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 398,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "a capture group that took no part splices in undefined",
+"del": "readonly prototype: Boolean;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 434,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: Number;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 587,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/** Returns a pseudorandom number between 0 and 1. */",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es5.d.ts",
+"line": 615,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/** Returns a date as a string value. */",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es5.d.ts",
+"line": 619,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/** Gets the year, using local time. */",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es5.d.ts",
+"line": 621,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/** Gets the month, using local time. */",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es5.d.ts",
+"line": 623,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/** Gets the day-of-the-month, using local time. */",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es5.d.ts",
+"line": 625,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/** Gets the day of the week, using local time. */",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es5.d.ts",
+"line": 627,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/** Gets the hours in a date, using local time. */",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es5.d.ts",
+"line": 629,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/** Gets the minutes of a Date object, using local time. */",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es5.d.ts",
+"line": 631,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/** Gets the seconds of a Date object, using local time. */",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es5.d.ts",
+"line": 633,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/** Gets the milliseconds of a Date, using local time. */",
+"add": "",
+"ndel": 2
+},
+{
+"file": "es5.d.ts",
+"line": 635,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/** Gets the difference in minutes between Universal Coordinated Time (UTC) and the time o",
+"add": "",
+"ndel": 96
+},
+{
+"file": "es5.d.ts",
+"line": 658,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: Date;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 679,
+"label": "library-declarations.6",
+"why": "result as wide as the engine",
+"L": "a group that took no part is undefined",
+"del": "declare var Date: DateConstructor;",
+"add": "interface RegExpMatchArray extends Array<string | undefined> { // L: a group that took no ",
+"ndel": 3
+},
+{
+"file": "es5.d.ts",
+"line": 694,
+"label": "library-declarations.6",
+"why": "result as wide as the engine",
+"L": "a group that took no part is undefined",
+"del": "interface RegExpExecArray extends Array<string> {",
+"add": "interface RegExpExecArray extends Array<string | undefined> { // L: a group that took no p",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 745,
+"label": "library-declarations.6",
+"why": "result as wide as the engine",
+"L": "a group that took no part is undefined",
+"del": "readonly \"prototype\": RegExp;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 798,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: Error;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 808,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: EvalError;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 818,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: RangeError;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 828,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: ReferenceError;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 838,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: SyntaxError;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 848,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: TypeError;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 858,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: URIError;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 879,
+"label": "library-declarations.7",
+"why": "JSON.stringify",
+"L": "undefined for a function, a symbol or undefined",
+"del": "stringify(value: any, replacer?: (this: any, key: string, value: any) => any, space?: stri",
+"add": "stringify(value: any, replacer?: (this: any, key: string, value: any) => any, space?: stri",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 887,
+"label": "library-declarations.7",
+"why": "JSON.stringify",
+"L": "undefined for a function, a symbol or undefined",
+"del": "stringify(value: any, replacer?: (number | string)[] | null, space?: string | number): str",
+"add": "stringify(value: any, replacer?: (number | string)[] | null, space?: string | number): str",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 907,
+"label": "effects",
+"why": "effect",
+"L": "undefined for a function, a symbol or undefined",
+"del": "/**",
+"add": "",
+"ndel": 4
+},
+{
+"file": "es5.d.ts",
+"line": 912,
+"label": "library-declarations.9",
+"why": "concat",
+"L": "concat spreads only an array, so it takes no structural ConcatArray",
+"del": "concat(...items: ConcatArray<T>[]): T[];",
+"add": "concat(...items: (readonly T[])[]): T[]; // L: concat spreads only an array, so it takes n",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 917,
+"label": "library-declarations.9",
+"why": "concat",
+"L": "concat spreads only an array, so it takes no structural ConcatArray",
+"del": "concat(...items: (T | ConcatArray<T>)[]): T[];",
+"add": "concat(...items: (T | readonly T[])[]): T[];",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 992,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 6
+},
+{
+"file": "es5.d.ts",
+"line": 1000,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 6
+},
+{
+"file": "es5.d.ts",
+"line": 1016,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "a new array, so concat's argument stays covariant for values",
+"del": "slice(start?: number, end?: number): T[];",
+"add": "slice(start?: number, end?: number): readonly T[]; // L: a new array, so concat's argument",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1027,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "a new array, so concat's argument stays covariant for values",
+"del": "/**",
+"add": "",
+"ndel": 14
+},
+{
+"file": "es5.d.ts",
+"line": 1033,
+"label": "library-declarations.9",
+"why": "concat",
+"L": "concat spreads only an array, so it takes no structural ConcatArray",
+"del": "concat(...items: ConcatArray<T>[]): T[];",
+"add": "concat(...items: (readonly T[])[]): T[]; // L: concat spreads only an array, so it takes n",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1039,
+"label": "library-declarations.9",
+"why": "concat",
+"L": "concat spreads only an array, so it takes no structural ConcatArray",
+"del": "concat(...items: (T | ConcatArray<T>)[]): T[];",
+"add": "concat(...items: (T | readonly T[])[]): T[];",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1044,
+"label": "library-declarations.9",
+"why": "concat",
+"L": "concat spreads only an array, so it takes no structural ConcatArray",
+"del": "/**",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es5.d.ts",
+"line": 1054,
+"label": "library-declarations.9",
+"why": "concat",
+"L": "concat spreads only an array, so it takes no structural ConcatArray",
+"del": "/**",
+"add": "",
+"ndel": 35
+},
+{
+"file": "es5.d.ts",
+"line": 1118,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 6
+},
+{
+"file": "es5.d.ts",
+"line": 1126,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 6
+},
+{
+"file": "es5.d.ts",
+"line": 1139,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "no constructor: given one number it makes that many holes, and which it does is ",
+"del": "new (arrayLength?: number): any[];",
+"add": "// L: no constructor: given one number it makes that many holes, and which it does is deci",
+"ndel": 8
+},
+{
+"file": "es5.d.ts",
+"line": 1145,
+"label": "complete",
+"why": "engine-built object declared as a type literal",
+"L": "a plain object, as PropertyDescriptor is.",
+"del": "interface TypedPropertyDescriptor<T> {",
+"add": "// L: a plain object, as PropertyDescriptor is.",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1153,
+"label": "complete",
+"why": "engine-built object declared as a type literal",
+"L": "a plain object, as PropertyDescriptor is.",
+"del": "}",
+"add": "};",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1170,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "T is declared covariant, so checkVarianceAnnotations holds it against the member",
+"del": "interface Promise<T> {",
+"add": "// L: T is declared covariant, so checkVarianceAnnotations holds it against the members in",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1262,
+"label": null,
+"why": "",
+"L": "(...args: never) takes no argument list, so every function is one",
+"del": "type Parameters<T extends (...args: any) => any> = T extends (...args: infer P) => any ? P",
+"add": "type Parameters<T extends (...args: never) => unknown> = T extends (...args: infer P) => u",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1267,
+"label": null,
+"why": "",
+"L": "(...args: never) takes no argument list, so every function is one",
+"del": "type ConstructorParameters<T extends abstract new (...args: any) => any> = T extends abstr",
+"add": "type ConstructorParameters<T extends abstract new (...args: never) => unknown> = T extends",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1272,
+"label": null,
+"why": "",
+"L": "(...args: never) takes no argument list, so every function is one",
+"del": "type ReturnType<T extends (...args: any) => any> = T extends (...args: any) => infer R ? R",
+"add": "type ReturnType<T extends (...args: never) => unknown> = T extends (...args: never) => inf",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1277,
+"label": null,
+"why": "",
+"L": "(...args: never) takes no argument list, so every function is one",
+"del": "type InstanceType<T extends abstract new (...args: any) => any> = T extends abstract new (",
+"add": "type InstanceType<T extends abstract new (...args: never) => unknown> = T extends abstract",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1344,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: ArrayBuffer;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1430,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "",
+"add": "",
+"ndel": 62
+},
+{
+"file": "es5.d.ts",
+"line": 1432,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: DataView<ArrayBufferLike>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1461,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 1471,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es5.d.ts",
+"line": 1549,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 1563,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 1577,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 1594,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 1602,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es5.d.ts",
+"line": 1613,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "readonly prototype: Int8Array<ArrayBufferLike>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1671,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 1681,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es5.d.ts",
+"line": 1759,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 1773,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 1787,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 1804,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 1812,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es5.d.ts",
+"line": 1823,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "readonly prototype: Uint8Array<ArrayBufferLike>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 1881,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 1891,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es5.d.ts",
+"line": 1969,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 1983,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 0
+},
+{
+"file": "es5.d.ts",
+"line": 1993,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "* the accumulation. The first call to the callbackfn function provides this value as an",
+"add": "* the accumulation. The first call to the callbackfn function provides this value as an ar",
+"ndel": 15
+},
+{
+"file": "es5.d.ts",
+"line": 1997,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 2014,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 2022,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es5.d.ts",
+"line": 2033,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "readonly prototype: Uint8ClampedArray<ArrayBufferLike>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 2091,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 2101,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es5.d.ts",
+"line": 2178,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 2192,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 2206,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 2223,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 2231,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es5.d.ts",
+"line": 2242,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "readonly prototype: Int16Array<ArrayBufferLike>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 2300,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 2310,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es5.d.ts",
+"line": 2388,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 2402,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 2416,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 2433,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 2441,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es5.d.ts",
+"line": 2452,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "readonly prototype: Uint16Array<ArrayBufferLike>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 2509,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 2519,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es5.d.ts",
+"line": 2597,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 2611,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 2625,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 2642,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 2650,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es5.d.ts",
+"line": 2661,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "readonly prototype: Int32Array<ArrayBufferLike>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 2719,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 2729,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es5.d.ts",
+"line": 2806,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 2820,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 2834,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 2851,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 2859,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es5.d.ts",
+"line": 2870,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "readonly prototype: Uint32Array<ArrayBufferLike>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 2928,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 2938,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es5.d.ts",
+"line": 3016,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 3030,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 3044,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 3061,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 3069,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es5.d.ts",
+"line": 3080,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "readonly prototype: Float32Array<ArrayBufferLike>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 3138,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 3148,
+"label": "writes.2",
+"why": "mutating method",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 10
+},
+{
+"file": "es5.d.ts",
+"line": 3226,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 3240,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "",
+"add": "// L: no overload without an initial value: on an empty list it throws",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 3254,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 12
+},
+{
+"file": "es5.d.ts",
+"line": 3271,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 11
+},
+{
+"file": "es5.d.ts",
+"line": 3279,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "/**",
+"add": "",
+"ndel": 5
+},
+{
+"file": "es5.d.ts",
+"line": 3290,
+"label": "library-declarations.5",
+"why": "reduce overload without an initial value",
+"L": "no overload without an initial value: on an empty list it throws",
+"del": "readonly prototype: Float64Array<ArrayBufferLike>;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "es5.d.ts",
+"line": 3323,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "/////////////////////////////",
+"add": "",
+"ndel": 148
+},
+{
+"file": "es5.d.ts",
+"line": 3324,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 7
+},
+{
+"file": "es5.d.ts",
+"line": 3327,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 6
+},
+{
+"file": "es5.d.ts",
+"line": 3330,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "/**",
+"add": "",
+"ndel": 19
+},
+{
+"file": "esnext.array.d.ts",
+"line": 6,
+"label": "library-declarations.6",
+"why": "result as wide as the engine",
+"L": "an array-like's places may hold nothing",
+"del": "fromAsync<T>(iterableOrArrayLike: AsyncIterable<T> | Iterable<T | PromiseLike<T>> | ArrayL",
+"add": "fromAsync<T>(iterableOrArrayLike: AsyncIterable<T> | Iterable<T | PromiseLike<T>>): Promis",
+"ndel": 1
+},
+{
+"file": "esnext.array.d.ts",
+"line": 17,
+"label": null,
+"why": "",
+"L": "the same",
+"del": "fromAsync<T, U>(iterableOrArrayLike: AsyncIterable<T> | Iterable<T> | ArrayLike<T>, mapFn:",
+"add": "fromAsync<T, U>(iterableOrArrayLike: AsyncIterable<T> | Iterable<T>, mapFn: (value: Awaite",
+"ndel": 1
+},
+{
+"file": "esnext.collection.d.ts",
+"line": 3,
+"label": "writes.2",
+"why": "in-place block",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "",
+"add": "// L: the core changes no object in place, so this file declares nothing that does.",
+"ndel": 0
+},
+{
+"file": "esnext.collection.d.ts",
+"line": 4,
+"label": "writes.2",
+"why": "in-place block",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "/**",
+"add": "",
+"ndel": 12
+},
+{
+"file": "esnext.collection.d.ts",
+"line": 7,
+"label": "writes.2",
+"why": "in-place block",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "/**",
+"add": "",
+"ndel": 12
+},
+{
+"file": "esnext.disposable.d.ts",
+"line": 5,
+"label": "writes.2",
+"why": "in-place block",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "",
+"add": "// L: the core changes no object in place, so this file declares nothing that does.",
+"ndel": 0
+},
+{
+"file": "esnext.disposable.d.ts",
+"line": 33,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "the core changes no object in place, so this file declares nothing that does.",
+"del": "readonly prototype: SuppressedError;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.disposable.d.ts",
+"line": 99,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: DisposableStack;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.disposable.d.ts",
+"line": 100,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "declare var DisposableStack: DisposableStackConstructor;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.disposable.d.ts",
+"line": 164,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: AsyncDisposableStack;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.disposable.d.ts",
+"line": 165,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "declare var AsyncDisposableStack: AsyncDisposableStackConstructor;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.disposable.d.ts",
+"line": 167,
+"label": "complete",
+"why": "variance annotation or this-bound overload",
+"L": "",
+"del": "interface IteratorObject<T, TReturn, TNext> extends Disposable {",
+"add": "interface IteratorObject<out T, TReturn, TNext> extends Disposable {",
+"ndel": 1
+},
+{
+"file": "esnext.intl.d.ts",
+"line": 0,
+"label": null,
+"why": "",
+"L": "",
+"del": "/// <reference lib=\"esnext.temporal\" />",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.intl.d.ts",
+"line": 1,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "declare namespace Intl {",
+"add": "",
+"ndel": 2
+},
+{
+"file": "esnext.intl.d.ts",
+"line": 3,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the machi",
+"del": "interface DateTimeFormat {",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the machine's",
+"ndel": 86
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 5,
+"label": "effects",
+"why": "effects block",
+"L": "the core performs no effects, so this file declares nothing that reads the clock",
+"del": "",
+"add": "// L: the core performs no effects, so this file declares nothing that reads the clock, th",
+"ndel": 0
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 107,
+"label": null,
+"why": "",
+"L": "",
+"del": "namespace Now {",
+"add": "",
+"ndel": 9
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 146,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): stri",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 153,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: PlainDate;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 176,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): stri",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 183,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: PlainTime;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 224,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): stri",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 234,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: PlainDateTime;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 289,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): stri",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 303,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: ZonedDateTime;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 343,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DurationFormatOptions): stri",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 350,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: Duration;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 370,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): stri",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 378,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: Instant;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 407,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): stri",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 415,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: PlainYearMonth;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 433,
+"label": "effects",
+"why": "effect",
+"L": "",
+"del": "toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): stri",
+"add": "",
+"ndel": 1
+},
+{
+"file": "esnext.temporal.d.ts",
+"line": 441,
+"label": "prototypes.2",
+"why": "prototype field",
+"L": "",
+"del": "readonly prototype: PlainMonthDay;",
+"add": "",
+"ndel": 1
+},
+{
+"file": "webworker.generated.d.ts",
+"line": 15181,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, CSSNumericValue]>;",
+"add": "entries(): ArrayIterator<readonly [number, CSSNumericValue]>;",
+"ndel": 1
+},
+{
+"file": "webworker.generated.d.ts",
+"line": 15188,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, CSSTransformComponent]>;",
+"add": "entries(): ArrayIterator<readonly [number, CSSTransformComponent]>;",
+"ndel": 1
+},
+{
+"file": "webworker.generated.d.ts",
+"line": 15195,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): ArrayIterator<[number, CSSUnparsedSegment]>;",
+"add": "entries(): ArrayIterator<readonly [number, CSSUnparsedSegment]>;",
+"ndel": 1
+},
+{
+"file": "webworker.generated.d.ts",
+"line": 15250,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "[Symbol.iterator](): FormDataIterator<[string, FormDataEntryValue]>;",
+"add": "[Symbol.iterator](): FormDataIterator<readonly [string, FormDataEntryValue]>;",
+"ndel": 1
+},
+{
+"file": "webworker.generated.d.ts",
+"line": 15252,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): FormDataIterator<[string, FormDataEntryValue]>;",
+"add": "entries(): FormDataIterator<readonly [string, FormDataEntryValue]>;",
+"ndel": 1
+},
+{
+"file": "webworker.generated.d.ts",
+"line": 15329,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "[Symbol.iterator](): HeadersIterator<[string, string]>;",
+"add": "[Symbol.iterator](): HeadersIterator<readonly [string, string]>;",
+"ndel": 1
+},
+{
+"file": "webworker.generated.d.ts",
+"line": 15331,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): HeadersIterator<[string, string]>;",
+"add": "entries(): HeadersIterator<readonly [string, string]>;",
+"ndel": 1
+},
+{
+"file": "webworker.generated.d.ts",
+"line": 15370,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "[Symbol.iterator](): StylePropertyMapReadOnlyIterator<[string, Iterable<CSSStyleValue>]>;",
+"add": "[Symbol.iterator](): StylePropertyMapReadOnlyIterator<readonly [string, Iterable<CSSStyleV",
+"ndel": 2
+},
+{
+"file": "webworker.generated.d.ts",
+"line": 15413,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "[Symbol.iterator](): URLSearchParamsIterator<[string, string]>;",
+"add": "[Symbol.iterator](): URLSearchParamsIterator<readonly [string, string]>;",
+"ndel": 1
+},
+{
+"file": "webworker.generated.d.ts",
+"line": 15415,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "entries(): URLSearchParamsIterator<[string, string]>;",
+"add": "entries(): URLSearchParamsIterator<readonly [string, string]>;",
+"ndel": 1
+},
+{
+"file": "webworker.generated.d.ts",
+"line": 15577,
+"label": "writes.2",
+"why": "readonly result",
+"L": "",
+"del": "[Symbol.asyncIterator](): FileSystemDirectoryHandleAsyncIterator<[string, FileSystemDirect",
+"add": "[Symbol.asyncIterator](): FileSystemDirectoryHandleAsyncIterator<readonly [string, FileSys",
+"ndel": 2
+}
+]
