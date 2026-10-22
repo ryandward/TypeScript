@@ -6,8 +6,11 @@ Claim. If the lab accepts a program, a generic type relates to another only wher
 Counterexample in plain TypeScript. Two conditional types with the same extends type relate when their check
 types relate in either direction, though [A] and [B] with B extends A pick different branches wherever B
 satisfies the extends type and A doesn't. A value relates to T[K] when it relates to T[K]'s constraint for
-writing, though T extends { a: string | number } may narrow a to string. Each witness returns a value of the
-wrong branch or the wrong member, and Node throws a TypeError.
+writing, though T extends { a: string | number } may narrow a to string. Two types whose instantiations nest
+three deep relate without comparing the levels below, and a generic type that refers to itself is measured as if
+the reference related whatever its type arguments, so a type that is invariant through its own reference is
+measured covariant. Each witness returns a value of the wrong branch, the wrong member or the wrong level, and
+Node throws a TypeError.
 
 Obligation 1, a generic type related through one of its instantiations: TS2322 (TypeScript's code)
   Statement. Two conditional types with the same extends type relate only if their check types relate both ways,
@@ -29,3 +32,50 @@ Obligation 1, a generic type related through one of its instantiations: TS2322 (
   Controls:
     generic-relations-ok.ts            conditional types with the same check type; a T[K] whose object isn't generic
     same-anonymous-instantiation.ts    two instantiations of one anonymous type with the same type argument
+
+Obligation 2, a comparison cut off at depth: TS2925
+  Statement. A comparison that recursiveTypeRelatedTo cuts off because both sides keep nesting is unproven, and an
+  unproven relation fails, except for references G<A> and H<A> to two generic types with the same type arguments
+  whose families relate: G<T> to H<T>, with the type parameters themselves for T, which then holds for every A. A
+  comparison that comes back to a pair it is already comparing still relates, as TypeScript has it: that is
+  coinduction over a regular type, and nothing below it is left uncompared.
+  Mechanism. Where isDeeplyNestedType marks both stacks and TypeScript answered Ternary.Maybe, recursiveTypeRelatedTo
+  calls relateFamilyAtCutoff and reports TS2925 when it fails. relateFamilyAtCutoff relates the two families in a
+  relation of their own and keeps the answer in familyRelations, by relation. A family already being related is
+  assumed, as Ternary.Unknown, which no cache records, and a proof that assumed a family further out, or a variance
+  getVariancesWorker assumed, answers Unknown and isn't kept.
+  Why it suffices. TypeScript's Maybe at the cutoff was the one answer the relation gave about levels it never
+  compared. The family relation compares every level of G<T> and H<T>, and assumes the pair it is proving only
+  below the levels it has compared, so it is coinduction over the family, as the cycle above is over a pair. Where
+  it assumes something not yet proven, its answer is Unknown until that proof ends.
+  Witnesses:
+    rel-deeply-nested.ts               two chains that agree for three levels and differ on the fourth
+  Controls:
+    recursive-relations-ok.ts          a regular recursive type widened, and a Set viewed as a ReadonlySet
+  Rejected sound code, because the cutoff fires where nothing is wrong:
+    cutoff-unproven.ts                 two families that never read T, and six aliased boxes into a recursive union
+
+Obligation 3, a variance measured through the type's own reference: TS2322 (TypeScript's code)
+  Statement. While a generic type's variance is measured, a reference to the type inside its own declaration relates
+  its type arguments by the variance under test for the parameter being measured, the measured variance for the
+  parameters before it, and invariance for the parameters after, which aren't measured yet. A variance stands only
+  if the declaration relates under that assumption. A variance the declaration states, as Promise's out T, is
+  checked against the declaration instead of measured.
+  Mechanism. getVariancesWorker records the assumption in varianceAssumptions for each of its tests, and
+  structuredTypeRelatedToWorker, where getVariances or getAliasVariances returns emptyArray, relates the type
+  arguments by it in relateByAssumedVariance, or both ways where nothing is assumed, and answers Ternary.Unknown on
+  success, which no cache records. A failure found while a variance is assumed isn't recorded either, since the
+  assumed invariance of a later parameter can be its cause. The library declares Promise's T out, which
+  checkVarianceAnnotations holds against Promise's declaration.
+  Why it suffices. TypeScript answered Unknown whatever the type arguments were, which assumed the type independent
+  of every parameter without checking it. Here each test assumes what it tests and checks the declaration under
+  that assumption, so a measured variance is one the declaration bears out: coinduction over the type's own
+  references. The parameters after the one being measured are assumed invariant, the strongest demand, so no test
+  passes on a variance the measurement hasn't found.
+  Witnesses:
+    rel-variance-recursive.ts          a type invariant through its own reference, widened as if covariant
+    rel-alias-variance-recursive.ts    the same type as an alias
+  Controls:
+    recursive-relations-ok.ts          a recursive interface measured covariant, and a Promise widened
+  Rejected sound code, because the measurement assumes one variance at a time:
+    variance-phantom.ts                a type that reads its parameter only through itself, measured covariant

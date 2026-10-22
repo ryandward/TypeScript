@@ -2,7 +2,7 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds twenty-eight diagnostics, changes the checker and two functions in utilities.ts that decide
+things: it adds twenty-nine diagnostics, changes the checker and two functions in utilities.ts that decide
 which files are checked, adds one internal type flag, declares readonly the new objects and collections the
 library hands out, deletes from the ES library every effect and every method that changes an object in place,
 and corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
@@ -17,7 +17,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Twenty-eight new errors, from TS2892 to TS2924, each the code of one rule's mechanism in
+Twenty-nine new errors, from TS2892 to TS2925, each the code of one rule's mechanism in
 L/rules/<rule>/rule.txt. The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891
 and TS2894 to the write rules, TS2897 to definite-assignment, TS2918 and TS2921 to reads that open-record now
 types as unknown and width leaves to TypeScript, and TS2922 to conversions, which was withdrawn.
@@ -90,6 +90,8 @@ types as unknown and width leaves to TypeScript, and TS2922 to conversions, whic
   TS2924  receivers
           '{0}' is a method of the engine's '{1}' and reads its object as this, so it is read only to be called
           where it stands.
+  TS2925  generic-relations
+          Type '{0}' and type '{1}' nest deeper than the comparison follows, so L doesn't assume they relate.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -302,12 +304,22 @@ receivers (soundness: TS2924; 7905011b8)
   static, is reported unless a call, a new or a tagged template invokes it where it stands, from property access
   and from a value read by key in getPropertyTypeForIndexType.
 
-generic-relations (soundness: TypeScript's TS2322; 7905011b8)
+generic-relations (soundness: TS2925 and TypeScript's TS2322; 7905011b8)
 - Two conditional types with the same extends type relate only if their check types relate both ways.
 - The writing constraint of an indexed access target is taken only when its object type isn't generic, or under
   comparability.
 - signaturesRelatedTo erases type parameters in its pairwise comparison of two instantiations of the same anonymous
   type only under comparability (566a8f9e5).
+- recursiveTypeRelatedTo answers False and reports TS2925 where isDeeplyNestedType marks both stacks, which
+  TypeScript answered Maybe, unless relateFamilyAtCutoff, new, relates the pair: references to two generic types
+  with the same type arguments whose families relate, G<T> to H<T> over the type parameters themselves. Each
+  relation keeps the families' answers in familyRelations; a family being related further out is assumed as
+  Unknown, and an answer that rests on an assumption isn't kept (familiesInProgress, outermostFamilyAssumed).
+- getVariancesWorker records in varianceAssumptions, for each test of a type parameter, the variance under test, the
+  measured variances of the parameters before it and invariance for those after. Where getVariances or
+  getAliasVariances returns emptyArray, which TypeScript answered Unknown whatever the type arguments,
+  relateByAssumedVariance, new, relates them by that assumption, or both ways where none is recorded, and answers
+  Unknown on success. recursiveTypeRelatedTo doesn't record a failure while a variance is assumed.
 
 tuples (soundness: TypeScript's TS18048; a8277f220)
 - createNormalizedTupleType types a tuple whose optional element comes before a required one as the union of its
@@ -347,6 +359,12 @@ which L doesn't write.
   StylePropertyMapReadOnly; the async iterator and entries() of FileSystemDirectoryHandle.
 - webworker.generated.d.ts: the same for the eight of those it declares: CSSNumericArray, CSSTransformValue,
   CSSUnparsedValue, FormData, Headers, StylePropertyMapReadOnly, URLSearchParams and FileSystemDirectoryHandle.
+
+Promise's T is declared out, so its variance comes from the declaration, which checkVarianceAnnotations holds
+against Promise's members, instead of a measurement through then's recursive Promise, which generic-relations now
+measures by assumption.
+
+- es5.d.ts, es2015.iterable.d.ts, es2015.symbol.wellknown.d.ts and es2018.promise.d.ts: interface Promise<out T>.
 
 
 The library's effects (src/lib; 8ab65f25b)

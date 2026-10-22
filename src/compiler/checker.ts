@@ -1529,6 +1529,13 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     var withinUnreachableCode = false;
     // L: set while overload resolution relates arguments whose parameter types aren't fully inferred yet (#17041).
     var excessPropertyChecksSilenced = false;
+    // L: the variances getVariancesWorker assumes for a generic type while it measures it, one per type parameter.
+    var varianceAssumptions = new Map<Symbol, VarianceFlags[]>();
+    // L: generic families G<T> to H<T> proven or refuted at the depth cutoff, by relation; the families being related,
+    // outermost first; and the outermost of them that the proofs under way have assumed.
+    var familyRelations = new Map<Map<string, RelationComparisonResult>, Map<string, Ternary>>();
+    var familiesInProgress: [Map<string, RelationComparisonResult>, string][] = [];
+    var outermostFamilyAssumed = 0;
     // L: set while compareSignaturesRelated relates a parameter as a value flow, under valueAssignableRelation, whose own
     // parameter comparisons already refuse any, so a signature inside doesn't start another relation.
     var relatingParameterAsValue = false;
@@ -23475,6 +23482,82 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             return Ternary.False;
         }
 
+        // L: references G<A> and H<A> to two generic types with the same type arguments relate, at the depth cutoff, if the
+        // family relates: G<T> to H<T> with the type parameters themselves for T, which then holds for every A. A family
+        // already being related is assumed to relate, coinduction over families, as Set<X> to ReadonlySet<X> needs, where
+        // each union method's result nests X deeper. Any other cutoff stays unproven.
+        function relateFamilyAtCutoff(source: Type, target: Type): Ternary {
+            if (!(getObjectFlags(source) & ObjectFlags.Reference && getObjectFlags(target) & ObjectFlags.Reference)) {
+                return Ternary.False;
+            }
+            const sourceTarget = (source as TypeReference).target;
+            const targetTarget = (target as TypeReference).target;
+            const parameters = sourceTarget.typeParameters;
+            if (!parameters || !targetTarget.typeParameters || targetTarget.typeParameters.length !== parameters.length || sourceTarget === targetTarget) {
+                return Ternary.False;
+            }
+            const sourceArguments = getTypeArguments(source as TypeReference);
+            const targetArguments = getTypeArguments(target as TypeReference);
+            for (let i = 0; i < parameters.length; i++) {
+                if (sourceArguments[i] !== targetArguments[i]) {
+                    return Ternary.False;
+                }
+            }
+            const key = `${getTypeId(sourceTarget)},${getTypeId(targetTarget)}`;
+            let families = familyRelations.get(relation);
+            if (!families) {
+                familyRelations.set(relation, families = new Map());
+            }
+            const known = families.get(key);
+            if (known !== undefined) {
+                return known;
+            }
+            const assumedAt = familiesInProgress.findIndex(([r, k]) => r === relation && k === key);
+            if (assumedAt >= 0) {
+                // The family is being related further out, and is assumed, as Unknown, which no cache records.
+                outermostFamilyAssumed = Math.min(outermostFamilyAssumed, assumedAt);
+                return Ternary.Unknown;
+            }
+            const depth = familiesInProgress.length;
+            const saveOutermost = outermostFamilyAssumed;
+            outermostFamilyAssumed = depth;
+            familiesInProgress.push([relation, key]);
+            const related = isTypeRelatedTo(createTypeReference(sourceTarget, parameters), createTypeReference(targetTarget, parameters), relation);
+            familiesInProgress.pop();
+            // A proof that assumed a family further out, or an assumed variance, holds only if they do, so it answers
+            // Unknown and isn't recorded. A failure is recorded unless a variance was assumed: assuming a family
+            // only grants relations.
+            const conditional = outermostFamilyAssumed < depth || varianceAssumptions.size > 0;
+            outermostFamilyAssumed = Math.min(saveOutermost, outermostFamilyAssumed);
+            if (!related) {
+                if (!varianceAssumptions.size) {
+                    families.set(key, Ternary.False);
+                }
+                return Ternary.False;
+            }
+            if (conditional) {
+                return Ternary.Unknown;
+            }
+            families.set(key, Ternary.True);
+            return Ternary.True;
+        }
+
+        // L: the type arguments of a recursive reference to a generic type whose variance is still being measured, related
+        // by the variance the measurement assumes (getVariancesWorker), or both ways, as an invariant parameter's are,
+        // where nothing is assumed. A success answers Unknown, which keeps it out of the relation's cache.
+        function relateByAssumedVariance(symbol: Symbol | undefined, sources: readonly Type[], targets: readonly Type[], intersectionState: IntersectionState): Ternary {
+            const assumed = symbol && varianceAssumptions.get(symbol);
+            let related: Ternary | undefined = assumed ? typeArgumentsRelatedTo(sources, targets, assumed, /*reportErrors*/ false, intersectionState) : undefined;
+            if (related === undefined) {
+                related = Ternary.True;
+                for (let i = 0; i < sources.length && i < targets.length && related; i++) {
+                    related = isRelatedTo(sources[i], targets[i], RecursionFlags.Both, /*reportErrors*/ false) &&
+                        isRelatedTo(targets[i], sources[i], RecursionFlags.Both, /*reportErrors*/ false);
+                }
+            }
+            return related ? Ternary.Unknown : Ternary.False;
+        }
+
         function typeRelatedToEachType(source: Type, target: IntersectionType, reportErrors: boolean, intersectionState: IntersectionState): Ternary {
             let result = Ternary.True;
             const targetTypes = target.types;
@@ -23706,7 +23789,14 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     depth: sourceDepth,
                     targetDepth,
                 });
-                result = Ternary.Maybe;
+                // L: both sides nest the way an infinite type's instantiations do, so the comparison is cut off without
+                // a proof either way, and an unproven relation fails closed. A cycle that returns to a pair already on the stack, above, is
+                // coinduction over a regular type and still relates, and so does a pair of references with the same
+                // type arguments whose generic family relates (relateFamilyAtCutoff).
+                result = relateFamilyAtCutoff(source, target);
+                if (!result && reportErrors) {
+                    reportError(Diagnostics.Type_0_and_type_1_nest_deeper_than_the_comparison_follows_so_L_doesn_t_assume_they_relate, typeToString(source), typeToString(target));
+                }
             }
             else {
                 tracing?.push(tracing.Phase.CheckTypes, "structuredTypeRelatedTo", { sourceId: source.id, targetId: target.id });
@@ -23742,7 +23832,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             else {
                 // A false result goes straight into global cache (when something is false under
                 // assumptions it will also be false without assumptions)
-                relation.set(id, RelationComparisonResult.Failed | propagatingVarianceFlags);
+                // L: except an assumed variance (getVariancesWorker), which can withhold a relation as well as grant one:
+                // a parameter not yet measured is assumed invariant, and the failure can be that assumption's.
+                if (!varianceAssumptions.size) {
+                    relation.set(id, RelationComparisonResult.Failed | propagatingVarianceFlags);
+                }
                 relationCount--;
                 resetMaybeStack(/*markAllAsSucceeded*/ false);
             }
@@ -23929,8 +24023,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 source.aliasSymbol === target.aliasSymbol && !(isMarkerType(source) || isMarkerType(target))
             ) {
                 const variances = getAliasVariances(source.aliasSymbol);
+                // L: as for a generic type's reference below: a recursive invocation relates the type arguments by the
+                // variance being assumed instead of answering Unknown whatever they are.
                 if (variances === emptyArray) {
-                    return Ternary.Unknown;
+                    return relateByAssumedVariance(source.aliasSymbol, source.aliasTypeArguments, target.aliasTypeArguments!, intersectionState);
                 }
                 const params = getSymbolLinks(source.aliasSymbol).typeParameters!;
                 const minParams = getMinTypeArgumentCount(params);
@@ -24364,11 +24460,12 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     // type references (which are intended by be compared structurally). Obtain the variance
                     // information for the type parameters and relate the type arguments accordingly.
                     const variances = getVariances((source as TypeReference).target);
-                    // We return Ternary.Maybe for a recursive invocation of getVariances (signalled by emptyArray). This
-                    // effectively means we measure variance only from type parameter occurrences that aren't nested in
-                    // recursive instantiations of the generic type.
+                    // L: a recursive invocation of getVariances (signalled by emptyArray), while the generic type's variance
+                    // is still being measured, relates the type arguments by the variance the measurement assumes
+                    // (relateByAssumedVariance), instead of answering Unknown, which measured only the occurrences outside
+                    // the recursion.
                     if (variances === emptyArray) {
-                        return Ternary.Unknown;
+                        return relateByAssumedVariance((source as TypeReference).target.symbol, getTypeArguments(source as TypeReference), getTypeArguments(target as TypeReference), intersectionState);
                     }
                     const varianceResult = relateVariances(getTypeArguments(source as TypeReference), getTypeArguments(target as TypeReference), variances, intersectionState);
                     if (varianceResult !== undefined) {
@@ -25389,7 +25486,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 resolutionStart = resolutionTargets.length;
             }
             links.variances = emptyArray;
-            const variances = [];
+            const variances: VarianceFlags[] = [];
             for (const tp of typeParameters) {
                 const modifiers = getTypeParameterModifiers(tp);
                 let variance = modifiers & ModifierFlags.Out ?
@@ -25405,14 +25502,33 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     // invariance, covariance, contravariance or bivariance.
                     const typeWithSuper = createMarkerType(symbol, tp, markerSuperType);
                     const typeWithSub = createMarkerType(symbol, tp, markerSubType);
-                    variance = (isTypeAssignableTo(typeWithSub, typeWithSuper) ? VarianceFlags.Covariant : 0) |
-                        (isTypeAssignableTo(typeWithSuper, typeWithSub) ? VarianceFlags.Contravariant : 0);
+                    // L: each test assumes the variance it tests for the parameter, the measured variance for the ones
+                    // before it and invariance for the ones after, and a recursive reference to the type relates its
+                    // arguments by that assumption: coinduction that checks what it assumes, where TypeScript assumed
+                    // the reference related whatever its arguments.
+                    const savedAssumption = varianceAssumptions.get(symbol);
+                    const assume = (tested: VarianceFlags) =>
+                        varianceAssumptions.set(symbol, typeParameters.map((_, j) => j < variances.length ? variances[j] : j === variances.length ? tested : VarianceFlags.Invariant));
+                    assume(VarianceFlags.Covariant);
+                    const covariant = isTypeAssignableTo(typeWithSub, typeWithSuper);
+                    assume(VarianceFlags.Contravariant);
+                    const contravariant = isTypeAssignableTo(typeWithSuper, typeWithSub);
+                    variance = (covariant ? VarianceFlags.Covariant : 0) | (contravariant ? VarianceFlags.Contravariant : 0);
                     // If the instantiations appear to be related bivariantly it may be because the
                     // type parameter is independent (i.e. it isn't witnessed anywhere in the generic
                     // type). To determine this we compare instantiations where the type parameter is
                     // replaced with marker types that are known to be unrelated.
-                    if (variance === VarianceFlags.Bivariant && isTypeAssignableTo(createMarkerType(symbol, tp, markerOtherType), typeWithSuper)) {
-                        variance = VarianceFlags.Independent;
+                    if (variance === VarianceFlags.Bivariant) {
+                        assume(VarianceFlags.Independent);
+                        if (isTypeAssignableTo(createMarkerType(symbol, tp, markerOtherType), typeWithSuper)) {
+                            variance = VarianceFlags.Independent;
+                        }
+                    }
+                    if (savedAssumption) {
+                        varianceAssumptions.set(symbol, savedAssumption);
+                    }
+                    else {
+                        varianceAssumptions.delete(symbol);
                     }
                     outofbandVarianceMarkerHandler = oldHandler;
                     if (unmeasurable || unreliable) {

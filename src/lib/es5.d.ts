@@ -1167,7 +1167,9 @@ interface PromiseLike<T> {
 /**
  * Represents the completion of an asynchronous operation
  */
-interface Promise<T> {
+// L: T is declared covariant, so checkVarianceAnnotations holds it against the members instead of the relation
+// measuring it through the Promise that then returns: nothing in a Promise takes a T in.
+interface Promise<out T> {
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.

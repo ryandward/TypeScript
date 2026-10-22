@@ -1,7 +1,7 @@
 /**
  * Represents the completion of an asynchronous operation
  */
-interface Promise<T> {
+interface Promise<out T> {
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.

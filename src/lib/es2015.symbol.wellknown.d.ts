@@ -154,7 +154,7 @@ interface Math {
     readonly [Symbol.toStringTag]: string;
 }
 
-interface Promise<T> {
+interface Promise<out T> {
     readonly [Symbol.toStringTag]: string;
 }
 

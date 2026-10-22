@@ -245,7 +245,7 @@ interface WeakSetConstructor {
     new <T extends WeakKey = WeakKey>(iterable: Iterable<T>): WeakSet<T>;
 }
 
-interface Promise<T> {}
+interface Promise<out T> {}
 
 interface PromiseConstructor {
     /**

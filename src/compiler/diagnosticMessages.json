@@ -4138,6 +4138,10 @@
         "category": "Error",
         "code": 2924
     },
+    "Type '{0}' and type '{1}' nest deeper than the comparison follows, so L doesn't assume they relate.": {
+        "category": "Error",
+        "code": 2925
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

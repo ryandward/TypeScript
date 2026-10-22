@@ -94,6 +94,9 @@ parameters
   library, not a measurement. A Map's key, a Set's element and an iterator's T are measured, and invariant.
 - Inference (inferFromSignature) still records method positions as bivariant. It chooses type arguments; the
   relation then checks them one way.
+- The library's forEach declares thisArg?: any, and the parameter relation reads that any as a promise to the
+  callback, so a ReadonlyMap<string, Map<string, number>> isn't a ReadonlyMap<string, ReadonlyMap<string, number>>
+  (TS2920), though a Map<string, number> is a ReadonlyMap<string, number>.
 
 initialization-order
 - The rule sees one file. A cycle of imports runs one module's code before another's has finished, so a binding
@@ -137,6 +140,28 @@ call-signature
 - A value typed Function can't be called now, even when it holds an ordinary function. Nobody has measured how
   much real code calls one; the core has to declare the signature of a function it is handed.
 
+
+generic-relations
+- A variance is measured one assumption at a time, and the parameters after the one measured are assumed
+  invariant, so a measured variance is one the declaration bears out but can be stricter than the type is: a
+  parameter read only through the type's own references, or passed to another parameter's place in them, measures
+  covariant or invariant where it is independent or covariant (variance-phantom.ts). Starting every parameter at
+  independent and weakening each until the measurement is stable would find the strongest variance.
+- The depth cutoff fires on finite comparisons too: isDeeplyNestedType counts three instantiations with the same
+  recursion identity and type ids that don't decrease, which a chain of aliases builds (cutoff-unproven.ts), and
+  TypeScript's variadicTuples1 trips it comparing a readonly array to an array through three instantiations of
+  every. relateFamilyAtCutoff needs the same type arguments on both sides, so two families that nest different
+  arguments, List<List<T>> against MyList<MyList<T>>, stay unproven; relating H<A> to H<B> by H's variance after
+  G<A> to H<A> by the family would prove them.
+- Against the build before obligations 2 and 3, TypeScript's 12,444 cases gain 23 diagnostics, all in tests of
+  recursive types and none a crash. Nine are on lines the lab already rejected. Of the fourteen lines newly
+  rejected, six are false relations: varianceMeasurement's Foo1 and Foo3, which TypeScript's own comments call
+  invariant; deeplyNestedMappedTypes' NestedRecord of number as one of string, which its comment expects to fail;
+  await_incorrectThisType's EPromise, invariant through this: EPromise<never, A>; and subclassThisTypeAssignable01
+  and 02, whose Vnode is invariant in its State. Eight are true and unproven: cyclicGenericTypeInstantiationInference,
+  infiniteExpandingTypeThroughInheritanceInstantiation, infinitelyExpandingBaseTypes1, instanceSubtypeCheck1,
+  mappedTypeRecursiveInference, recursiveConditionalTypes (the alias chain above), recursiveTypeInGenericConstraint
+  (the measurement above) and variadicTuples1.
 
 lab
 - tools/crashes.mjs runs TypeScript's own test cases through the lab for exceptions only. Their baselines have
