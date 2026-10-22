@@ -98,7 +98,7 @@ any (soundness: TS2898, TS2900; 8ac4d727f, 2adfd653a, 29e19bf5e, f0cb8e20c)
   TS2898 as well.
 - getBindingElementTypeFromParentType reads a parent of type any as uncheckedType, as checkExpression reads a value
   of type any, so a nested destructuring pattern, whose parent is a property's type and never an expression, takes
-  apart an unknown (the commit after 49dbf0517).
+  apart an unknown (e0bd3fffd).
 - errorOrUnchecked and headedIfUnchecked are new: where the rejected type is uncheckedType, they put TS2900 at
   the head of the error's chain. They are used in getPropertyTypeForIndexType (the property doesn't exist),
   checkNonNullTypeWithReporter (the value is of type unknown), invocationError (the value isn't callable),
