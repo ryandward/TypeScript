@@ -304,7 +304,7 @@ receivers (soundness: TS2924; 7905011b8)
   static, is reported unless a call, a new or a tagged template invokes it where it stands, from property access
   and from a value read by key in getPropertyTypeForIndexType.
 
-generic-relations (soundness: TS2925 and TypeScript's TS2322; 7905011b8)
+generic-relations (soundness: TS2925 and TypeScript's TS2322; 7905011b8, d2279c30a)
 - Two conditional types with the same extends type relate only if their check types relate both ways.
 - The writing constraint of an indexed access target is taken only when its object type isn't generic, or under
   comparability.
@@ -360,7 +360,7 @@ which L doesn't write.
 - webworker.generated.d.ts: the same for the eight of those it declares: CSSNumericArray, CSSTransformValue,
   CSSUnparsedValue, FormData, Headers, StylePropertyMapReadOnly, URLSearchParams and FileSystemDirectoryHandle.
 
-Promise's T is declared out, so its variance comes from the declaration, which checkVarianceAnnotations holds
+Promise's T is declared out (d2279c30a), so its variance comes from the declaration, which checkVarianceAnnotations holds
 against Promise's members, instead of a measurement through then's recursive Promise, which generic-relations now
 measures by assumption.
 
