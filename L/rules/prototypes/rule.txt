@@ -53,3 +53,11 @@ Obligation 3, a constructor's newTarget: TS2550 (TypeScript's code)
   Why it suffices. Reflect.construct is the library's only function that takes a newTarget.
   Witnesses:
     lib-reflect-construct-newtarget.ts  Object built with Set as its newTarget, which passes instanceof Set
+
+Obligation 4, an inherited member the type doesn't declare: TS2921
+  Statement. A read of a name the type doesn't declare, found on Object, may find the value's own property (see
+  width).
+  Mechanism. checkInheritedMemberRead reports TS2921.
+  Why it suffices. width's argument: the type names only some of its value's properties.
+  Witnesses:
+    chk-proto-null.ts                  toString read from an object with no prototype

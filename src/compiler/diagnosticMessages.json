@@ -4134,6 +4134,10 @@
         "category": "Error",
         "code": 2920
     },
+    "'{0}' is inherited, but a value of type '{1}' may hold its own '{0}' of any type, since the type names only some of its properties.": {
+        "category": "Error",
+        "code": 2921
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

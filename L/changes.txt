@@ -2,7 +2,7 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds twenty-seven diagnostics, changes the checker and two functions in utilities.ts that decide
+things: it adds twenty-eight diagnostics, changes the checker and two functions in utilities.ts that decide
 which files are checked, adds one internal type flag, declares readonly the new objects and collections the
 library hands out, deletes from the ES library every effect and every method that changes an object in place,
 and corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
@@ -17,7 +17,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Twenty-seven new errors, from TS2892 to TS2920, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+Twenty-eight new errors, from TS2892 to TS2921, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
 The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
 rules and TS2897 to definite-assignment.
 
@@ -86,6 +86,9 @@ rules and TS2897 to definite-assignment.
           Parameter '{0}' is required, but the target can be called without it, so it would receive undefined.
   TS2920  any
           Parameter '{0}' takes '{1}', but the target types it any, which promises it anything.
+  TS2921  width
+          '{0}' is inherited, but a value of type '{1}' may hold its own '{0}' of any type, since the type names only
+          some of its properties.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -247,6 +250,9 @@ width (soundness: TS2915, TS2916 and TS2917; 82868af24)
 - typeRelatedToIndexInfo infers an index signature only for an exact source, and otherwise reports TS2916 beneath
   TypeScript's missing-index error.
 - The shortcut relating an empty object type to a mapped type with a ? modifier takes only an exact source.
+- checkInheritedMemberRead reports TS2921 on a read of a name the type doesn't declare that the lookup finds on
+  Object or Function, unless the value is a primitive or its type exact, from property access and from a value
+  read in getPropertyTypeForIndexType (the commit after 0c168e1a0).
 - getSignatureApplicabilityError's first pass, and unionOrIntersectionRelatedTo for a union target, keep an
   argument's or source's freshness instead of taking its regular type, and silence the excess-property check with
   excessPropertyChecksSilenced, saved and restored around each use. The regular type would be stricter than the

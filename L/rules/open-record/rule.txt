@@ -49,3 +49,14 @@ Obligation 3, a read the library types where no read is checked: TS2550 (TypeScr
   Why it suffices. Reflect.get is the library's only function that reads a property by a key it is handed.
   Witnesses:
     lib-reflect-get-inherited.ts       toString read from a Record<string, number> by Reflect.get
+
+Obligation 4, an inherited member the type doesn't declare: TS2921
+  Statement. A read of a name the type doesn't declare, found on Object, may find the value's own property (see
+  width).
+  Mechanism. checkInheritedMemberRead reports TS2921.
+  Why it suffices. width's argument: the type names only some of its value's properties.
+  Witnesses:
+    chk-record-own-tostring.ts         a record whose literal had a toString entry, its toString called
+    rule-open-record.ts                constructor read from a Record<string, number>
+  Regressions:
+    chk-record-own-tostring-element.ts  the same entry read by a literal key, which the release refuses to call

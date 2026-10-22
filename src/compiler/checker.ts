@@ -2648,6 +2648,22 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         }
     }
 
+    // L: a read of a name the type doesn't declare, found on Object or Function, whose members every object inherits. A
+    // value of an open type may hold its own property there, of any type, and the read finds that first. A primitive
+    // holds no property of its own, and an object literal's fresh type names every property it has.
+    function checkInheritedMemberRead(type: Type, name: __String, errorNode: Node) {
+        for (const t of type.flags & TypeFlags.Union ? (type as UnionType).types : [type]) {
+            const apparent = getApparentType(t);
+            if (
+                !isPrimitiveValuedType(t) && !isExactObjectType(t) &&
+                !getPropertyOfType(apparent, name, /*skipObjectFunctionPropertyAugment*/ true) && getPropertyOfType(apparent, name)
+            ) {
+                error(errorNode, Diagnostics._0_is_inherited_but_a_value_of_type_1_may_hold_its_own_0_of_any_type_since_the_type_names_only_some_of_its_properties, unescapeLeadingUnderscores(name), typeToString(t));
+                return;
+            }
+        }
+    }
+
     // L: an object type other than the empty object type {}, whose facts say its values are objects.
     function holdsNoPrimitive(type: Type): boolean {
         return !!(type.flags & TypeFlags.Object) && !(getObjectFlags(type) & ObjectFlags.Anonymous && isEmptyObjectType(type as ObjectType));
@@ -19345,6 +19361,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             }
             const prop = getPropertyOfType(objectType, propName);
             if (prop) {
+                if (accessNode && accessFlags & AccessFlags.ExpressionPosition) {
+                    checkInheritedMemberRead(objectType, propName, getIndexNodeForAccessExpression(accessNode));
+                }
                 if (accessFlags & AccessFlags.ReportDeprecated && accessNode && prop.declarations && isDeprecatedSymbol(prop) && isUncalledFunctionReference(accessNode, prop)) {
                     const deprecatedNode = accessExpression?.argumentExpression ?? (isIndexedAccessTypeNode(accessNode) ? accessNode.indexType : accessNode);
                     addDeprecatedSuggestion(deprecatedNode, prop.declarations, propName as string);
@@ -35105,6 +35124,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             prop = getPropertyOfType(apparentType, right.escapedText, /*skipObjectFunctionPropertyAugment*/ isConstEnumObjectType(apparentType), /*includeTypeOnlyMembers*/ node.kind === SyntaxKind.QualifiedName);
         }
         markLinkedReferences(node, ReferenceHint.Property, prop, leftType);
+        if (prop && isPropertyAccessExpression(node)) {
+            checkInheritedMemberRead(leftType, prop.escapedName, right);
+        }
 
         let propType: Type;
         if (!prop) {
