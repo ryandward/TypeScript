@@ -292,7 +292,7 @@ conversions (soundness: TS2922 and TypeScript's TS2345 and TS2684; 9ad783be6)
   operand that may be an object in an untagged template's substitution, + and unary +, < > <= >=, and == or !=
   against an operand that may be a primitive other than null or undefined.
 
-records (soundness: TS2923 and TypeScript's TS2339; the commit after c4281f2bb)
+records (soundness: TS2923 and TypeScript's TS2339; 078128b8e)
 - isEnginePropertyOf and isEngineDeclaredProperty are new: a property the library declares on an interface or a
   class, followed back through a mapped or spread property's syntheticOrigin, or a tuple's length.
 - propertiesRelatedTo reports TS2923 when an engine property stands in for one a type outside the library declares.
