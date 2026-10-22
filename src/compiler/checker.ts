@@ -25006,10 +25006,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 // We have instantiations of the same anonymous type (which typically will be the type of a
                 // method). Simply do a pairwise comparison of the signatures in the two signature lists instead
                 // of the much more expensive N * M comparison matrix we explore below. We erase type parameters
-                // as they are known to always be the same.
+                // as they are known to always be the same. L: only for comparability, as for a single signature below:
+                // erasing a method's own T to any collapses T | U, so U's instantiations would relate whatever they are.
                 Debug.assertEqual(sourceSignatures.length, targetSignatures.length);
                 for (let i = 0; i < targetSignatures.length; i++) {
-                    const related = signatureRelatedTo(sourceSignatures[i], targetSignatures[i], /*erase*/ true, reportErrors, intersectionState, incompatibleReporter(sourceSignatures[i], targetSignatures[i]));
+                    const related = signatureRelatedTo(sourceSignatures[i], targetSignatures[i], /*erase*/ relation === comparableRelation, reportErrors, intersectionState, incompatibleReporter(sourceSignatures[i], targetSignatures[i]));
                     if (!related) {
                         return Ternary.False;
                     }

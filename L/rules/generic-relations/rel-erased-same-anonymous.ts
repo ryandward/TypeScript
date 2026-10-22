@@ -5,5 +5,5 @@ function make<U>(seed: U) {
 }
 const numeric = make(42);
 const stringy = make('hello');
-const swapped: typeof numeric = stringy;
+const swapped: typeof numeric = stringy; // rejected here: TS2322
 console.log(swapped.feed<number>((t: number) => t.toFixed(1)));

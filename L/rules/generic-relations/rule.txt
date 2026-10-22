@@ -16,11 +16,16 @@ Obligation 1, a generic type related through one of its instantiations: TS2322 (
   every key holds.
   Mechanism. structuredTypeRelatedToWorker requires both directions of checkTypesRelated for two conditional types,
   and takes the writing constraint of an indexed access target only when its object type is its own base
-  constraint, or under comparability.
-  Why it suffices. These are the two branches of the relation that answered for every instantiation by looking at
-  one.
+  constraint, or under comparability. signaturesRelatedTo compares two instantiations of the same anonymous type
+  pairwise without erasing their methods' type parameters to any, but under comparability: erasing a method's T
+  collapses T | U to any, so any two instantiations of U would relate.
+  Why it suffices. These are the branches of the relation that answered for every instantiation by looking at one,
+  or at none.
   Witnesses:
     rel-conditional-either.ts          [A] and [B] with B extends A, one picking number where the other picks string
     rel-indexed-access-write.ts        42 returned as T['a'] for a T whose a is a string
+    rel-erased-same-anonymous.ts       an instantiation for strings held as one for numbers, its generic method
+                                       erased
   Controls:
     generic-relations-ok.ts            conditional types with the same check type; a T[K] whose object isn't generic
+    same-anonymous-instantiation.ts    two instantiations of one anonymous type with the same type argument
