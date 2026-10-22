@@ -234,7 +234,9 @@ const standing = (r) => {
   if (of(r).some((c) => c.status === 'broken')) return 'broken';
   if (of(r).some((c) => c.status === 'failing')) return 'false positives';
   if (of(r).some((c) => c.status === 'open')) return 'holes open';
-  return 'sound';
+  // Every witness the proof cites is rejected and every control accepted. That is all it measures: a hole no case
+  // witnesses is outside it, so the status doesn't say the rule is sound.
+  return 'witnesses closed';
 };
 
 const out = ['# L lab: where each rule stands', ''];
