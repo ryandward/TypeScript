@@ -14,11 +14,19 @@ Obligation 1, call with a signature: TS2349 (TypeScript's code)
   Statement. A call may be accepted only if the callee's type has a call signature that the arguments are
   checked against. Function promises none, because typeof 'function' is true of a constructor, which can't be
   called.
-  Mechanism. Not built. resolveCallExpression takes isUntypedFunctionCall's branch for every callee typed
-  Function. The any half of that branch is the any rule's: it reads an any callee as unknown, which has no
-  branch to take.
+  Mechanism. isUntypedFunctionCall no longer takes a callee that is assignable to Function and has no signature
+  of its own, so resolveCallExpression, resolveTaggedTemplateExpression and resolveDecorator report it as not
+  callable. Its any half is the any rule's: an any callee is read as unknown, which has no signature either.
+  Why it suffices. isUntypedFunctionCall is the only way a call reaches resolveUntypedCall's anySignature; every
+  other call resolves against a signature of the callee's type.
   In Lean. ../../lean/Top.lean's typeof 'function' test refines nothing, and Vacuity.lean proves the witness's
   program untypable there. mutants/funCall, TypeScript's narrowing to a callable, is refuted by calling a
   class.
   Witnesses:
     chk-call-narrowed-function.ts      an unknown narrowed by typeof 'function', then called
+    chk-function-type-call.ts          a constructor held as Function, called
+    chk-call-function-tagged.ts        a constructor held as Function, used as a template's tag
+  Rejected sound code, because Function promises no call:
+    function-held-arrow.ts             an arrow function held as Function, called
+  Controls:
+    typed-call.ts                      a callee with a call signature

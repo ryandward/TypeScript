@@ -37292,10 +37292,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
      * If FuncExpr is of type Any, or of an object type that has no call or construct signatures
      * but is a subtype of the Function interface, the call is an untyped function call.
      */
-    function isUntypedFunctionCall(funcType: Type, apparentFuncType: Type, numCallSignatures: number, numConstructSignatures: number): boolean {
-        // We exclude union types because we may have a union of function types that happen to have no common signatures.
-        return isTypeAny(funcType) || isTypeAny(apparentFuncType) && !!(funcType.flags & TypeFlags.TypeParameter) ||
-            !numCallSignatures && !numConstructSignatures && !(apparentFuncType.flags & TypeFlags.Union) && !(getReducedType(apparentFuncType).flags & TypeFlags.Never) && isTypeAssignableTo(funcType, globalFunctionType);
+    // L: only a callee of type any is called untyped, and the any rule reads a value of type any as unknown, which has
+    // no signature. A callee assignable to Function with no signature of its own is not callable: typeof 'function' is
+    // true of a constructor, which throws when called without new, so Function promises no call.
+    function isUntypedFunctionCall(funcType: Type, apparentFuncType: Type, _numCallSignatures: number, _numConstructSignatures: number): boolean {
+        return !!isTypeAny(funcType) || !!isTypeAny(apparentFuncType) && !!(funcType.flags & TypeFlags.TypeParameter);
     }
 
     function resolveNewExpression(node: NewExpression, candidatesOutArray: Signature[] | undefined, checkMode: CheckMode): Signature {

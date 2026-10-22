@@ -108,9 +108,8 @@ open-record
   reads past the check, as Reflect.get did. No other is known, but the library hasn't been searched for one.
 
 call-signature
-- Not built, so chk-call-narrowed-function.ts is open: the release and the lab both call a Function with no
-  signature, and Node throws when it holds a constructor. Nobody has measured how much real code calls a value
-  typed Function.
+- A value typed Function can't be called now, even when it holds an ordinary function. Nobody has measured how
+  much real code calls one; the core has to declare the signature of a function it is handed.
 
 
 lab

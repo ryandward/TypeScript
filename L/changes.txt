@@ -254,8 +254,12 @@ open-record (soundness: TS2918 and TypeScript's TS2339 and TS2550; b4491c5d3)
 - getIndexedAccessTypeOrUndefined no longer replaces a value read's key by string for a type with only a string
   index signature, so a literal key naming a member Object declares is typed as that member.
 
-Rules with no checker change: effects and library-declarations are built in the library alone (below),
-optional-field is a specification only, and call-signature isn't built (its witness is open; see debt.txt).
+call-signature (soundness: TypeScript's TS2349; the commit after dbee84b68)
+- isUntypedFunctionCall takes only a callee of type any, so a callee assignable to Function with no signature
+  of its own is reported as not callable, in a call, a tagged template or a decorator.
+
+Rules with no checker change: effects and library-declarations are built in the library alone (below), and
+optional-field is a specification only.
 
 
 The library (src/lib; 89beff3af, comment in fb73bc43f)

@@ -2,5 +2,5 @@
 // constructor is a function, and calling one without new throws.
 const value: unknown = Map;
 if (typeof value === 'function') {
-  console.log(value());
+  console.log(value()); // rejected here: TS2349
 }
