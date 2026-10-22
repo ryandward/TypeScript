@@ -266,8 +266,7 @@ e3c46a87e)
   checkPropertyAccessExpressionOrQualifiedName (property access). A read by a literal key naming no inherited
   member, a number or a template literal type gets the index signature's type with undefined, as before.
 - getIndexedAccessTypeOrUndefined adds undefined to a value read by a generic key whose base constraint isn't a
-  union of literals, and gives unknown where an inherited name is assignable to that constraint (the commit after
-  0a42c76d9).
+  union of literals, and gives unknown where an inherited name is assignable to that constraint (fdeda80e9).
 - getIndexedAccessTypeOrUndefined no longer replaces a value read's key by string for a type with only a string
   index signature, so a literal key naming a member Object declares is typed as that member.
 
