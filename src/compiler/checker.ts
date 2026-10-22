@@ -36233,17 +36233,29 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         // can be specified by users through attributes property.
         const paramType = getEffectiveFirstArgumentForJsxSignature(signature, node);
         const attributesType = isJsxOpeningFragment(node) ? createJsxAttributesTypeFromAttributesProperty(node) : checkExpressionWithContextualType(node.attributes, paramType, /*inferenceContext*/ undefined, checkMode);
-        const checkAttributesType = checkMode & CheckMode.SkipContextSensitive ? getRegularTypeOfObjectLiteral(attributesType) : attributesType;
-        return checkTagNameDoesNotExpectTooManyArguments() && checkTypeRelatedToAndOptionallyElaborate(
-            checkAttributesType,
-            paramType,
-            relation,
-            reportErrors ? isJsxOpeningFragment(node) ? node : node.tagName : undefined,
-            isJsxOpeningFragment(node) ? undefined : node.attributes,
-            /*headMessage*/ undefined,
-            containingMessageChain,
-            errorOutputContainer,
-        );
+        // L: as for a call's arguments, the attributes keep their fresh type, which says they name every property they
+        // have, and the first pass silences excess-property checks instead of taking the regular type, which would be
+        // stricter than the fresh one checked after it.
+        if (!checkTagNameDoesNotExpectTooManyArguments()) {
+            return false;
+        }
+        const saveSilenced = excessPropertyChecksSilenced;
+        excessPropertyChecksSilenced ||= !!(checkMode & CheckMode.SkipContextSensitive);
+        try {
+            return checkTypeRelatedToAndOptionallyElaborate(
+                attributesType,
+                paramType,
+                relation,
+                reportErrors ? isJsxOpeningFragment(node) ? node : node.tagName : undefined,
+                isJsxOpeningFragment(node) ? undefined : node.attributes,
+                /*headMessage*/ undefined,
+                containingMessageChain,
+                errorOutputContainer,
+            );
+        }
+        finally {
+            excessPropertyChecksSilenced = saveSilenced;
+        }
 
         function checkTagNameDoesNotExpectTooManyArguments(): boolean {
             if (getJsxNamespaceContainerForImplicitImport(node)) {

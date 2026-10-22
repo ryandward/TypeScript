@@ -18,6 +18,8 @@ L/
   tools/
     tracker.mjs      runs every case, checks it against its proof, and prints where each rule and the catalog stand
     compare.mjs      lists what the lab rejects in a project that plain TypeScript accepts
+    crashes.mjs      compiles TypeScript's own test cases with the lab and the release, and lists every exception
+                     only the lab's checker throws
     rules.mjs        reads every rule's proof, for the tracker and compare.mjs
     console.d.ts     console.log, the one host function a case may call
 ```

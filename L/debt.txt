@@ -113,8 +113,9 @@ call-signature
 
 
 lab
-- TypeScript's own test suite has never been run on the lab. Its baselines would change wherever L does, so
-  the run is noisy, but a crash in a path no case reaches would go unnoticed without it.
+- tools/crashes.mjs runs TypeScript's own test cases through the lab for exceptions only. Their baselines have
+  never been compared, which would show where L changes diagnostics, and the cases compile under L's options
+  rather than each case's own, so a path only another option reaches goes unexercised.
 - compare.mjs judges only the lines changed since the merge base with main. The whole-project check that found
   the trap losing its mark (every lab-only rejection, with or without an L code, against a baseline build of
   the commit before) was a script in the scratchpad, not a tool in the repo.
