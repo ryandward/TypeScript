@@ -59,13 +59,21 @@ Obligation 5, a deleted overload: TS2554 (TypeScript's code)
 Obligation 6, a result as wide as the engine's: TS2322 (TypeScript's code)
   Statement. JSON.stringify returns string | undefined. Array.from and Array.fromAsync of an array-like that
   isn't iterable give (T | undefined)[], and a map function over one is handed T | undefined. A regex match's
-  elements, past the whole match, are string | undefined, and so are its named groups and their indices.
+  elements, past the whole match, are string | undefined, and so are its named groups and their indices. split
+  with a RegExp separator returns (string | undefined)[], since a capture group that took no part splices in
+  undefined, and so does a RegExp's [Symbol.split]. Array.isArray narrows to readonly unknown[], since nothing
+  checked the elements.
   Mechanism. src/lib corrects each declaration (es5.d.ts, es2015.core.d.ts, es2015.iterable.d.ts,
   esnext.array.d.ts, es2018.regexp.d.ts, es2022.regexp.d.ts), so the result no longer fits a narrower slot, and
   TypeScript reports TS2322 where it is given one.
   Why it suffices. A call's result has the type its declaration gives it, and that type now admits undefined
   wherever the engine returns it.
   Witnesses:
+    lib-split-capture-group.ts         split's result held as strings, with a group that took no part
+    lib-split-capture-group-after.ts   the same, with the group after the separator
+    lib-split-capture-group-empty.ts   the same, with a separator that matches only the empty string
+    lib-array-isarray-any.ts           a list Array.isArray found, held as strings
+    rel-any-nested-array.ts            the same, returned as readonly string[]
     lib-json-stringify-function.ts     a function stringified, held as a string
     lib-array-from-length.ts           Array.from({ length: 2 }) held as strings
     lib-esnext-fromasync-length.ts     the same through Array.fromAsync
@@ -76,12 +84,15 @@ Obligation 6, a result as wide as the engine's: TS2322 (TypeScript's code)
 Obligation 7, an argument the engine accepts: TS2345 (TypeScript's code)
   Statement. matchAll and replaceAll take a string, never a RegExp, which throws without the g flag; matchAll
   makes a string's pattern global itself. The release declares matchAll for a RegExp only, so no case can call
-  it with a string and compile under both. An iterator's flatMap takes a callback that returns no string, which
+  it with a string and compile under both. A list Array.isArray found is readonly unknown[], which a parameter
+  taking a narrower element type refuses. An iterator's flatMap takes a callback that returns no string, which
   it throws on.
   Mechanism. src/lib/es2020.string.d.ts, es2021.string.d.ts and es2025.iterator.d.ts narrow each parameter,
   so an argument outside it reports TS2345.
   Why it suffices. Every call to these methods is checked against their declared parameters.
   Witnesses:
+    lib-array-isarray-generic-element.ts  a list Array.isArray found, passed where a list of strings is taken
+    lib-array-isarray-generic-list.ts  the same, with the list itself the type parameter
     lib-partial-matchall-nonglobal.ts  matchAll with a RegExp that isn't global
     lib-partial-replaceall-nonglobal.ts  replaceAll with a RegExp that isn't global
     lib-partial-esnext-iterator-flatmap-string.ts  flatMap with a callback that returns a string
@@ -94,3 +105,17 @@ Obligation 8, a key the engine accepts: TS2344 (TypeScript's code)
   Why it suffices. WeakMap and WeakSet constrain their key to WeakKey.
   Witnesses:
     lib-partial-esnext-weakmap-registered-symbol.ts  a WeakMap keyed by symbol
+
+Obligation 9, an argument concat spreads: TS2769 (TypeScript's code)
+  Statement. concat takes values and real lists, readonly T[], never a structural ConcatArray: it spreads only an
+  array, or an object marked Symbol.isConcatSpreadable, which it spreads into holes, and appends any other object
+  whole.
+  Mechanism. src/lib/es5.d.ts declares each of Array's and ReadonlyArray's concat overloads over T | readonly T[],
+  so an argument that is neither matches no overload, and TypeScript reports TS2769.
+  Why it suffices. Every concat is declared on Array or ReadonlyArray, and a readonly T[] has every member an array
+  has, which an object written to fake one would have to declare.
+  Witnesses:
+    lib-concat-array-like.ts           an object with length, join and slice, appended whole
+    lib-concat-spreadable-array-from.ts  an object marked isConcatSpreadable, spread into holes, read by Array.from
+    lib-concat-spreadable-findindex.ts  the same, read by findIndex
+    lib-concat-spreadable-for-of.ts    the same, read by for-of

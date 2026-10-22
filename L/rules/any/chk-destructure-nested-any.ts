@@ -3,5 +3,5 @@
 const it: Iterator<number> = [1].values();
 console.log(it.next());
 // Runtime: TypeError: Cannot read properties of undefined (reading 'length') (the second next() is done, value undefined)
-const { value: { length } } = it.next();
+const { value: { length } } = it.next(); // rejected here: TS2900
 export { length };

@@ -41,7 +41,7 @@ Obligation 1, a write: TS2904
     optional-into-optional.ts              an optional property widened into an optional one, deleted
   Controls:
     call-site-rest-arguments.ts            arguments matched against a tuple rest parameter
-    concat-library-declaration.ts          an array passed to concat, which takes a ConcatArray of a wider type
+    concat-library-declaration.ts          an array passed to concat, which takes a readonly list of a wider type
     context-sensitive-argument.ts          an object literal argument holding a context-sensitive function
     field-check.ts                         a check on a readonly field, which narrows it
     fresh-literal-index-signature.ts       a fresh object literal against an index signature in a union

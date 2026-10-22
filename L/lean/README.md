@@ -87,7 +87,7 @@ array; whether its steps compose to these refinements is a claim about `checker.
 | controls | narrowed-before-use, unknown-checked | `ifStr`, `ifNum` |
 | (open) | L/rules/call-signature: `typeof value === "function"`, then `value()` on a class | funCall: TypeScript narrows to `Function` and calls it with no signature; refuted by calling `ctor` |
 | TS2898 | direct `any` → `T` | subDown.direct |
-| TS2898 | rel-any-nested-array, lib-array-isarray-any, lib-object-values-interface, lib-promise-any-errors (`errors: any[]` → `readonly Error[]`) | subDown.nested-array (`Subty.arr`) |
+| TS2898 | lib-object-values-interface, lib-promise-any-errors (`errors: any[]` → `readonly Error[]`) | subDown.nested-array (`Subty.arr`) |
 | TS2898 | lib-promise-catch-annotated, lib-promise-any-errors (catch parameter annotated `AggregateError`) | subDown.callback-param (`Subty.arrow`) |
 | TS2898 | lib-json-stringify-replacer (second parameter), lib-string-replace-callback (rest parameter's element) | by analogy only: functions here take one argument, so these routes are not modelled |
 | TS2898 | lib-allsettled-reason-any (`reason` field of `PromiseRejectedResult` inside the callback's parameter) | subDown.settled-reason (`Subty.record` inside `Subty.arrow`) |

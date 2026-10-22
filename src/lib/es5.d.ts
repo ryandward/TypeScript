@@ -354,7 +354,8 @@ interface String {
      * @param separator A string that identifies character or characters to use in separating the string. If omitted, a single-element array containing the entire string is returned.
      * @param limit A value used to limit the number of elements returned in the array.
      */
-    split(separator: string | RegExp, limit?: number): string[];
+    split(separator: string, limit?: number): string[];
+    split(separator: RegExp, limit?: number): (string | undefined)[]; // L: a capture group that took no part splices in undefined
 
     /**
      * Returns the substring at the specified location within a String object.
@@ -935,12 +936,12 @@ interface ReadonlyArray<T> {
      * Combines two or more arrays.
      * @param items Additional items to add to the end of array1.
      */
-    concat(...items: ConcatArray<T>[]): T[];
+    concat(...items: (readonly T[])[]): T[]; // L: concat spreads only an array, so it takes no structural ConcatArray
     /**
      * Combines two or more arrays.
      * @param items Additional items to add to the end of array1.
      */
-    concat(...items: (T | ConcatArray<T>)[]): T[];
+    concat(...items: (T | readonly T[])[]): T[];
     /**
      * Adds all the elements of an array separated by the specified separator string.
      * @param separator A string used to separate one element of an array from the next in the resulting String. If omitted, the array elements are separated with a comma.
@@ -1056,13 +1057,13 @@ interface Array<T> {
      * This method returns a new array without modifying any existing arrays.
      * @param items Additional arrays and/or items to add to the end of the array.
      */
-    concat(...items: ConcatArray<T>[]): T[];
+    concat(...items: (readonly T[])[]): T[]; // L: concat spreads only an array, so it takes no structural ConcatArray
     /**
      * Combines two or more arrays.
      * This method returns a new array without modifying any existing arrays.
      * @param items Additional arrays and/or items to add to the end of the array.
      */
-    concat(...items: (T | ConcatArray<T>)[]): T[];
+    concat(...items: (T | readonly T[])[]): T[];
     /**
      * Adds all the elements of an array into a string, separated by the specified separator string.
      * @param separator A string used to separate one element of the array from the next in the resulting string. If omitted, the array elements are separated with a comma.
@@ -1163,7 +1164,7 @@ interface Array<T> {
 
 interface ArrayConstructor {
     // L: no constructor: given one number it makes that many holes, and which it does is decided when it runs
-    isArray(arg: any): arg is any[];
+    isArray(arg: unknown): arg is readonly unknown[]; // L: an array of unknown, not of any: nothing checked its elements
     readonly prototype: any[];
 }
 

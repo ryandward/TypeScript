@@ -1,5 +1,5 @@
-// control: concat never writes into its argument, and ConcatArray<T>.slice() hands out a new array, declared
-// readonly, so string[] passes as ConcatArray<string | number>.
+// control: concat never writes into its argument, and takes a readonly list, so string[] passes where a
+// readonly (string | number)[] is taken.
 const strings: string[] = ['a'];
 const sink: (string | number)[] = [];
 console.log(sink.concat(strings).join(','));

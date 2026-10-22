@@ -11784,8 +11784,12 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     function getBindingElementTypeFromParentType(declaration: BindingElement, parentType: Type, noTupleBoundsCheck: boolean): Type {
+        // L: a value of type any was never checked, so taking it apart reads it as unknown, as checkExpression reads it.
+        if (parentType === anyType) {
+            parentType = uncheckedType;
+        }
         // If an any type was inferred for parent, infer that for the binding element
-        if (isTypeAny(parentType)) {
+        else if (isTypeAny(parentType)) {
             return parentType;
         }
         const pattern = declaration.parent;

@@ -33,9 +33,7 @@ Obligation 1, assignability: TS2898
   Witnesses:
     flow-typeof-function.ts            typeof 'function' keeps an object type callable, and its call gives any
     rel-erased-overload-target.ts      an erased generic signature, (x: any) => any, held as two overloads
-    rel-any-nested-array.ts            Array.isArray's any[] returned as readonly string[]
     rel-any-nested-promise.ts          then(JSON.parse)'s Promise<any> held as a Promise of an interface
-    lib-array-isarray-any.ts           the same any[], through a ternary
     rel-any-declared-promise.ts        a function declared to return Promise<any>, awaited into an interface
     lib-then-json-parse.ts             then(JSON.parse) infers Promise<any>
     lib-object-values-interface.ts     Object.values on an interface returns any[]
@@ -65,6 +63,8 @@ Obligation 2, structure: TS2900
     reportTypeNotIterableError         TS2488    array spread, call spread, array destructuring
     invocationError                    TS2349    tagged template
     resolveInstanceofExpression        TS2359    instanceof
+  getBindingElementTypeFromParentType reads a parent of type any as uncheckedType too, so a nested destructuring
+  pattern, whose parent is a property's type and never an expression, is judged the same way.
   The mark survives the two operations that would otherwise drop it: getNonNullableType keeps it through an
   optional chain or ??, and getUnionType keeps it in a union through IncludesUnchecked.
   Why it suffices. Every one of these operations takes its operand's type from checkExpression: directly,
@@ -78,6 +78,7 @@ Obligation 2, structure: TS2900
   parser from Top to { name: string }, built from the checks L asks for (a plain-object test, in, and typeof on
   the field bound to a name), never gets stuck on any value.
   Witnesses:
+    chk-destructure-nested-any.ts      a nested pattern takes apart an iterator result's value: any
     rule-any.ts                        a value typed any read as a string
     chk-property-off-any.ts            a property read off null
     chk-element-off-any.ts             an element read off null

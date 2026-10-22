@@ -62,8 +62,8 @@ rules and TS2897 to definite-assignment.
   TS2911  void
           A void result may hold anything, and a parameter typed void takes only undefined.
   TS2912  initialization-order
-          '{0}' is declared below this read. L reads a binding only below its declaration, so nothing can run the read
-          before the binding exists.
+          '{0}' is declared below this read. L reads a binding only below its declaration, so nothing can run the
+          read before the binding exists.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -96,6 +96,9 @@ any (soundness: TS2898, TS2900; 8ac4d727f, 2adfd653a, 29e19bf5e, f0cb8e20c)
 - isSimpleTypeRelatedTo: under valueAssignableRelation, a source of type any relates only to unknown or a union of
   undefined, null and {}, and anywhere else reports TS2898. An uncheckedType source that fails to relate reports
   TS2898 as well.
+- getBindingElementTypeFromParentType reads a parent of type any as uncheckedType, as checkExpression reads a value
+  of type any, so a nested destructuring pattern, whose parent is a property's type and never an expression, takes
+  apart an unknown (the commit after 49dbf0517).
 - errorOrUnchecked and headedIfUnchecked are new: where the rejected type is uncheckedType, they put TS2900 at
   the head of the error's chain. They are used in getPropertyTypeForIndexType (the property doesn't exist),
   checkNonNullTypeWithReporter (the value is of type unknown), invocationError (the value isn't callable),
@@ -257,6 +260,12 @@ stops compiling, which costs nothing L keeps.
 - An iterator's flatMap takes a callback that returns no string, which it throws on (es2025.iterator).
 - WeakMap and WeakSet keys are objects: WeakKeyTypes has no symbol, since a registered symbol throws as a key
   (es2023.collection).
+- split with a RegExp separator returns (string | undefined)[], and so does a RegExp's [Symbol.split] (es5,
+  es2015.symbol.wellknown): a capture group that took no part splices in undefined. A string separator still gives
+  string[]. Array.isArray narrows to readonly unknown[], not any[] (es5). concat takes T or a readonly T[], never the
+  structural ConcatArray (es5): it spreads only an array, or an object marked isConcatSpreadable into holes, and
+  appends any other object whole. These four came with the crashes from L-hooks' exemption audit (the commit after
+  49dbf0517).
 
 The library's writes (src/lib; a36084efe)
 

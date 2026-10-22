@@ -29,7 +29,7 @@ same leaf check):
 | counterexample | route | witnesses |
 | --- | --- | --- |
 | `subDown.direct` | `Subty.top` then `subDown` | direct `any` → `T` |
-| `subDown.nested-array` | `Subty.arr subDown` — array covariance | rel-any-nested-array, lib-array-isarray-any, lib-object-values-interface, lib-promise-any-errors (`errors: any[]`) |
+| `subDown.nested-array` | `Subty.arr subDown` — array covariance | lib-object-values-interface, lib-promise-any-errors (`errors: any[]`) |
 | `subDown.callback-param` | `Subty.arrow subDown refl` — parameter contravariance | lib-promise-catch-annotated, lib-promise-any-errors (catch parameter). lib-json-stringify-replacer and lib-string-replace-callback go through a second / rest parameter, not modelled |
 | `subDown.settled-reason` | `Subty.arrow (Subty.record … subDown) refl` — record depth inside parameter contravariance | lib-allsettled-reason-any |
 

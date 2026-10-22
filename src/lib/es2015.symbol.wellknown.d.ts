@@ -207,7 +207,7 @@ interface RegExp {
      * @param limit if not undefined, the output array is truncated so that it contains no more
      * than 'limit' elements.
      */
-    [Symbol.split](string: string, limit?: number): string[];
+    [Symbol.split](string: string, limit?: number): (string | undefined)[]; // L: a capture group that took no part splices in undefined
 }
 
 interface RegExpConstructor {

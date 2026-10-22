@@ -1,4 +1,4 @@
--- rel-any-nested-array: an any[] holding null, viewed as a record[] through array covariance,
+-- lib-promise-any-errors: an any[] holding null, viewed as a record[] through array covariance,
 -- iterated with a field read. Nothing here names subDown at the array; `Subty.arr` carries it.
 ⟨.forEach (.arr [.nul]) (.lam (.record [("l", .num)]) (.proj (.var 0) "l")), .undef,
   .forEach
