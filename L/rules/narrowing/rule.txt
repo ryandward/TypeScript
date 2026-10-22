@@ -90,7 +90,7 @@ Obligation 5, the false branch of a test of how an object was built: TS2339 (Typ
   through it.
   Why it suffices. Each test asks how an object was built: by a constructor, as an array, as an error. A value of
   the same type built as an object literal fails the test, so failing it proves nothing about the value's type.
-  The true branch is TypeScript's, which trusts the prototype chain (see debt.txt).
+  The true branch is TypeScript's, which trusts the prototype chain, and prototypes makes that chain honest.
   Witnesses:
     flow-instanceof-error.ts           an Error built as an object literal, which instanceof false drops
     flow-is-error-literal.ts           the same through Error.isError

@@ -4106,6 +4106,10 @@
         "category": "Error",
         "code": 2913
     },
+    "L has no prototypes. A __proto__ key sets the object's prototype instead of making the property its type names.": {
+        "category": "Error",
+        "code": 2914
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

@@ -120,3 +120,10 @@ Obligation 6, the false branch of a test of how an object was built: TS2339 (Typ
   Why it suffices. narrowing's argument: a Dog built as an object literal fails instanceof Dog.
   Witnesses:
     flow-instanceof-else.ts            a Dog built as an object literal, which instanceof false drops
+
+Obligation 7, a prototype from the library: TS2339 (TypeScript's code)
+  Statement. No program reads a class's prototype (see prototypes).
+  Mechanism. resolveAnonymousTypeMembers drops the prototype a class's static side gets from the binder.
+  Why it suffices. prototypes' argument: a class's prototype holds none of the fields its instances get.
+  Witnesses:
+    chk-prototype-field.ts             an instance field read off the class's prototype

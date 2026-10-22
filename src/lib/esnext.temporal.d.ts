@@ -151,7 +151,6 @@ declare namespace Temporal {
 
     interface PlainDateConstructor {
         new (isoYear: number, isoMonth: number, isoDay: number, calendar?: string): PlainDate;
-        readonly prototype: PlainDate;
         from(item: PlainDateLike, options?: OverflowOptions): PlainDate;
         compare(one: PlainDateLike, two: PlainDateLike): number;
     }
@@ -182,7 +181,6 @@ declare namespace Temporal {
 
     interface PlainTimeConstructor {
         new (hour?: number, minute?: number, second?: number, millisecond?: number, microsecond?: number, nanosecond?: number): PlainTime;
-        readonly prototype: PlainTime;
         from(item: PlainTimeLike, options?: OverflowOptions): PlainTime;
         compare(one: PlainTimeLike, two: PlainTimeLike): number;
     }
@@ -234,7 +232,6 @@ declare namespace Temporal {
 
     interface PlainDateTimeConstructor {
         new (isoYear: number, isoMonth: number, isoDay: number, hour?: number, minute?: number, second?: number, millisecond?: number, microsecond?: number, nanosecond?: number, calendar?: string): PlainDateTime;
-        readonly prototype: PlainDateTime;
         from(item: PlainDateTimeLike, options?: OverflowOptions): PlainDateTime;
         compare(one: PlainDateTimeLike, two: PlainDateTimeLike): number;
     }
@@ -304,7 +301,6 @@ declare namespace Temporal {
 
     interface ZonedDateTimeConstructor {
         new (epochNanoseconds: bigint, timeZone: string, calendar?: string): ZonedDateTime;
-        readonly prototype: ZonedDateTime;
         from(item: ZonedDateTimeLike, options?: ZonedDateTimeFromOptions): ZonedDateTime;
         compare(one: ZonedDateTimeLike, two: ZonedDateTimeLike): number;
     }
@@ -352,7 +348,6 @@ declare namespace Temporal {
 
     interface DurationConstructor {
         new (years?: number, months?: number, weeks?: number, days?: number, hours?: number, minutes?: number, seconds?: number, milliseconds?: number, microseconds?: number, nanoseconds?: number): Duration;
-        readonly prototype: Duration;
         from(item: DurationLike): Duration;
         compare(one: DurationLike, two: DurationLike, options?: DurationRelativeToOptions): number;
     }
@@ -381,7 +376,6 @@ declare namespace Temporal {
 
     interface InstantConstructor {
         new (epochNanoseconds: bigint): Instant;
-        readonly prototype: Instant;
         from(item: InstantLike): Instant;
         fromEpochMilliseconds(epochMilliseconds: number): Instant;
         fromEpochNanoseconds(epochNanoseconds: bigint): Instant;
@@ -419,7 +413,6 @@ declare namespace Temporal {
 
     interface PlainYearMonthConstructor {
         new (isoYear: number, isoMonth: number, calendar?: string, referenceISODay?: number): PlainYearMonth;
-        readonly prototype: PlainYearMonth;
         from(item: PlainYearMonthLike, options?: OverflowOptions): PlainYearMonth;
         compare(one: PlainYearMonthLike, two: PlainYearMonthLike): number;
     }
@@ -446,7 +439,6 @@ declare namespace Temporal {
 
     interface PlainMonthDayConstructor {
         new (isoMonth: number, isoDay: number, calendar?: string, referenceISOYear?: number): PlainMonthDay;
-        readonly prototype: PlainMonthDay;
         from(item: PlainMonthDayLike, options?: OverflowOptions): PlainMonthDay;
     }
     var PlainMonthDay: PlainMonthDayConstructor;

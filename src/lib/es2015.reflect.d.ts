@@ -15,20 +15,6 @@ declare namespace Reflect {
     function apply(target: Function, thisArgument: any, argumentsList: ArrayLike<any>): any;
 
     /**
-     * Constructs the target with the elements of specified array as the arguments
-     * and the specified constructor as the `new.target` value.
-     * @param target The constructor to invoke.
-     * @param argumentsList An array of argument values to be passed to the constructor.
-     * @param newTarget The constructor to be used as the `new.target` object.
-     */
-    function construct<A extends readonly any[], R>(
-        target: new (...args: A) => R,
-        argumentsList: Readonly<A>,
-        newTarget?: new (...args: any) => any,
-    ): R;
-    function construct(target: Function, argumentsList: ArrayLike<any>, newTarget?: Function): any;
-
-    /**
      * Gets the property of target, equivalent to `target[propertyKey]` when `receiver === target`.
      * @param target Object that contains the property on itself or in its prototype chain.
      * @param propertyKey The property name.

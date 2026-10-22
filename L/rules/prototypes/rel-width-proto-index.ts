@@ -2,7 +2,7 @@
 // that carries return: 5, and for-of calls it.
 type Open = Iterator<number> & { readonly [key: string]: unknown };
 const proto = { return: 5 };
-const it: Open = { next: (): IteratorResult<number> => ({ done: false, value: 1 }), __proto__: proto };
+const it: Open = { next: (): IteratorResult<number> => ({ done: false, value: 1 }), __proto__: proto }; // rejected here: TS2914
 const iterable: Iterable<number> = { [Symbol.iterator]: () => it };
 for (const n of iterable) {
   console.log(n);

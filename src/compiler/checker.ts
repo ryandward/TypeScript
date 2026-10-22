@@ -14681,6 +14681,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             });
             members = varsOnly;
         }
+        // L: a class's static side has no prototype, which is no instance of the class: Iterator.prototype has no next.
+        if (symbol.flags & SymbolFlags.Class && members.has("prototype" as __String)) {
+            members = new Map(members);
+            members.delete("prototype" as __String);
+        }
         let baseConstructorIndexInfo: IndexInfo | undefined;
         setStructuredTypeMembers(type, members, emptyArray, emptyArray, emptyArray);
         if (symbol.flags & SymbolFlags.Class) {
@@ -33600,6 +33605,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             let member = getSymbolOfDeclaration(memberDecl);
             const computedNameType = memberDecl.name && memberDecl.name.kind === SyntaxKind.ComputedPropertyName ?
                 checkComputedPropertyName(memberDecl.name) : undefined;
+            // L: a __proto__ key written plainly sets the object's prototype and makes no property.
+            if (memberDecl.kind === SyntaxKind.PropertyAssignment && isPropertyNameLiteral(memberDecl.name) && getTextOfIdentifierOrLiteral(memberDecl.name) === "__proto__") {
+                error(memberDecl.name, Diagnostics.L_has_no_prototypes_A_proto_key_sets_the_object_s_prototype_instead_of_making_the_property_its_type_names);
+            }
             if (
                 memberDecl.kind === SyntaxKind.PropertyAssignment ||
                 memberDecl.kind === SyntaxKind.ShorthandPropertyAssignment ||

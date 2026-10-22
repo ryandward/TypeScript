@@ -5,7 +5,6 @@ interface AggregateError extends Error {
 interface AggregateErrorConstructor {
     new (errors: Iterable<any>, message?: string): AggregateError;
     (errors: Iterable<any>, message?: string): AggregateError;
-    readonly prototype: AggregateError;
 }
 
 declare var AggregateError: AggregateErrorConstructor;

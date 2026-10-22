@@ -79,9 +79,6 @@ initialization-order
   imported from a module that hasn't run yet is read before it exists (L-hooks' other-self-import-tdz).
 
 narrowing
-- instanceof's true branch trusts the prototype chain. Object.create(Map.prototype) passes instanceof Map with none
-  of a Map's internal state, and Map's getters throw on it (catalog/chk-proto-create-instanceof.ts); an object
-  literal's __proto__ key sets a prototype the same way (catalog/chk-proto-literal-key.ts).
 - The false branch of Array.isArray removes nothing now, so `Array.isArray(x) ? x : [x]` leaves the array type in
   the second branch. Testing the other member, `typeof x === 'string' ? [x] : x`, narrows both ways.
 

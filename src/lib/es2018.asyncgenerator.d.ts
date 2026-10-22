@@ -26,10 +26,6 @@ interface AsyncGeneratorFunction {
      * Returns the name of the function.
      */
     readonly name: string;
-    /**
-     * A reference to the prototype.
-     */
-    readonly prototype: AsyncGenerator;
 }
 
 interface AsyncGeneratorFunctionConstructor {
@@ -51,8 +47,4 @@ interface AsyncGeneratorFunctionConstructor {
      * Returns the name of the function.
      */
     readonly name: string;
-    /**
-     * A reference to the prototype.
-     */
-    readonly prototype: AsyncGeneratorFunction;
 }

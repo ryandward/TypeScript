@@ -1,0 +1,55 @@
+prototypes
+kind: soundness
+
+Claim. If the lab accepts a program, no object it reaches sits on a prototype it doesn't own: each was built by
+its constructor, or as a literal on Object's prototype. instanceof's true branch, which trusts the prototype chain,
+is then true of every value that takes it.
+
+Counterexample in plain TypeScript. An object literal's __proto__ key sets the object's prototype, and the checker
+types it as a property. The library types every constructor's prototype as one of its instances, though Map's
+prototype has none of a Map's internal state and Iterator's has no next, and TypeScript gives every class, Iterator
+included, a prototype typed the same way. Object.create, and Reflect.construct with a newTarget, build an object on
+any prototype. Each witness reads such an object as an instance, and Node throws a TypeError.
+
+Obligation 1, a __proto__ key: TS2914
+  Statement. No object literal has a __proto__ key written as a plain name or string. A computed or shorthand
+  __proto__ key makes an own property, as its type says, and stays.
+  Mechanism. checkObjectLiteral reports TS2914 on a property assignment whose name is the identifier or string
+  literal __proto__.
+  Why it suffices. A plain __proto__ key in an object literal is the only syntax that sets a prototype, and every
+  object literal is checked by checkObjectLiteral.
+  Witnesses:
+    chk-proto-literal-key.ts           a __proto__ key holding a string, read back as a property
+    chk-proto-null.ts                  a __proto__ key of null, whose object has no toString
+    chk-proto-literal-instanceof.ts    a __proto__ key holding Map's prototype, which passes instanceof Map
+    rel-width-proto-index.ts           a __proto__ key, let past the excess-property check by an index signature,
+                                       giving an iterator a return that isn't a function
+  Rejected sound code, because L takes no __proto__ key:
+    record-literal.ts                  a __proto__ key of null, with only an own field read
+  Controls:
+    computed-proto-key.ts              a computed and a shorthand __proto__ key, each an own property
+
+Obligation 2, a prototype from the library: TS2339 (TypeScript's code)
+  Statement. No program reads a constructor's prototype or calls Object.create.
+  Mechanism. Every prototype field is deleted from the library's constructors, resolveAnonymousTypeMembers drops
+  the prototype a class's static side gets from the binder, and Object.create is deleted.
+  Why it suffices. Classes are the library's alone (see classes), and Iterator is its only one. A prototype is
+  reached through a constructor's prototype property, a class's, or a function that builds on one: the library
+  declares no other prototype and no other such function once Reflect.construct is gone (obligation 3), and
+  Object.setPrototypeOf and Reflect.setPrototypeOf went with the effects. instanceof's right side is then judged by
+  its construct signatures alone, which getInstanceType reads when there is no prototype property.
+  Witnesses:
+    lib-prototype-field.ts             Map's prototype read as a Map
+    lib-iterator-prototype.ts          Iterator's prototype read as an Iterator, with no next
+    chk-proto-create-instanceof.ts     Object.create on Map's prototype, which passes instanceof Map
+  Controls:
+    instanceof-constructed.ts          a Map built by its constructor, read as one after instanceof
+
+Obligation 3, a constructor's newTarget: TS2550 (TypeScript's code)
+  Statement. No program calls Reflect.construct, whose newTarget builds an object on another constructor's
+  prototype. new builds what Reflect.construct builds without one.
+  Mechanism. Reflect.construct is deleted from the library; TypeScript reports a property the library lacks as
+  TS2550 when a later library declares it.
+  Why it suffices. Reflect.construct is the library's only function that takes a newTarget.
+  Witnesses:
+    lib-reflect-construct-newtarget.ts  Object built with Set as its newTarget, which passes instanceof Set

@@ -31,7 +31,6 @@ interface SuppressedError extends Error {
 interface SuppressedErrorConstructor {
     new (error: any, suppressed: any, message?: string): SuppressedError;
     (error: any, suppressed: any, message?: string): SuppressedError;
-    readonly prototype: SuppressedError;
 }
 declare var SuppressedError: SuppressedErrorConstructor;
 
@@ -98,7 +97,6 @@ interface DisposableStack {
 
 interface DisposableStackConstructor {
     new (): DisposableStack;
-    readonly prototype: DisposableStack;
 }
 
 interface AsyncDisposableStack {
@@ -164,7 +162,6 @@ interface AsyncDisposableStack {
 
 interface AsyncDisposableStackConstructor {
     new (): AsyncDisposableStack;
-    readonly prototype: AsyncDisposableStack;
 }
 
 interface IteratorObject<T, TReturn, TNext> extends Disposable {

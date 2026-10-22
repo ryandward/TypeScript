@@ -2,7 +2,7 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds twenty diagnostics, changes the checker and two functions in utilities.ts that decide which
+things: it adds twenty-one diagnostics, changes the checker and two functions in utilities.ts that decide which
 files are checked, adds one internal type flag, declares readonly the new objects and collections the library
 hands out, deletes from the ES library every effect and every method that changes an object in place, and
 corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
@@ -17,7 +17,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Twenty new errors, from TS2892 to TS2913, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+Twenty-one new errors, from TS2892 to TS2914, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
 The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
 rules and TS2897 to definite-assignment.
 
@@ -67,6 +67,9 @@ rules and TS2897 to definite-assignment.
   TS2913  narrowing
           Type '{0}' is primitive, and L holds no primitive in an object type such as '{1}', since every value of an
           object type must be an object.
+  TS2914  prototypes
+          L has no prototypes. A __proto__ key sets the object's prototype instead of making the property its type
+          names.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -207,6 +210,12 @@ narrowing (soundness: TS2913 and TypeScript's TS2339, TS2366 and TS18046; 6c1f96
 - narrowTypeBySwitchOnTrue narrows by a skipped clause only when the clause is boolean, since skipping a clause
   proves only that its value isn't true.
 
+prototypes (soundness: TS2914 and TypeScript's TS2339 and TS2550; the commit after 4b924f088)
+- checkObjectLiteral reports TS2914 on a property assignment named __proto__ by an identifier or string literal,
+  which sets the object's prototype and makes no property.
+- resolveAnonymousTypeMembers drops the prototype a class's static side gets from the binder, so Iterator, the
+  library's one class, has none. The library's own prototype fields are deleted (below).
+
 Rules with no checker change: effects and library-declarations are built in the library alone (below),
 optional-field is a specification only, and call-signature isn't built (its witness is open; see debt.txt).
 
@@ -282,6 +291,9 @@ stops compiling, which costs nothing L keeps.
 - An iterator's flatMap takes a callback that returns no string, which it throws on (es2025.iterator).
 - WeakMap and WeakSet keys are objects: WeakKeyTypes has no symbol, since a registered symbol throws as a key
   (es2023.collection).
+- No constructor declares a prototype: all 56 prototype fields are deleted from the core's library, since a
+  constructor's prototype is not one of its instances (Map's has no Map state, Date's no time). Object.create and
+  Reflect.construct are deleted, since each builds an object on a prototype it is handed (es5, es2015.reflect).
 - split with a RegExp separator returns (string | undefined)[], and so does a RegExp's [Symbol.split] (es5,
   es2015.symbol.wellknown): a capture group that took no part splices in undefined. A string separator still gives
   string[]. Array.isArray narrows to readonly unknown[], not any[] (es5). concat takes T or a readonly T[], never

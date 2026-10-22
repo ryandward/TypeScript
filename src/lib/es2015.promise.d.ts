@@ -1,10 +1,5 @@
 interface PromiseConstructor {
     /**
-     * A reference to the prototype.
-     */
-    readonly prototype: Promise<any>;
-
-    /**
      * Creates a new Promise.
      * @param executor A callback used to initialize the promise. This callback is passed two arguments:
      * a resolve callback used to resolve the promise with a value or the result of another promise,

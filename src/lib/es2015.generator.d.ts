@@ -26,10 +26,6 @@ interface GeneratorFunction {
      * Returns the name of the function.
      */
     readonly name: string;
-    /**
-     * A reference to the prototype.
-     */
-    readonly prototype: Generator;
 }
 
 interface GeneratorFunctionConstructor {
@@ -51,8 +47,4 @@ interface GeneratorFunctionConstructor {
      * Returns the name of the function.
      */
     readonly name: string;
-    /**
-     * A reference to the prototype.
-     */
-    readonly prototype: GeneratorFunction;
 }

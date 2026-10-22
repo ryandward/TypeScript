@@ -16,7 +16,6 @@ interface SharedArrayBuffer {
 }
 
 interface SharedArrayBufferConstructor {
-    readonly prototype: SharedArrayBuffer;
     new (byteLength?: number): SharedArrayBuffer;
     readonly [Symbol.species]: SharedArrayBufferConstructor;
 }

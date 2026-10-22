@@ -13,8 +13,6 @@ interface WeakRef<T extends WeakKey> {
 }
 
 interface WeakRefConstructor {
-    readonly prototype: WeakRef<any>;
-
     /**
      * Creates a WeakRef instance for the given target value.
      * In es2023 the value can be either a symbol or an object, in previous versions only object is permissible.
@@ -47,8 +45,6 @@ interface FinalizationRegistry<T> {
 }
 
 interface FinalizationRegistryConstructor {
-    readonly prototype: FinalizationRegistry<any>;
-
     /**
      * Creates a finalization registry with an associated cleanup callback
      * @param cleanupCallback The callback to call after a value in the registry has been reclaimed.

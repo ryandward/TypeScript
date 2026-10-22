@@ -3,4 +3,4 @@
 class Item { // rejected here: TS2902
   readonly name: string = "x";
 }
-console.log(Item.prototype.name.toUpperCase());
+console.log(Item.prototype.name.toUpperCase()); // rejected here: TS2339

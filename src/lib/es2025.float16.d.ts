@@ -283,7 +283,6 @@ interface Float16Array<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
 }
 
 interface Float16ArrayConstructor {
-    readonly prototype: Float16Array<ArrayBufferLike>;
     new (length?: number): Float16Array<ArrayBuffer>;
     new (array: ArrayLike<number> | Iterable<number>): Float16Array<ArrayBuffer>;
     new <TArrayBuffer extends ArrayBufferLike = ArrayBuffer>(buffer: TArrayBuffer, byteOffset?: number, length?: number): Float16Array<TArrayBuffer>;

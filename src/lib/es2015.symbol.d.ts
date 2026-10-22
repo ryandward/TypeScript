@@ -1,10 +1,5 @@
 interface SymbolConstructor {
     /**
-     * A reference to the prototype.
-     */
-    readonly prototype: Symbol;
-
-    /**
      * Returns a new unique Symbol value.
      * @param  description Description of the new Symbol object.
      */
