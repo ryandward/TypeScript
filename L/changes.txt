@@ -174,7 +174,7 @@ parameters and void (soundness: TS2911, and TypeScript's own TS2322 and TS2339; 
 - With method parameters strict, isImplementationCompatibleWithOverload rejects a method or constructor overload
   that widens a parameter (TypeScript's TS2394), filed under classes.
 
-initialization-order (soundness: TS2912; the commit after dfa25ac95)
+initialization-order (soundness: TS2912; 51453724a)
 - isReadBeforeDeclaration is new: the read of a name whose value declaration is a function declaration, or a
   block-scoped variable or binding element, in the same file and outside the library, that ends before the
   declaration begins. A read inside the declaration itself, or in a type position, isn't one.
