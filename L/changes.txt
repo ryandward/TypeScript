@@ -210,7 +210,7 @@ narrowing (soundness: TS2913 and TypeScript's TS2339, TS2366 and TS18046; 6c1f96
 - narrowTypeBySwitchOnTrue narrows by a skipped clause only when the clause is boolean, since skipping a clause
   proves only that its value isn't true.
 
-prototypes (soundness: TS2914 and TypeScript's TS2339 and TS2550; the commit after 4b924f088)
+prototypes (soundness: TS2914 and TypeScript's TS2339 and TS2550; b85ec04e5)
 - checkObjectLiteral reports TS2914 on a property assignment named __proto__ by an identifier or string literal,
   which sets the object's prototype and makes no property.
 - resolveAnonymousTypeMembers drops the prototype a class's static side gets from the binder, so Iterator, the
