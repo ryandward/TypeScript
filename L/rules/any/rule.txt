@@ -40,6 +40,7 @@ Obligation 1, assignability: TS2898
     lib-promise-any-errors.ts          AggregateError.errors is any[]
     lib-generator-tnext-any.ts         yield is any when Generator's TNext is left to its default
     lib-allsettled-reason-any.ts       a callback claims a record for PromiseRejectedResult's reason: any
+    chk-any-nested-constraint.ts       an any inside a constraint's parameter type, which the body passes a string
   Controls:
     unknown-checked.ts                 an any flowing into unknown, decided by typeof before it is read
   Rejected sound code, because soundness forces it:
@@ -50,7 +51,10 @@ Obligation 3, a parameter typed any: TS2920
   unknown, in every relation. A parameter typed any says its caller may pass anything, and a type parameter's
   constraint makes the generic body such a caller.
   Mechanism. compareSignaturesRelated compares a target parameter that is any itself (isAnyParameterType, not
-  errorType or an instantiation's wildcard) as unknown, and reports TS2920 when the source's parameter refuses it.
+  errorType or an instantiation's wildcard) as unknown, and relates every other parameter as a value flow too,
+  under valueAssignableRelation, so an any nested in it is refused as well; either failure reports TS2920. A
+  constraint refused this way reaches the program through inference, which falls back to the constraint, and the
+  argument's flow into it then reports TS2898 (chk-any-nested-constraint, cited under obligation 1).
   The library's utility types bound a function by (...args: never) => unknown instead, which takes no argument
   list at all, so every function satisfies it.
   Why it suffices. Every relation between function types compares parameters in compareSignaturesRelated, so no

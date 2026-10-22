@@ -1529,6 +1529,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     var withinUnreachableCode = false;
     // L: set while overload resolution relates arguments whose parameter types aren't fully inferred yet (#17041).
     var excessPropertyChecksSilenced = false;
+    // L: set while compareSignaturesRelated relates a parameter as a value flow, under valueAssignableRelation, whose own
+    // parameter comparisons already refuse any, so a signature inside doesn't start another relation.
+    var relatingParameterAsValue = false;
     var reportedUnreachableNodes: Set<Node> | undefined;
 
     var emptySymbols = createSymbolTable();
@@ -22040,6 +22043,18 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     /**
      * Returns true if `s` is `(...args: A) => R` where `A` is `any`, `any[]`, `never`, or `never[]`, and `R` is `any` or `unknown`.
      */
+    // L: what a target passes, related to a source's parameter as a value flows, under valueAssignableRelation.
+    function isTypeRelatedAsParameterValue(passed: Type, parameter: Type): boolean {
+        const saveRelating = relatingParameterAsValue;
+        relatingParameterAsValue = true;
+        try {
+            return isTypeRelatedTo(passed, parameter, valueAssignableRelation);
+        }
+        finally {
+            relatingParameterAsValue = saveRelating;
+        }
+    }
+
     // L: a parameter type that is any itself, not errorType after a reported error or the wildcard of an instantiation.
     function isAnyParameterType(type: Type): boolean {
         return !!(type.flags & TypeFlags.Any) && type !== errorType && type !== wildcardType;
@@ -22141,10 +22156,14 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 if (related && checkMode & SignatureCheckMode.StrictArity && i >= getMinArgumentCount(source) && i < getMinArgumentCount(target) && compareTypes(sourceType, targetType, /*reportErrors*/ false)) {
                     related = Ternary.False;
                 }
-                if (!related) {
+                // L: a parameter receives a value, so what the target passes relates to it as a value flows, in every
+                // relation: an any anywhere in it, as in Record<string, any>, promises the source anything there.
+                const anyRefused = !!related && !callbacks && !targetTypeIsAny && !!declaredTargetType && !relatingParameterAsValue &&
+                    !isTypeRelatedAsParameterValue(declaredTargetType, sourceType);
+                if (!related || anyRefused) {
                     if (reportErrors) {
-                        if (targetTypeIsAny) {
-                            errorReporter!(Diagnostics.Parameter_0_takes_1_but_the_target_types_it_any_which_promises_it_anything, unescapeLeadingUnderscores(getParameterNameAtPosition(source, i)), typeToString(sourceType));
+                        if (targetTypeIsAny || anyRefused) {
+                            errorReporter!(Diagnostics.Parameter_0_takes_1_but_the_target_passes_2_whose_any_promises_it_anything, unescapeLeadingUnderscores(getParameterNameAtPosition(source, i)), typeToString(sourceType), typeToString(declaredTargetType!));
                         }
                         else {
                             errorReporter!(Diagnostics.Types_of_parameters_0_and_1_are_incompatible, unescapeLeadingUnderscores(getParameterNameAtPosition(source, i)), unescapeLeadingUnderscores(getParameterNameAtPosition(target, i)));

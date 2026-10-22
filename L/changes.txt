@@ -85,7 +85,7 @@ rules and TS2897 to definite-assignment.
   TS2919  arity
           Parameter '{0}' is required, but the target can be called without it, so it would receive undefined.
   TS2920  any
-          Parameter '{0}' takes '{1}', but the target types it any, which promises it anything.
+          Parameter '{0}' takes '{1}', but the target passes '{2}', whose any promises it anything.
   TS2921  width
           '{0}' is inherited, but a value of type '{1}' may hold its own '{0}' of any type, since the type names
           only some of its properties.
@@ -122,7 +122,10 @@ any (soundness: TS2898, TS2900; 8ac4d727f, 2adfd653a, 29e19bf5e, f0cb8e20c)
   undefined, null and {}, and anywhere else reports TS2898. An uncheckedType source that fails to relate reports
   TS2898 as well.
 - compareSignaturesRelated compares a target parameter that is any itself (isAnyParameterType) as unknown, in
-  every relation, and reports TS2920 when the source's parameter refuses it (861f1fc84).
+  every relation, and reports TS2920 when the source's parameter refuses it (861f1fc84). It also relates every
+  other parameter as a value flow, under valueAssignableRelation, so an any nested in it is refused too; the
+  nested relation is started once (isTypeRelatedAsParameterValue and relatingParameterAsValue), since a fresh
+  relation's recursion guards don't see the outer one's (the commit after 0caaf143d).
 - getBindingElementTypeFromParentType reads a parent of type any as uncheckedType, as checkExpression reads a value
   of type any, so a nested destructuring pattern, whose parent is a property's type and never an expression, takes
   apart an unknown (e0bd3fffd).
