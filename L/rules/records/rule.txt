@@ -1,0 +1,44 @@
+records
+kind: soundness
+
+Claim. If the lab accepts a program, every property a record type names, one declared outside the library, is own
+enumerable data in each of its values, so a spread or a rest copies it; and a spread's type names no property the
+copy lacks.
+
+Counterexample in plain TypeScript. A spread runs CopyDataProperties, which copies a value's own enumerable
+properties and nothing else, but getSpreadType keeps every property the source's type declares. An array's
+length is own and not enumerable, and its methods live on Array.prototype; a Map's size is a getter on
+Map.prototype; an error's message is own and not enumerable. So a copy of an array is typed with a length, a
+copy of a Map with a size, and an engine object held as a record whose type names those properties is copied
+into nothing there. Each witness's oracle finds undefined where its type says a number or a string, and throws.
+
+Obligation 1, an engine object's member in a record's place: TS2923
+  Statement. A property of an engine object, one the library declares on an interface or a class, or a tuple's
+  length, doesn't stand in for a property a type outside the library declares. A record built from literals, and
+  a plain object the engine builds, which the library declares as a type literal, as an iterator result, have
+  their properties as data and still relate.
+  Mechanism. propertiesRelatedTo reports TS2923 when isEnginePropertyOf holds of the source's property and not of
+  the target's, in every relation but comparability. isEngineDeclaredProperty follows a mapped or spread
+  property's syntheticOrigin back, so Readonly of a record is data and Readonly of a Map isn't.
+  Why it suffices. Every assignability judgment between object types compares named properties in
+  propertiesRelatedTo, so an engine object reaches a record type only through one of them.
+  Witnesses:
+    rel-record-holds-map.ts            a Map held as a record with a size, then spread
+    rel-record-holds-array.ts          an array held as a record with a length, then spread
+    rel-record-holds-error.ts          an Error held as a record with a message, then spread
+  Rejected sound code, because an array isn't a record:
+    array-as-record.ts                 an array passed where { readonly length: number } is taken, never spread
+  Controls:
+    record-spreads.ts                  literal records, Readonly, array entries, tuple elements, an iterator result
+
+Obligation 2, an engine object's member through a spread: TS2339 (TypeScript's code)
+  Statement. A spread's or a rest's type drops the source's engine members, and keeps its data: a record's
+  properties, an array's index signature, a tuple's elements.
+  Mechanism. getSpreadType, getAnonymousPartialType and the rest type skip a property isEnginePropertyOf holds of,
+  so a read of it on the copy finds no property, which TypeScript reports.
+  Why it suffices. Those are the three places a spread or rest type is built from a source's properties.
+  Witnesses:
+    rel-spread-array-length.ts         an array's spread, its length read
+    rel-spread-map-size.ts             a Map's spread, its size read
+  Controls:
+    record-spreads.ts                  an array's spread keeps its entries, a tuple's its elements

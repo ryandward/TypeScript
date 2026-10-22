@@ -113,6 +113,14 @@ conversions
   reference gets TypeScript's covariance for arrays. The converting methods take this: ArrayLike to step around
   it, but passing a TemplateStringsArray where a readonly (string | number)[] is taken fails.
 
+records
+- A property is the engine's when the library declares it on an interface or a class, which is the library's
+  convention rather than the engine's fact. A plain object the engine builds that the library still declares as an
+  interface, as a RegExpMatchArray's index and groups, is refused as a record's data and dropped from a spread,
+  which is sound but loses data.
+- A value the shell hands the core can be any object, typed as a record: the boundary must parse it into a literal
+  (see all rules).
+
 call-signature
 - A value typed Function can't be called now, even when it holds an ordinary function. Nobody has measured how
   much real code calls one; the core has to declare the signature of a function it is handed.

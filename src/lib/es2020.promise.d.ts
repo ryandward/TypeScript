@@ -1,12 +1,14 @@
-interface PromiseFulfilledResult<T> {
+// L: a plain object the engine builds, with own enumerable data properties, is declared as a type literal, which a
+// record type and a spread treat as data; an interface describes an engine object, whose members aren't.
+type PromiseFulfilledResult<T> = {
     status: "fulfilled";
     value: T;
-}
+};
 
-interface PromiseRejectedResult {
+type PromiseRejectedResult = {
     status: "rejected";
     reason: any;
-}
+};
 
 type PromiseSettledResult<T> = PromiseFulfilledResult<T> | PromiseRejectedResult;
 

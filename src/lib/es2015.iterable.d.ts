@@ -9,15 +9,17 @@ interface SymbolConstructor {
 }
 
 // L: iterator results and built-in entries() tuples are readonly, since each is new and nothing writes it.
-interface IteratorYieldResult<TYield> {
+// L: a plain object the engine builds, with own enumerable data properties, is declared as a type literal, which a
+// record type and a spread treat as data; an interface describes an engine object, whose members aren't.
+type IteratorYieldResult<TYield> = {
     readonly done?: false;
     readonly value: TYield;
-}
+};
 
-interface IteratorReturnResult<TReturn> {
+type IteratorReturnResult<TReturn> = {
     readonly done: true;
     readonly value: TReturn;
-}
+};
 
 type IteratorResult<T, TReturn = any> = IteratorYieldResult<T> | IteratorReturnResult<TReturn>;
 

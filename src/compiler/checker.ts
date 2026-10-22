@@ -11768,7 +11768,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (
                 !isTypeAssignableTo(literalTypeFromProperty, omitKeyType)
                 && !(getDeclarationModifierFlagsFromSymbol(prop) & (ModifierFlags.Private | ModifierFlags.Protected))
-                && isSpreadableProperty(prop)
+                && isSpreadableProperty(prop) && !isEnginePropertyOf(source, prop)
             ) {
                 spreadableProperties.push(prop);
             }
@@ -20290,7 +20290,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 if (getDeclarationModifierFlagsFromSymbol(prop) & (ModifierFlags.Private | ModifierFlags.Protected)) {
                     // do nothing, skip privates
                 }
-                else if (isSpreadableProperty(prop)) {
+                else if (isSpreadableProperty(prop) && !isEnginePropertyOf(type, prop)) {
                     const isSetonlyAccessor = prop.flags & SymbolFlags.SetAccessor && !(prop.flags & SymbolFlags.GetAccessor);
                     const flags = SymbolFlags.Property | SymbolFlags.Optional;
                     const result = createSymbol(flags, prop.escapedName, getIsLateCheckFlag(prop) | (readonly ? CheckFlags.Readonly : 0));
@@ -20366,13 +20366,14 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (getDeclarationModifierFlagsFromSymbol(rightProp) & (ModifierFlags.Private | ModifierFlags.Protected)) {
                 skippedPrivateMembers.add(rightProp.escapedName);
             }
-            else if (isSpreadableProperty(rightProp)) {
+            // L: a spread copies only own enumerable properties, so an engine object's members don't survive it.
+            else if (isSpreadableProperty(rightProp) && !isEnginePropertyOf(right, rightProp)) {
                 members.set(rightProp.escapedName, getSpreadSymbol(rightProp, readonly));
             }
         }
 
         for (const leftProp of getPropertiesOfType(left)) {
-            if (skippedPrivateMembers.has(leftProp.escapedName) || !isSpreadableProperty(leftProp)) {
+            if (skippedPrivateMembers.has(leftProp.escapedName) || !isSpreadableProperty(leftProp) || isEnginePropertyOf(left, leftProp)) {
                 continue;
             }
             if (members.has(leftProp.escapedName)) {
@@ -20408,6 +20409,22 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     }
 
     /** We approximate own properties as non-methods plus methods that are inside the object literal */
+    // L: a property the library declares on an interface or class, which describes an engine object: its members live on
+    // a prototype, or are own but not enumerable, as an array's length is. A property a mapped type or a spread makes
+    // takes its origin's kind; one a tuple element or an index signature makes is data, but a tuple's length isn't.
+    function isEnginePropertyOf(type: Type, prop: Symbol): boolean {
+        return isEngineDeclaredProperty(prop) || prop.escapedName === "length" && someType(type, isTupleType);
+    }
+
+    function isEngineDeclaredProperty(prop: Symbol): boolean {
+        const origin = prop.flags & SymbolFlags.Transient ? (prop as TransientSymbol).links.syntheticOrigin : undefined;
+        if (origin) {
+            return isEngineDeclaredProperty(origin);
+        }
+        return !(getCheckFlags(prop) & CheckFlags.Mapped) &&
+            some(prop.declarations, d => inDefaultLibrary(d) && !!d.parent && (isInterfaceDeclaration(d.parent) || isClassLike(d.parent)));
+    }
+
     function isSpreadableProperty(prop: Symbol): boolean {
         return !some(prop.declarations, isPrivateIdentifierClassElementDeclaration) &&
             (!(prop.flags & (SymbolFlags.Method | SymbolFlags.GetAccessor | SymbolFlags.SetAccessor)) ||
@@ -24813,6 +24830,17 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 const name = targetProp.escapedName;
                 if (!(targetProp.flags & SymbolFlags.Prototype) && (!numericNamesOnly || isNumericLiteralName(name) || name === "length") && (!optionalsOnly || targetProp.flags & SymbolFlags.Optional)) {
                     const sourceProp = getPropertyOfType(source, name);
+                    // L: an engine object's member is no record's own enumerable data, so it doesn't stand in for a
+                    // property a type outside the library declares: a spread of that type would copy nothing there.
+                    if (
+                        sourceProp && sourceProp !== targetProp && relation !== comparableRelation &&
+                        isEnginePropertyOf(source, sourceProp) && !isEnginePropertyOf(target, targetProp)
+                    ) {
+                        if (reportErrors) {
+                            reportError(Diagnostics.Property_0_belongs_to_the_engine_s_1_not_to_data_a_record_holds_so_it_doesn_t_satisfy_0_in_2, symbolToString(targetProp), typeToString(source), typeToString(target));
+                        }
+                        return Ternary.False;
+                    }
                     if (sourceProp && sourceProp !== targetProp) {
                         const related = propertyRelatedTo(source, target, sourceProp, targetProp, getNonMissingTypeOfSymbol, reportErrors, intersectionState, relation === comparableRelation);
                         if (!related) {

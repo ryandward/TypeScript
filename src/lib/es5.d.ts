@@ -86,14 +86,16 @@ interface Symbol {
 
 declare type PropertyKey = string | number | symbol;
 
-interface PropertyDescriptor {
+// L: a plain object the engine builds, with own enumerable data properties, is declared as a type literal, which a
+// record type and a spread treat as data; an interface describes an engine object, whose members aren't.
+type PropertyDescriptor = {
     configurable?: boolean;
     enumerable?: boolean;
     value?: any;
     writable?: boolean;
     get?(): any;
     set?(v: any): void;
-}
+};
 
 interface PropertyDescriptorMap {
     [key: PropertyKey]: PropertyDescriptor;
@@ -1140,14 +1142,15 @@ interface ArrayConstructor {
 
 declare var Array: ArrayConstructor;
 
-interface TypedPropertyDescriptor<T> {
+// L: a plain object, as PropertyDescriptor is.
+type TypedPropertyDescriptor<T> = {
     enumerable?: boolean;
     configurable?: boolean;
     writable?: boolean;
     value?: T;
     get?: () => T;
     set?: (value: T) => void;
-}
+};
 
 declare type PromiseConstructorLike = new <T>(executor: (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void) => PromiseLike<T>;
 

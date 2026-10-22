@@ -4142,6 +4142,10 @@
         "category": "Error",
         "code": 2922
     },
+    "Property '{0}' belongs to the engine's '{1}', not to data a record holds, so it doesn't satisfy '{0}' in '{2}'.": {
+        "category": "Error",
+        "code": 2923
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

@@ -2,7 +2,7 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds twenty-nine diagnostics, changes the checker and two functions in utilities.ts that decide which
+things: it adds thirty diagnostics, changes the checker and two functions in utilities.ts that decide which
 files are checked, adds one internal type flag, declares readonly the new objects and collections the library
 hands out, deletes from the ES library every effect and every method that changes an object in place, and
 corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
@@ -17,7 +17,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Twenty-nine new errors, from TS2892 to TS2922, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+Thirty new errors, from TS2892 to TS2923, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
 The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
 rules and TS2897 to definite-assignment.
 
@@ -92,6 +92,9 @@ rules and TS2897 to definite-assignment.
   TS2922  conversions
           '{0}' may be an object, and converting it to a primitive calls a Symbol.toPrimitive, valueOf or toString
           it may hold as anything.
+  TS2923  records
+          Property '{0}' belongs to the engine's '{1}', not to data a record holds, so it doesn't satisfy '{0}' in
+          '{2}'.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -289,6 +292,13 @@ conversions (soundness: TS2922 and TypeScript's TS2345 and TS2684; 9ad783be6)
   operand that may be an object in an untagged template's substitution, + and unary +, < > <= >=, and == or !=
   against an operand that may be a primitive other than null or undefined.
 
+records (soundness: TS2923 and TypeScript's TS2339; the commit after c4281f2bb)
+- isEnginePropertyOf and isEngineDeclaredProperty are new: a property the library declares on an interface or a
+  class, followed back through a mapped or spread property's syntheticOrigin, or a tuple's length.
+- propertiesRelatedTo reports TS2923 when an engine property stands in for one a type outside the library declares.
+- getSpreadType, getAnonymousPartialType and the rest type skip engine properties, as CopyDataProperties copies
+  only own enumerable ones.
+
 Rules with no checker change: effects and library-declarations are built in the library alone (below), and
 optional-field is a specification only.
 
@@ -371,6 +381,9 @@ stops compiling, which costs nothing L keeps.
   String.raw's substitutions are primitives (es2015.core). join and toString on Array and ReadonlyArray, and
   toSorted with no comparer (es2023.array, after the overload that takes one), take this: ArrayLike of the
   primitives. Converting an object calls a method a value of an open type may hold as anything (conversions).
+- IteratorYieldResult and IteratorReturnResult (es2015.iterable), PromiseFulfilledResult and PromiseRejectedResult
+  (es2020.promise), PropertyDescriptor and TypedPropertyDescriptor (es5) are type literals, not interfaces: the
+  engine builds each as a plain object with own enumerable data, and records reads an interface as an engine object.
 - Reflect.get is deleted (es2015.reflect): it reads a key as an element access does but types the result as an
   indexed access type, which no read check sees (open-record).
 - Array.from takes a string as itself (es2015.iterable), returning its code points, since a string is no longer

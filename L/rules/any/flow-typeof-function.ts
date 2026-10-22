@@ -2,5 +2,5 @@
 // and are removed, but a function is a value of an object type it fits, and every function has a name.
 type Named = { readonly name: string };
 const run = (x: Named | (() => number)): number => (typeof x === 'function' ? x().toFixed().length : x.name.length); // rejected here: TS2898
-const named: Named = (): string => 'not a number';
+const named: Named = (): string => 'not a number'; // rejected here: TS2923
 console.log(run(named));
