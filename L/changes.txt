@@ -284,7 +284,7 @@ arity (soundness: TS2919; 02d3dfcd3)
 - The isTopSignature shortcut that related every function to a top signature is deleted; the StrictTopSignature
   guard for subtype reduction stays.
 
-conversions (soundness: TS2922 and TypeScript's TS2345 and TS2684; the commit after 7d745587a)
+conversions (soundness: TS2922 and TypeScript's TS2345 and TS2684; 9ad783be6)
 - isPrimitiveOnlyType, mayHoldConvertingPrimitive and checkConversionOperand are new. TS2922 is reported for an
   operand that may be an object in an untagged template's substitution, + and unary +, < > <= >=, and == or !=
   against an operand that may be a primitive other than null or undefined.
