@@ -2,7 +2,7 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds nineteen diagnostics, changes the checker and two functions in utilities.ts that decide which
+things: it adds twenty diagnostics, changes the checker and two functions in utilities.ts that decide which
 files are checked, adds one internal type flag, declares readonly the new objects and collections the library
 hands out, deletes from the ES library every effect and every method that changes an object in place, and
 corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
@@ -17,7 +17,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Nineteen new errors, from TS2892 to TS2912, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+Twenty new errors, from TS2892 to TS2913, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
 The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
 rules and TS2897 to definite-assignment.
 
@@ -64,6 +64,9 @@ rules and TS2897 to definite-assignment.
   TS2912  initialization-order
           '{0}' is declared below this read. L reads a binding only below its declaration, so nothing can run the
           read before the binding exists.
+  TS2913  narrowing
+          Type '{0}' is primitive, and L holds no primitive in an object type such as '{1}', since every value of an
+          object type must be an object.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -185,6 +188,25 @@ initialization-order (soundness: TS2912; 51453724a)
   deferred and lets it through; holding every read to the order of the file means a function that reads a const is
   declared after it, and is itself read only after its own declaration.
 
+narrowing (soundness: TS2913 and TypeScript's TS2339, TS2366 and TS18046; the commit after 985f36dd4)
+- holdsNoPrimitive and isPrimitiveValuedType are new. structuredTypeRelatedToWorker, before it takes a primitive's
+  apparent type, fails with TS2913 when the target is an object type other than the anonymous empty one and the
+  source is a primitive, a type constrained to one, or an intersection with one. unionOrIntersectionRelatedTo
+  keeps reporting for such a source against a union with an object member, and typeRelatedToSomeType elaborates
+  against that member, so the chain names TS2913.
+- getTypeFactsWorker gives an object type with no call or construct signature, and object, a function's facts as
+  well as an object's, since a function is a value of every object type whose properties a function has.
+- narrowTypeByInKeyword's true branch keeps every member, intersecting one that doesn't declare the key with
+  Record<key, unknown>.
+- getNarrowedTypeWorker returns the type unchanged in the false branch, for instanceof and for a library predicate
+  such as Error.isError: an object literal of the tested type fails the test.
+- narrowTypeByConstructor, isMatchingConstructorReference and their two calls are deleted, so x.constructor === C
+  narrows nothing.
+- narrowTypeByEquality keeps, in the true branch of ==, every member but null and undefined, since == converts;
+  isCoercibleUnderDoubleEquals is deleted.
+- narrowTypeBySwitchOnTrue narrows by a skipped clause only when the clause is boolean, since skipping a clause
+  proves only that its value isn't true.
+
 Rules with no checker change: effects and library-declarations are built in the library alone (below),
 optional-field is a specification only, and call-signature isn't built (its witness is open; see debt.txt).
 
@@ -262,10 +284,9 @@ stops compiling, which costs nothing L keeps.
   (es2023.collection).
 - split with a RegExp separator returns (string | undefined)[], and so does a RegExp's [Symbol.split] (es5,
   es2015.symbol.wellknown): a capture group that took no part splices in undefined. A string separator still gives
-  string[]. Array.isArray narrows to readonly unknown[], not any[] (es5). concat takes T or a readonly T[], never the
-  structural ConcatArray (es5): it spreads only an array, or an object marked isConcatSpreadable into holes, and
-  appends any other object whole. These four came with the crashes from L-hooks' exemption audit (the commit after
-  49dbf0517).
+  string[]. Array.isArray narrows to readonly unknown[], not any[] (es5). concat takes T or a readonly T[], never
+  the structural ConcatArray (es5): it spreads only an array, or an object marked isConcatSpreadable into holes,
+  and appends any other object whole. These four came with the crashes from L-hooks' exemption audit (e0bd3fffd).
 
 The library's writes (src/lib; a36084efe)
 

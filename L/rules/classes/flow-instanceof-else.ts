@@ -3,7 +3,7 @@
 class Cat { meow(): string { return 'meow'; } } // rejected here: TS2902
 class Dog { bark(): string { return 'woof'; } } // rejected here: TS2902
 
-const speak = (pet: Cat | Dog): string => (pet instanceof Dog ? pet.bark() : pet.meow());
+const speak = (pet: Cat | Dog): string => (pet instanceof Dog ? pet.bark() : pet.meow()); // rejected here: TS2339
 
 const fakeDog: Dog = { bark: () => 'woof' };
 console.log(speak(fakeDog), speak(new Cat()));

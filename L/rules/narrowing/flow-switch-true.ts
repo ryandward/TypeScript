@@ -6,7 +6,7 @@ const classify = (x: true | string | Tag): string => {
     case x:
       return 'exactly true';
     default:
-      return x.toUpperCase();
+      return x.toUpperCase(); // rejected here: TS2339
   }
 };
 const t: Tag = { label: 'l' };

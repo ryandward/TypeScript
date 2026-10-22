@@ -5,7 +5,7 @@ const size = (x: Sized | number): string => {
     case 'object':
       return String(x.length);
     default:
-      return x.toFixed(1);
+      return x.toFixed(1); // rejected here: TS2339
   }
 };
-console.log(size(3), size('abc'));
+console.log(size(3), size('abc')); // rejected here: TS2913

@@ -112,3 +112,11 @@ Obligation 5, a read before its declaration: TS2912
   Why it suffices. initialization-order's argument: the function can't run before its own declaration.
   Witnesses:
     chk-tdz-class.ts                       the function is called above its declaration
+
+Obligation 6, the false branch of a test of how an object was built: TS2339 (TypeScript's code)
+  Statement. The false branch of instanceof removes nothing (see narrowing).
+  Mechanism. getNarrowedTypeWorker returns the type unchanged in the false branch, so pet.meow() is read on
+  Cat | Dog.
+  Why it suffices. narrowing's argument: a Dog built as an object literal fails instanceof Dog.
+  Witnesses:
+    flow-instanceof-else.ts            a Dog built as an object literal, which instanceof false drops

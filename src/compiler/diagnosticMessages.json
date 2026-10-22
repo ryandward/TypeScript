@@ -4102,6 +4102,10 @@
         "category": "Error",
         "code": 2912
     },
+    "Type '{0}' is primitive, and L holds no primitive in an object type such as '{1}', since every value of an object type must be an object.": {
+        "category": "Error",
+        "code": 2913
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

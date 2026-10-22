@@ -2611,6 +2611,19 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             getSourceFileOfNode(declaration) === getSourceFileOfNode(node) && node.end <= declaration.pos;
     }
 
+    // L: a type that may hold a primitive: a primitive, a type whose constraint is one, or an intersection with one, as in
+    // a branded string.
+    function isPrimitiveValuedType(type: Type): boolean {
+        const constraint = getBaseConstraintOrType(type);
+        return constraint.flags & TypeFlags.UnionOrIntersection ? some((constraint as UnionOrIntersectionType).types, isPrimitiveValuedType) :
+            !!(constraint.flags & TypeFlags.Primitive);
+    }
+
+    // L: an object type other than the empty object type {}, whose facts say its values are objects.
+    function holdsNoPrimitive(type: Type): boolean {
+        return !!(type.flags & TypeFlags.Object) && !(getObjectFlags(type) & ObjectFlags.Anonymous && isEmptyObjectType(type as ObjectType));
+    }
+
     // L: a statement that declares a value with no implementation: an ambient variable, function, class, enum or
     // namespace, outermost in its ambient context, as `declare` or a declaration file's top level makes one.
     function isAmbientValueDeclaration(node: Node): boolean {
@@ -23151,7 +23164,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     eachTypeRelatedToType(source as UnionType, target, reportErrors && !(source.flags & TypeFlags.Primitive), intersectionState);
             }
             if (target.flags & TypeFlags.Union) {
-                return typeRelatedToSomeType(getRegularTypeOfObjectLiteral(source), target as UnionType, reportErrors && !(source.flags & TypeFlags.Primitive) && !(target.flags & TypeFlags.Primitive), intersectionState);
+                // L: a primitive is told why when an object type in the union is what refuses it.
+                const elaborate = !(source.flags & TypeFlags.Primitive) && !(target.flags & TypeFlags.Primitive) ||
+                    isPrimitiveValuedType(source) && some((target as UnionType).types, holdsNoPrimitive);
+                return typeRelatedToSomeType(getRegularTypeOfObjectLiteral(source), target as UnionType, reportErrors && elaborate, intersectionState);
             }
             if (target.flags & TypeFlags.Intersection) {
                 return typeRelatedToEachType(source, target as IntersectionType, reportErrors, IntersectionState.Target);
@@ -23234,8 +23250,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 }
             }
             if (reportErrors) {
-                // Elaborate only if we can find a best matching type in the target union
-                const bestMatchingType = getBestMatchingType(source, target, isRelatedTo);
+                // Elaborate only if we can find a best matching type in the target union. L: or, for a primitive, an object type
+                // in the union, which says it holds no primitive.
+                const bestMatchingType = getBestMatchingType(source, target, isRelatedTo) ??
+                    (isPrimitiveValuedType(source) ? find(targetTypes, holdsNoPrimitive) : undefined);
                 if (bestMatchingType) {
                     isRelatedTo(source, bestMatchingType, RecursionFlags.Target, /*reportErrors*/ true, /*headMessage*/ undefined, intersectionState);
                 }
@@ -24087,6 +24105,16 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     return Ternary.False;
                 }
                 const sourceIsPrimitive = !!(sourceFlags & TypeFlags.Primitive);
+                // L: a primitive is never a value of an object type, but for the empty object type {}. Narrowing takes every
+                // value of an object type to be an object, truthy and never a string or a number, and `in` throws on a primitive.
+                if (
+                    relation !== identityRelation && holdsNoPrimitive(target) && isPrimitiveValuedType(source)
+                ) {
+                    if (reportErrors) {
+                        reportError(Diagnostics.Type_0_is_primitive_and_L_holds_no_primitive_in_an_object_type_such_as_1_since_every_value_of_an_object_type_must_be_an_object, typeToString(source), typeToString(target));
+                    }
+                    return Ternary.False;
+                }
                 if (relation !== identityRelation) {
                     source = getApparentType(source);
                     sourceFlags = source.flags;
@@ -25931,11 +25959,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
      * @param source
      * @param target
      */
-    function isCoercibleUnderDoubleEquals(source: Type, target: Type): boolean {
-        return ((source.flags & (TypeFlags.Number | TypeFlags.String | TypeFlags.BooleanLiteral)) !== 0)
-            && ((target.flags & (TypeFlags.Number | TypeFlags.String | TypeFlags.Boolean)) !== 0);
-    }
-
     /**
      * Return true if type was inferred from an object literal, written as an object type literal, or is the shape of a module
      * with no call or construct signatures.
@@ -28273,11 +28296,13 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 return 0;
             }
 
+            // L: an object type with no call signature holds a function too, since a function has every property such a type
+            // can ask for, so typeof may say 'function' of its value as well as 'object'.
             return getObjectFlags(type) & ObjectFlags.Anonymous && isEmptyObjectType(type as ObjectType) ?
                 strictNullChecks ? TypeFacts.EmptyObjectStrictFacts : TypeFacts.EmptyObjectFacts :
                 isFunctionObjectType(type as ObjectType) ?
                 strictNullChecks ? TypeFacts.FunctionStrictFacts : TypeFacts.FunctionFacts :
-                strictNullChecks ? TypeFacts.ObjectStrictFacts : TypeFacts.ObjectFacts;
+                strictNullChecks ? TypeFacts.ObjectStrictFacts | TypeFacts.FunctionStrictFacts : TypeFacts.ObjectFacts | TypeFacts.FunctionFacts;
         }
         if (flags & TypeFlags.Void) {
             return TypeFacts.VoidFacts;
@@ -28291,8 +28316,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         if (flags & TypeFlags.ESSymbolLike) {
             return strictNullChecks ? TypeFacts.SymbolStrictFacts : TypeFacts.SymbolFacts;
         }
+        // L: object holds functions too.
         if (flags & TypeFlags.NonPrimitive) {
-            return strictNullChecks ? TypeFacts.ObjectStrictFacts : TypeFacts.ObjectFacts;
+            return strictNullChecks ? TypeFacts.ObjectStrictFacts | TypeFacts.FunctionStrictFacts : TypeFacts.ObjectFacts | TypeFacts.FunctionFacts;
         }
         if (flags & TypeFlags.Never) {
             return TypeFacts.None;
@@ -29664,21 +29690,15 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
 
         function narrowTypeByInKeyword(type: Type, nameType: StringLiteralType | NumberLiteralType | UniqueESSymbolType, assumeTrue: boolean) {
             const name = getPropertyNameFromType(nameType);
-            const isKnownProperty = someType(type, t => isTypePresencePossible(t, name, /*assumeTrue*/ true));
-            if (isKnownProperty) {
-                // If the check is for a known property (i.e. a property declared in some constituent of
-                // the target type), we filter the target type by presence of absence of the property.
-                return filterType(type, t => isTypePresencePossible(t, name, assumeTrue));
+            if (!assumeTrue) {
+                return filterType(type, t => isTypePresencePossible(t, name, /*assumeTrue*/ false));
             }
-            if (assumeTrue) {
-                // If the check is for an unknown property, we intersect the target type with `Record<X, unknown>`,
-                // where X is the name of the property.
-                const recordSymbol = getGlobalRecordSymbol();
-                if (recordSymbol) {
-                    return getIntersectionType([type, getTypeAliasInstantiation(recordSymbol, [nameType, unknownType])]);
-                }
-            }
-            return type;
+            // L: a value can carry a key its type doesn't name, since a type may name fewer properties than its values have,
+            // so the true branch removes no constituent: one that doesn't declare the key is intersected with
+            // `Record<X, unknown>`, where X is the name of the property.
+            const recordSymbol = getGlobalRecordSymbol();
+            const keyRecord = recordSymbol && getTypeAliasInstantiation(recordSymbol, [nameType, unknownType]);
+            return mapType(type, t => isTypePresencePossible(t, name, /*assumeTrue*/ true) || !keyRecord ? t : getIntersectionType([t, keyRecord]));
         }
 
         function narrowTypeByBooleanComparison(type: Type, expr: Expression, bool: BooleanLiteral, operator: BinaryOperator, assumeTrue: boolean): Type {
@@ -29728,12 +29748,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     if (rightAccess) {
                         return narrowTypeByDiscriminantProperty(type, rightAccess, operator, left, assumeTrue);
                     }
-                    if (isMatchingConstructorReference(left)) {
-                        return narrowTypeByConstructor(type, operator, right, assumeTrue);
-                    }
-                    if (isMatchingConstructorReference(right)) {
-                        return narrowTypeByConstructor(type, operator, left, assumeTrue);
-                    }
+                    // L: x.constructor === C narrows nothing, since any record can carry a constructor property.
                     if (isBooleanLiteral(right) && !isAccessExpression(left)) {
                         return narrowTypeByBooleanComparison(type, left, right, operator, assumeTrue);
                     }
@@ -29844,7 +29859,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                         return nonPrimitiveType;
                     }
                 }
-                const filteredType = filterType(type, t => areTypesComparable(t, valueType) || doubleEquals && isCoercibleUnderDoubleEquals(t, valueType));
+                // L: == converts a value of another type before comparing, an object through its valueOf or toString, so only
+                // null and undefined are never loosely equal to a value that is neither.
+                const filteredType = filterType(type, t => areTypesComparable(t, valueType) || doubleEquals && !(t.flags & TypeFlags.Nullable));
                 return replacePrimitivesWithLiterals(filteredType, valueType);
             }
             if (isUnitType(valueType)) {
@@ -29988,12 +30005,15 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             const defaultIndex = findIndex(switchStatement.caseBlock.clauses, clause => clause.kind === SyntaxKind.DefaultClause);
             const hasDefaultClause = clauseStart === clauseEnd || (defaultIndex >= clauseStart && defaultIndex < clauseEnd);
 
+            // L: a skipped clause proves only that its value isn't true, which says it is falsy only of a boolean, so a clause
+            // of another type narrows nothing.
+            const narrowBySkipped = (type: Type, clause: CaseOrDefaultClause) =>
+                clause.kind === SyntaxKind.CaseClause && isTypeAssignableTo(getTypeOfExpression(clause.expression), booleanType) ?
+                    narrowType(type, clause.expression, /*assumeTrue*/ false) : type;
+
             // First, narrow away all of the cases that preceded this set of cases.
             for (let i = 0; i < clauseStart; i++) {
-                const clause = switchStatement.caseBlock.clauses[i];
-                if (clause.kind === SyntaxKind.CaseClause) {
-                    type = narrowType(type, clause.expression, /*assumeTrue*/ false);
-                }
+                type = narrowBySkipped(type, switchStatement.caseBlock.clauses[i]);
             }
 
             // If our current set has a default, then none the other cases were hit either.
@@ -30001,10 +30021,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             // get here through other paths.
             if (hasDefaultClause) {
                 for (let i = clauseEnd; i < switchStatement.caseBlock.clauses.length; i++) {
-                    const clause = switchStatement.caseBlock.clauses[i];
-                    if (clause.kind === SyntaxKind.CaseClause) {
-                        type = narrowType(type, clause.expression, /*assumeTrue*/ false);
-                    }
+                    type = narrowBySkipped(type, switchStatement.caseBlock.clauses[i]);
                 }
                 return type;
             }
@@ -30012,62 +30029,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             // Now, narrow based on the cases in this set.
             const clauses = switchStatement.caseBlock.clauses.slice(clauseStart, clauseEnd);
             return getUnionType(map(clauses, clause => clause.kind === SyntaxKind.CaseClause ? narrowType(type, clause.expression, /*assumeTrue*/ true) : neverType));
-        }
-
-        function isMatchingConstructorReference(expr: Expression) {
-            return (isPropertyAccessExpression(expr) && idText(expr.name) === "constructor" ||
-                isElementAccessExpression(expr) && isStringLiteralLike(expr.argumentExpression) && expr.argumentExpression.text === "constructor") &&
-                isMatchingReference(reference, expr.expression);
-        }
-
-        function narrowTypeByConstructor(type: Type, operator: SyntaxKind, identifier: Expression, assumeTrue: boolean): Type {
-            // Do not narrow when checking inequality.
-            if (assumeTrue ? (operator !== SyntaxKind.EqualsEqualsToken && operator !== SyntaxKind.EqualsEqualsEqualsToken) : (operator !== SyntaxKind.ExclamationEqualsToken && operator !== SyntaxKind.ExclamationEqualsEqualsToken)) {
-                return type;
-            }
-
-            // Get the type of the constructor identifier expression, if it is not a function then do not narrow.
-            const identifierType = getTypeOfExpression(identifier);
-            if (!isFunctionType(identifierType) && !isConstructorType(identifierType)) {
-                return type;
-            }
-
-            // Get the prototype property of the type identifier so we can find out its type.
-            const prototypeProperty = getPropertyOfType(identifierType, "prototype" as __String);
-            if (!prototypeProperty) {
-                return type;
-            }
-
-            // Get the type of the prototype, if it is undefined, or the global `Object` or `Function` types then do not narrow.
-            const prototypeType = getTypeOfSymbol(prototypeProperty);
-            const candidate = !isTypeAny(prototypeType) ? prototypeType : undefined;
-            if (!candidate || candidate === globalObjectType || candidate === globalFunctionType) {
-                return type;
-            }
-
-            // If the type that is being narrowed is `any` then just return the `candidate` type since every type is a subtype of `any`.
-            if (isTypeAny(type)) {
-                return candidate;
-            }
-
-            // Filter out types that are not considered to be "constructed by" the `candidate` type.
-            return filterType(type, t => isConstructedBy(t, candidate));
-
-            function isConstructedBy(source: Type, target: Type) {
-                // If either the source or target type are a class type then we need to check that they are the same exact type.
-                // This is because you may have a class `A` that defines some set of properties, and another class `B`
-                // that defines the same set of properties as class `A`, in that case they are structurally the same
-                // type, but when you do something like `instanceOfA.constructor === B` it will return false.
-                if (
-                    source.flags & TypeFlags.Object && getObjectFlags(source) & ObjectFlags.Class ||
-                    target.flags & TypeFlags.Object && getObjectFlags(target) & ObjectFlags.Class
-                ) {
-                    return source.symbol === target.symbol;
-                }
-
-                // For all other types just check that the `source` type is a subtype of the `target` type.
-                return isTypeSubtypeOf(source, target);
-            }
         }
 
         function narrowTypeByInstanceof(type: Type, expr: InstanceofExpression, assumeTrue: boolean): Type {
@@ -30127,16 +30088,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         }
 
         function getNarrowedTypeWorker(type: Type, candidate: Type, assumeTrue: boolean, checkDerived: boolean) {
+            // L: the false branch of a test of how an object was built, instanceof or a library predicate such as
+            // Error.isError, removes nothing: a value of the candidate's type built by hand, as an object literal, fails it.
             if (!assumeTrue) {
-                if (type === candidate) {
-                    return neverType;
-                }
-                if (checkDerived) {
-                    return filterType(type, t => !isTypeDerivedFrom(t, candidate));
-                }
-                type = type.flags & TypeFlags.Unknown ? unknownUnionType : type;
-                const trueType = getNarrowedType(type, candidate, /*assumeTrue*/ true, /*checkDerived*/ false);
-                return recombineUnknownType(filterType(type, t => !isTypeSubsetOf(t, trueType)));
+                return type;
             }
             if (type.flags & TypeFlags.AnyOrUnknown) {
                 return candidate;

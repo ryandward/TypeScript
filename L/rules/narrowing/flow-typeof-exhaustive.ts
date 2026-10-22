@@ -2,7 +2,7 @@
 // and 'number' is taken as exhaustive for Sized | number, so the implicit fall-off return of
 // undefined is never reported.
 type Sized = { readonly length: number };
-const kindOf = (x: Sized | number): string => {
+const kindOf = (x: Sized | number): string => { // rejected here: TS2366
   switch (typeof x) {
     case 'object':
       return 'object';
@@ -10,4 +10,4 @@ const kindOf = (x: Sized | number): string => {
       return 'number';
   }
 };
-console.log(kindOf('abc').toUpperCase());
+console.log(kindOf('abc').toUpperCase()); // rejected here: TS2913

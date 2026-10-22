@@ -2,4 +2,4 @@
 // (nonPrimitiveType), but y may hold a primitive, and `in` throws on primitives.
 type Sized = { readonly length: number };
 const probe = (x: unknown, y: Sized): boolean => (x === y ? 'k' in x : false);
-console.log(probe('abc', 'abc'));
+console.log(probe('abc', 'abc')); // rejected here: TS2913

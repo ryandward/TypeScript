@@ -1,0 +1,134 @@
+narrowing
+kind: soundness
+
+Claim. If the lab accepts a program, every narrowing removes from a union only the members that no value taking
+that branch can belong to.
+
+Counterexample in plain TypeScript. Narrowing reads facts the checker assumes of each type, and several are false.
+A string is a value of { readonly length: number } and 0 of Number, through their apparent types, yet an object
+type's facts say its values are objects, truthy and never a string or a number. A function is a value of every
+object type whose properties a function has, yet typeof is assumed never to say 'function' of one. `in` keeps only
+the members that declare the key, but a value can carry keys its type doesn't name. The false branch of instanceof
+or Error.isError drops the tested type, but an object literal of that type was never built by the constructor.
+x.constructor === C trusts a property any record can carry. == is assumed never to convert an object, which it
+does through valueOf. Skipping a case of switch (true) is read as the value being falsy, when it proves only that
+the value isn't true. Each witness reaches a branch whose type excludes its value, and Node throws a TypeError.
+
+Obligation 1, a primitive in an object type: TS2913
+  Statement. No primitive is a value of an object type other than the empty object type {}. A string is not a
+  { readonly length: number }, 0 is not a Number, and a string is not an Iterable<string>.
+  Mechanism. structuredTypeRelatedToWorker, just before it takes a primitive's apparent type, fails and reports
+  TS2913 when the target holds no primitive (holdsNoPrimitive: an object type other than the anonymous empty one)
+  and the source may hold one (isPrimitiveValuedType: a primitive, or a type whose base constraint is one or is a
+  union or intersection with one, as a branded string is). Against a union target, unionOrIntersectionRelatedTo
+  keeps reporting for such a source, and typeRelatedToSomeType elaborates against the member that refuses it.
+  Why it suffices. A primitive relates to an object type only through its apparent type, which this check comes
+  before, in every relation but identity. With no primitive in them, the facts getTypeFactsWorker gives an object
+  type are true of every value but a function: an object, truthy, of typeof 'object', and safe on the right of
+  `in`. Obligation 2 adds the function.
+  Witnesses:
+    flow-number-interface-and.ts       0 typed Number, so && takes it for truthy
+    flow-number-interface-boolean.ts   0 typed boolean | Number, and the false branch of a test drops Number
+    flow-number-interface-false-and.ts  the same through &&
+    flow-number-interface-ternary.ts   the same with false | Number
+    flow-eq-unknown-object.ts          a string passed as a record, so === with it narrows unknown to object
+    flow-adjacent-in-primitive.ts      a string passed as a record, which `in` throws on
+    flow-typeof-object-primitive.ts    a string passed as a record, which typeof 'object' drops
+    flow-typeof-switch.ts              the same through switch (typeof x)
+    flow-typeof-exhaustive.ts          a string passed to a typeof switch taken for exhaustive
+  Rejected sound code, because a primitive is never a value of an object type:
+    primitive-as-record.ts             a string passed where { readonly length: number } is taken
+    primitive-iterable.ts              a string passed to Array.from as an Iterable
+    number-interface.ts                0 held as a Number
+  Controls:
+    empty-object-primitive.ts          primitives held as {}, which holds every value but null and undefined
+    truthiness.ts                      a record told from undefined by truthiness
+
+Obligation 2, typeof of an object type: TS2339 (TypeScript's code)
+  Statement. typeof may say 'function' or 'object' of a value of an object type with no call or construct
+  signature, and of object, so neither branch of a typeof test against 'object' or 'function' removes one.
+  Mechanism. getTypeFactsWorker gives such a type, and object, the facts of a function as well as of an object.
+  A type with a call or construct signature keeps a function's facts.
+  Why it suffices. A function is an object with length, name and Function's members, so it is a value of every
+  object type whose properties those satisfy, and of object; only a function has a call signature. typeof narrowing
+  reads these facts and nothing else, so the use that needs the removed member is reported as a missing property.
+  Witnesses:
+    flow-typeof-object-else.ts         a function, which typeof 'object' false drops from object | string
+    flow-typeof-object-primitive.ts    typeof 'object' false drops Sized from Sized | number
+    flow-typeof-switch.ts              the same through switch (typeof x)
+  Controls:
+    typeof-primitive.ts                typeof against a primitive, both ways
+    typeof-function.ts                 typeof against 'function', on a function type and a number
+
+Obligation 3, a typeof switch that misses 'function': TS2366 (TypeScript's code)
+  Statement. A switch on typeof is exhaustive only if it covers 'function' for an object type with no call
+  signature, since obligation 2's facts say such a value may be one.
+  Mechanism. computeExhaustiveSwitchStatement reads the facts of obligation 2, so a function that falls off the
+  end of such a switch lacks a return, which TypeScript reports.
+  Why it suffices. Exhaustiveness is decided from the same facts as narrowing, and nowhere else.
+  Witnesses:
+    flow-typeof-exhaustive.ts          a switch covering 'object' and 'number', taken for exhaustive over
+                                       Sized | number
+
+Obligation 4, a key a member doesn't declare: TS18046 (TypeScript's code)
+  Statement. The true branch of `in` removes no member: a member that doesn't declare the key keeps it as unknown.
+  The false branch removes the members that require it.
+  Mechanism. narrowTypeByInKeyword's true branch maps each member that doesn't declare the key to its intersection
+  with Record<key, unknown>, as TypeScript already did for object.
+  Why it suffices. A type can name fewer properties than its values have, so a value of any member may carry the
+  key; one that requires it has it in every value, since exactOptionalPropertyTypes makes a required property
+  present and L has no writes or delete to remove one.
+  Witnesses:
+    flow-in-width.ts                   a Named carrying run: 5, which `in` takes for a Runner
+    flow-adjacent-in-primitive.ts      the same, and a string on the right of `in`
+  Controls:
+    in-false-branch.ts                 `in` false removes the member that requires the key
+
+Obligation 5, the false branch of a test of how an object was built: TS2339 (TypeScript's code)
+  Statement. The false branch of instanceof, or of a library predicate such as Error.isError, removes nothing.
+  Mechanism. getNarrowedTypeWorker returns the type unchanged in the false branch, and every such narrowing goes
+  through it.
+  Why it suffices. Each test asks how an object was built: by a constructor, as an array, as an error. A value of
+  the same type built as an object literal fails the test, so failing it proves nothing about the value's type.
+  The true branch is TypeScript's, which trusts the prototype chain (see debt.txt).
+  Witnesses:
+    flow-instanceof-error.ts           an Error built as an object literal, which instanceof false drops
+    flow-is-error-literal.ts           the same through Error.isError
+  Controls:
+    instanceof-true-branch.ts          instanceof true narrows unknown to Error
+
+Obligation 6, constructor equality: TS2339 (TypeScript's code)
+  Statement. x.constructor === C narrows nothing.
+  Mechanism. narrowTypeByConstructor and its two calls are deleted.
+  Why it suffices. Any record can carry a constructor property, and an object literal of an instance type has
+  Object for its constructor.
+  Witnesses:
+    flow-constructor-eq.ts             a record whose constructor property is Error, taken for an Error
+
+Obligation 7, equality: TS2339 (TypeScript's code)
+  Statement. === against a value removes the members with no value equal to it. == against a value that isn't null
+  or undefined removes only null and undefined.
+  Mechanism. narrowTypeByEquality's true branch keeps, under ==, every member that isn't null or undefined.
+  isCoercibleUnderDoubleEquals, which kept only number, string and boolean literal members, is deleted.
+  Why it suffices. == converts an operand of another type before it compares: a string to a number, an object
+  through its valueOf or toString. Only null and undefined equal nothing but each other.
+  Witnesses:
+    flow-loose-eq.ts                   a record whose valueOf returns 1, which == 1 drops
+  Rejected sound code, because == converts:
+    loose-equality-literal.ts          'a' == 1, which can never hold, kept in the true branch
+  Controls:
+    loose-null.ts                      == null, which removes null and undefined
+    discriminant.ts                    a literal field telling a union's members apart
+
+Obligation 8, switch (true): TS2339 (TypeScript's code)
+  Statement. Skipping a clause of switch (true) narrows by the clause only when the clause is boolean.
+  Mechanism. narrowTypeBySwitchOnTrue narrows by a skipped clause only when the clause's type is assignable to
+  boolean. A clause's own branch narrows as before, since a value that is true is truthy.
+  Why it suffices. A clause runs when its value === true. Skipping a boolean clause proves it false, but skipping
+  a clause of another type proves only that the value isn't true.
+  Witnesses:
+    flow-switch-true.ts                a Tag, which skipping case x was taken to make a string
+  Rejected sound code, because a clause that isn't boolean narrows nothing:
+    switch-true-non-boolean.ts         true | 0, which skipping case x leaves 0
+  Controls:
+    switch-true-boolean.ts             a boolean clause, which later clauses narrow by
