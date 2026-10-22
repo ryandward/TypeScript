@@ -244,7 +244,7 @@ width (soundness: TS2915, TS2916 and TS2917; 82868af24)
   excessPropertyChecksSilenced, saved and restored around each use. The regular type would be stricter than the
   fresh one checked after it, which TypeScript's overload resolution assumes never happens.
 
-open-record (soundness: TS2918 and TypeScript's TS2339 and TS2550; the commit after 9606bd9cd)
+open-record (soundness: TS2918 and TypeScript's TS2339 and TS2550; b4491c5d3)
 - checkIndexSignatureRead is new, with the names Object.prototype and Function.prototype give every object and
   function (inheritedObjectNames and inheritedFunctionNames, at module level). It reports TS2918 when one of them
   is assignable to the key of a value read through an index signature, from getPropertyTypeForIndexType (element
