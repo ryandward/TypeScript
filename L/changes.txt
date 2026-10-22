@@ -230,7 +230,7 @@ width (soundness: TS2915, TS2916 and TS2917; 82868af24)
   property its values have. (82868af24 counted a module's namespace object too, but typeof m types any value.)
 - An exact target relates only to an exact source that names nothing it lacks (isExactWithin), or TS2917 is
   reported, so subtype reduction in a conditional or array expression can't keep a fresh type over a wider
-  member (the commit after 37095f31a).
+  member (2477ac7cf).
 - propertiesRelatedTo relates a target's optional property that the source doesn't name to what a value of the
   source may hold there, its index signature's type or unknown, unless the source is exact, and reports TS2915.
 - typeRelatedToIndexInfo infers an index signature only for an exact source, and otherwise reports TS2916 beneath
