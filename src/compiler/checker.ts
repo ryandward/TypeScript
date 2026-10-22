@@ -2626,12 +2626,16 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             !!(constraint.flags & TypeFlags.Primitive);
     }
 
+    // L: the names a value of the type inherits, whose values come from a prototype, not from the value's entries.
+    function getInheritedNames(type: Type): readonly string[] {
+        return typeHasCallOrConstructSignatures(type) ? concatenate(inheritedObjectNames, inheritedFunctionNames) : inheritedObjectNames;
+    }
+
     // L: a read through an index signature at a key that may name an inherited member finds that member, not an
     // entry, since an object holds its entries and its prototype's members under the same keys. A Map holds entries
     // apart from its members.
     function checkIndexSignatureRead(objectType: Type, keyType: Type, errorNode: Node) {
-        const names = typeHasCallOrConstructSignatures(objectType) ? concatenate(inheritedObjectNames, inheritedFunctionNames) : inheritedObjectNames;
-        const name = find(names, n => isTypeAssignableTo(getStringLiteralType(n), keyType));
+        const name = find(getInheritedNames(objectType), n => isTypeAssignableTo(getStringLiteralType(n), keyType));
         if (name) {
             error(errorNode, Diagnostics.A_key_of_type_0_may_be_1_which_every_object_inherits_so_a_read_through_an_index_signature_may_find_that_instead_of_an_entry_A_Map_holds_entries_by_any_key, typeToString(keyType), name);
         }
@@ -24728,7 +24732,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     // signature says, or anything at all: a type may name fewer properties than its values have. Only a
                     // type that names every property of its values says the property is absent.
                     else if (!sourceProp && targetProp.flags & SymbolFlags.Optional && relation !== comparableRelation) {
-                        const unnamedType = getApplicableIndexInfoForName(source, name)?.type ?? (isExactObjectType(source) ? undefined : unknownType);
+                        // An inherited name holds the prototype's member, whatever the source's index signature or exactness says.
+                        const unnamedType = contains(getInheritedNames(source), unescapeLeadingUnderscores(name)) ? unknownType :
+                            getApplicableIndexInfoForName(source, name)?.type ?? (isExactObjectType(source) ? undefined : unknownType);
                         if (!unnamedType) {
                             continue;
                         }

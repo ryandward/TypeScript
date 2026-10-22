@@ -236,6 +236,7 @@ width (soundness: TS2915, TS2916 and TS2917; 82868af24)
   member (2477ac7cf).
 - propertiesRelatedTo relates a target's optional property that the source doesn't name to what a value of the
   source may hold there, its index signature's type or unknown, unless the source is exact, and reports TS2915.
+  At a name every object inherits (getInheritedNames, shared with open-record) the value is unknown regardless.
 - typeRelatedToIndexInfo infers an index signature only for an exact source, and otherwise reports TS2916 beneath
   TypeScript's missing-index error.
 - The shortcut relating an empty object type to a mapped type with a ? modifier takes only an exact source.

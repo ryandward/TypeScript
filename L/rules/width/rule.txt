@@ -16,7 +16,8 @@ Obligation 1, an optional field the source doesn't name: TS2915
   Statement. A source relates to an optional property of the target that it doesn't name only if what a value of
   the source may hold there relates to the property's type: the type of the source's index signature for that
   name, or unknown. A type that names every property of its values, a fresh object literal written without a
-  spread, holds nothing there, and relates.
+  spread, holds nothing there, and relates. At a name every object inherits, as open-record lists them, a value
+  holds the prototype's member, so what it holds there is unknown whatever the source says.
   Mechanism. propertiesRelatedTo relates that type to the property's and reports TS2915 when it fails;
   isExactObjectType decides which types name every property. The shortcut that relates an empty object type to a
   mapped type with a ? modifier takes only an empty object literal. Overload resolution's first pass, and the
@@ -48,8 +49,11 @@ Obligation 1, an optional field the source doesn't name: TS2915
     rel-width-partial-record.ts        {} hiding onDone: a string, returned as a Partial record of hooks
     rel-width-fresh-reduction-optional.ts  a conditional whose literal's fresh type swallowed a value hiding
                                        return: 5
+    rel-width-inherited-name.ts        a record of strings taken for one whose __proto__ is a string or absent
   Rejected sound code, because the type names only some of the properties its values may have:
     named-literal.ts                   a literal held under its own open type, then taken for an Iterator
+  Rejected sound code, because every object inherits a value at __proto__:
+    literal-inherited-name.ts          a literal taken for a type whose __proto__ is a string or absent, never read
   Controls:
     literal-iterator.ts                an object literal written where an Iterator is taken
     literal-options.ts                 empty and partial literals where every field is optional
