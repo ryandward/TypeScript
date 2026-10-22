@@ -188,7 +188,7 @@ initialization-order (soundness: TS2912; 51453724a)
   deferred and lets it through; holding every read to the order of the file means a function that reads a const is
   declared after it, and is itself read only after its own declaration.
 
-narrowing (soundness: TS2913 and TypeScript's TS2339, TS2366 and TS18046; the commit after 985f36dd4)
+narrowing (soundness: TS2913 and TypeScript's TS2339, TS2366 and TS18046; 6c1f96b0a)
 - holdsNoPrimitive and isPrimitiveValuedType are new. structuredTypeRelatedToWorker, before it takes a primitive's
   apparent type, fails with TS2913 when the target is an object type other than the anonymous empty one and the
   source is a primitive, a type constrained to one, or an intersection with one. unionOrIntersectionRelatedTo
