@@ -222,7 +222,7 @@ prototypes (soundness: TS2914 and TypeScript's TS2339 and TS2550; b85ec04e5)
 - resolveAnonymousTypeMembers drops the prototype a class's static side gets from the binder, so Iterator, the
   library's one class, has none. The library's own prototype fields are deleted (below).
 
-width (soundness: TS2915 and TS2916; the commit after 21bde73e7)
+width (soundness: TS2915 and TS2916; 82868af24)
 - isExactObjectType is new: a fresh object literal written without a spread, or a module's namespace object, the
   types that name every property their values have.
 - propertiesRelatedTo relates a target's optional property that the source doesn't name to what a value of the
