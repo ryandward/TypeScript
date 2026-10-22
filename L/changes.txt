@@ -310,6 +310,8 @@ stops compiling, which costs nothing L keeps.
 - An iterator's flatMap takes a callback that returns no string, which it throws on (es2025.iterator).
 - WeakMap and WeakSet keys are objects: WeakKeyTypes has no symbol, since a registered symbol throws as a key
   (es2023.collection).
+- Array.from takes a string as itself (es2015.iterable), returning its code points, since a string is no longer
+  an Iterable: no primitive is a value of an object type (narrowing).
 - No constructor declares a prototype: all 56 prototype fields are deleted from the core's library, since a
   constructor's prototype is not one of its instances (Map's has no Map state, Date's no time). Object.create and
   Reflect.construct are deleted, since each builds an object on a prototype it is handed (es5, es2015.reflect).

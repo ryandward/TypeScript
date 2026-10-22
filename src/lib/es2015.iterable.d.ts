@@ -92,6 +92,21 @@ interface ArrayConstructor {
      * @param thisArg Value of 'this' used to invoke the mapfn.
      */
     from<T, U>(iterable: Iterable<T>, mapfn: (v: T, k: number) => U, thisArg?: any): U[]; // L: the same
+
+    // L: a string is no Iterable, since no primitive is a value of an object type, so from takes it as itself, and
+    // the engine iterates it by code point.
+    /**
+     * Creates an array of a string's code points.
+     * @param source The string to take apart.
+     */
+    from(source: string): string[];
+
+    /**
+     * Creates an array of a string's code points, mapped.
+     * @param source The string to take apart.
+     * @param mapfn A mapping function to call on every code point.
+     */
+    from<U>(source: string, mapfn: (v: string, k: number) => U): U[];
 }
 
 interface ReadonlyArray<T> {

@@ -16,7 +16,8 @@ the value isn't true. Each witness reaches a branch whose type excludes its valu
 
 Obligation 1, a primitive in an object type: TS2913
   Statement. No primitive is a value of an object type other than the empty object type {}. A string is not a
-  { readonly length: number }, 0 is not a Number, and a string is not an Iterable<string>.
+  { readonly length: number }, 0 is not a Number, and a string is not an Iterable<string>. A library function that
+  takes a string declares it as one, as Array.from does.
   Mechanism. structuredTypeRelatedToWorker, just before it takes a primitive's apparent type, fails and reports
   TS2913 when the target holds no primitive (holdsNoPrimitive: an object type other than the anonymous empty one)
   and the source may hold one (isPrimitiveValuedType: a primitive, or a type whose base constraint is one or is a
@@ -38,10 +39,11 @@ Obligation 1, a primitive in an object type: TS2913
     flow-typeof-exhaustive.ts          a string passed to a typeof switch taken for exhaustive
   Rejected sound code, because a primitive is never a value of an object type:
     primitive-as-record.ts             a string passed where { readonly length: number } is taken
-    primitive-iterable.ts              a string passed to Array.from as an Iterable
+    primitive-iterable.ts              a string held as an Iterable<string>
     number-interface.ts                0 held as a Number
   Controls:
     empty-object-primitive.ts          primitives held as {}, which holds every value but null and undefined
+    array-from-string.ts               Array.from of a string, which the library takes as a string
     truthiness.ts                      a record told from undefined by truthiness
 
 Obligation 2, typeof of an object type: TS2339 (TypeScript's code)
