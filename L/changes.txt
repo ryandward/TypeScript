@@ -260,7 +260,7 @@ call-signature (soundness: TypeScript's TS2349; 3329cd10a)
 - isUntypedFunctionCall takes only a callee of type any, so a callee assignable to Function with no signature
   of its own is reported as not callable, in a call, a tagged template or a decorator.
 
-arity (soundness: TS2919; the commit after 98522f567)
+arity (soundness: TS2919; 02d3dfcd3)
 - compareSignaturesRelated reports TS2919 at a position the target may leave without an argument and the source
   requires, when undefined doesn't relate to the source's parameter. SignatureCheckMode.MissingArguments is new:
   signatureRelatedTo sets it for valueAssignableRelation, and a callback parameter's comparison carries it.
