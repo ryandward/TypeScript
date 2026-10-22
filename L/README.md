@@ -50,6 +50,8 @@ A case's first line says what it is for:
   a hole the lab hasn't closed yet, and the tracker counts it open.
 - `// control:` a program the lab must keep accepting.
 - `// rejected sound code:` a program that can't go wrong, which the lab rejects on purpose, and why.
+- `// regression:` a program the release rejects and Node crashes on, which the lab must keep rejecting: the fork
+  changes the library and the checker, and a change can let through what the release's own checks stopped.
 
 A witness's name says what it gets past, as in L-hooks' catalog: rel- the type relation, flow- narrowing,
 chk- other checks, lib- library declarations, and rule- a program that crashes only when its rule is

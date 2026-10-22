@@ -24,8 +24,9 @@ Obligation 1, a parameter relates one way: TS2322 (TypeScript's code)
   Mechanism. compareSignaturesRelated relates each parameter with compareTypes(targetType, sourceType) alone, a
   callback's signature in StrictCallback mode at every depth, and a this type contravariantly. getVariancesWorker
   measures through the relation, so a type parameter used in a method's parameter is measured contravariant there.
-  src/lib deletes Iterator's, AsyncIterator's, Generator's and AsyncGenerator's return and throw, which took a
-  TReturn in and made it invariant, so an array is still an Iterable of any return type.
+  src/lib declares Iterator's and AsyncIterator's return and throw as taking never, and Generator and AsyncGenerator
+  inherit them: a TReturn taken in made TReturn invariant, which stopped an array from being an Iterable, but the
+  declarations stay, since for-of calls return when a loop breaks and must not meet one that isn't a function.
   Why it suffices. Every relation between two signatures goes through compareSignaturesRelated, and variance is
   measured with the same relation.
   Witnesses:
@@ -37,6 +38,8 @@ Obligation 1, a parameter relates one way: TS2322 (TypeScript's code)
     readonly-set-widened.ts            a ReadonlySet widened, through has(value: T)
     iterator-widened.ts                an iterator widened, through reduce's initialValue: T
     generator-widened.ts               a generator widened, through the same reduce
+  Regressions:
+    lib-iterator-return-number.ts      an iterator whose return is a number, which the release's Iterator rejects
   Controls:
     fewer-arguments.ts                 a callback that takes fewer arguments than map passes
     wider-parameter.ts                 a function whose parameter is wider than its type asks

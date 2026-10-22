@@ -12,7 +12,7 @@ export const KINDS = ['soundness', 'policy', 'information', 'project'];
 // A mechanism that L has no code for yet is proved by TypeScript's own code, and says so:
 // `Obligation 2, accessor not narrowed: TS2339 (TypeScript's code)`.
 const OBLIGATION = /^Obligation (\d+), ([^:]+): TS(\d+)( \(TypeScript's code\))?$/;
-const CITATION = /^  (Witnesses|Controls|Rejected sound code[^:]*):$/;
+const CITATION = /^  (Witnesses|Controls|Regressions|Rejected sound code[^:]*):$/;
 const CITED = /^    (\S+\.ts)(?:\s|$)/;
 const CONTINUED = /^     /;
 
@@ -54,7 +54,7 @@ function obligations(text, dir, problems) {
       found.push({ number: Number(o[1]), code: Number(o[3]), name: o[2], own: o[4] === undefined, cites: [] });
       role = undefined;
     }
-    else if (c) role = c[1] === 'Witnesses' ? 'witness' : c[1] === 'Controls' ? 'control' : 'sound';
+    else if (c) role = c[1] === 'Witnesses' ? 'witness' : c[1] === 'Controls' ? 'control' : c[1] === 'Regressions' ? 'regression' : 'sound';
     else if (cited && role && found.length) found[found.length - 1].cites.push({ file: cited[1], role });
     else if (!CONTINUED.test(line)) role = undefined;
   }

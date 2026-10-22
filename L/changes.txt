@@ -267,10 +267,13 @@ The library's members the strict relation can't type (src/lib; f0d53de57)
 
 With every parameter related one way, two parts of the library no longer compiled, and the core uses neither:
 
-- Iterator's and AsyncIterator's return and throw (es2015.iterable, es2018.asynciterable), and Generator's and
-  AsyncGenerator's (es2015.generator, es2018.asyncgenerator). return takes a TReturn in, which made TReturn
-  invariant: with Iterable's any defaults the any rule then refused an array as an Iterable, and Generator's
-  required parameter didn't fit IteratorObject's optional one. The core drives no iterator by hand.
+- Iterator's and AsyncIterator's return and throw take never and return IteratorResult<T, unknown> (es2015.iterable,
+  es2018.asynciterable), and Generator and AsyncGenerator inherit them (es2015.generator, es2018.asyncgenerator).
+  return took a TReturn in, which made TReturn invariant: with Iterable's any defaults the any rule then refused an
+  array as an Iterable, and Generator's required parameter didn't fit IteratorObject's optional one. f0d53de57
+  deleted the two members, which let an iterator whose return is a number pass as an Iterator, and for-of calls
+  return when a loop breaks; the commit after d029b69bc declares them again, taking never, and the regression case
+  lib-iterator-return-number holds it.
 - Function's, CallableFunction's and NewableFunction's apply, call and bind (es5). Each binds a this, the core has
   none, and their this parameters, narrower than Function's, kept CallableFunction and NewableFunction from
   extending Function.

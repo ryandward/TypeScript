@@ -35,9 +35,9 @@ const CONSOLE = join(lab, 'tools', 'console.d.ts');
 const RELEASE = join(repo, 'lib/typescript.js');
 const LAB = join(repo, 'built/local/typescript.js');
 const MARK = /\/\/ rejected here(?:: TS(\d+)(?: (.*\S))?)?\s*$/;
-const ROLE = /^\/\/ (witness|control|rejected sound code): /;
-const KIND_OF_ROLE = { witness: 'witness', control: 'control', 'rejected sound code': 'sound' };
-const ROLE_NAME = { witness: 'a witness', control: 'a control', sound: 'rejected sound code' };
+const ROLE = /^\/\/ (witness|control|rejected sound code|regression): /;
+const KIND_OF_ROLE = { witness: 'witness', control: 'control', 'rejected sound code': 'sound', regression: 'regression' };
+const ROLE_NAME = { witness: 'a witness', control: 'a control', sound: 'rejected sound code', regression: 'a regression' };
 const wanted = process.argv.slice(2);
 const withCatalog = wanted.length === 0 || wanted.includes('catalog');
 
@@ -152,10 +152,13 @@ function facts(c) {
   const ran = run(c);
   const threw = ran.status !== 0;
   const problems = [];
-  if (c.kind === undefined) problems.push('the first line doesn\'t say whether it is a witness, a control or rejected sound code');
-  if (accepted.length) problems.push(`the release rejects line ${lines(accepted).join(', ')}: ${head(accepted[0])}`);
-  if (c.kind === 'witness' && !(threw && /TypeError|ReferenceError/.test(ran.stderr))) problems.push('Node does not throw a TypeError or ReferenceError');
-  if (c.kind !== 'witness' && threw) problems.push(`Node throws: ${ran.stderr.split('\n').find((l) => /Error/.test(l)) ?? ran.stderr.trim()}`);
+  const crashes = c.kind === 'witness' || c.kind === 'regression';
+  if (c.kind === undefined) problems.push('the first line doesn\'t say whether it is a witness, a control, rejected sound code or a regression');
+  // A regression is a crash the release itself rejects, which a change to the fork could let through.
+  if (c.kind === 'regression' && !accepted.length) problems.push('the release accepts it, so it is a witness, not a regression');
+  if (c.kind !== 'regression' && accepted.length) problems.push(`the release rejects line ${lines(accepted).join(', ')}: ${head(accepted[0])}`);
+  if (crashes && !(threw && /TypeError|ReferenceError/.test(ran.stderr))) problems.push('Node does not throw a TypeError or ReferenceError');
+  if (!crashes && threw) problems.push(`Node throws: ${ran.stderr.split('\n').find((l) => /Error/.test(l)) ?? ran.stderr.trim()}`);
   const base = c.file.split(sep).pop();
   return { text, marks, got, problems, base };
 }
@@ -204,7 +207,7 @@ function judge(c) {
         problems.push(`line ${m.line} is rejected for another reason: its chain has ${codes}, not TS${m.code}${m.fragment ? ` with "${m.fragment}"` : ''}`);
       }
     }
-    status = problems.length ? 'broken' : c.kind === 'witness' ? 'closed' : 'rejected as designed';
+    status = problems.length ? 'broken' : c.kind === 'witness' ? 'closed' : c.kind === 'regression' ? 'held' : 'rejected as designed';
   }
   return { ...c, status, problems, ...summary(c, text, got, marks) };
 }
@@ -273,6 +276,7 @@ section('Controls the lab rejects (false positives)', judged, 'failing', (c) => 
 section('Holes still open', judged, 'open', (c) => `: ${c.about}`);
 section('Witnesses closed', judged, 'closed', (c) => ` (${c.mechanism}): ${c.about}`);
 section('Rejected as designed', judged, 'rejected as designed', (c) => ` (${c.mechanism}): ${c.about}`);
+section('Regressions held', judged, 'held', (c) => ` (${c.mechanism}): ${c.about}`);
 section('Catalog: rejected by the lab, waiting for a rule to cite them', catalogued, 'rejected', (c) => ` (${codes(c)}): ${c.about}`);
 section('Catalog: open', catalogued, 'open', (c) => `: ${c.about}`);
 console.log(out.join('\n'));

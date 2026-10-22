@@ -12,7 +12,10 @@ interface SymbolConstructor {
 interface AsyncIterator<T, TReturn = any, TNext = any> {
     // NOTE: 'next' is defined using a tuple to ensure we report the correct assignability errors in all places.
     next(...[value]: [] | [TNext]): Promise<IteratorResult<T, TReturn>>;
-    // L: no return or throw: each takes a value into the iterator, which makes TReturn invariant, and the core drives no iterator by hand
+    // L: return and throw stay declared, so for-of, which calls return when a loop breaks, never meets one that isn't a
+    // function. They take never: a TReturn taken in would make TReturn invariant, and the core drives no iterator by hand.
+    return?(value: never): Promise<IteratorResult<T, unknown>>;
+    throw?(e: never): Promise<IteratorResult<T, unknown>>;
 }
 
 interface AsyncIterable<T, TReturn = any, TNext = any> {
