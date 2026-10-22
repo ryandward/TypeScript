@@ -2614,8 +2614,15 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     function isReadBeforeDeclaration(node: Identifier, declaration: Declaration): boolean {
         const ordered = isFunctionDeclaration(declaration) ||
             (isVariableDeclaration(declaration) || isBindingElement(declaration)) && !!(getCombinedNodeFlags(declaration) & NodeFlags.BlockScoped);
-        return ordered && !(declaration.flags & NodeFlags.Ambient) && !inDefaultLibrary(declaration) && !isPartOfTypeQuery(node) &&
-            getSourceFileOfNode(declaration) === getSourceFileOfNode(node) && node.end <= declaration.pos;
+        return ordered && !(declaration.flags & NodeFlags.Ambient) && !inDefaultLibrary(declaration) &&
+            getSourceFileOfNode(declaration) === getSourceFileOfNode(node) && node.end <= declaration.pos && !isInErasedPosition(node);
+    }
+
+    // L: a read the emitter erases, which runs nothing: one inside a type, typeof included, or a computed name in an
+    // interface or a type alias. An expression with type arguments counts as a type node but runs, as an instantiation
+    // expression or a class's extends clause; only its type arguments, type nodes of their own, are erased.
+    function isInErasedPosition(node: Node): boolean {
+        return !!findAncestor(node, n => isTypeNode(n) && !isExpressionWithTypeArguments(n) || isInterfaceDeclaration(n) || isTypeAliasDeclaration(n));
     }
 
     // L: a type that may hold a primitive: a primitive, a type whose constraint is one, or an intersection with one, as in

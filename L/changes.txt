@@ -198,7 +198,8 @@ parameters and void (soundness: TS2911, and TypeScript's own TS2322 and TS2339; 
 initialization-order (soundness: TS2912; 51453724a)
 - isReadBeforeDeclaration is new: the read of a name whose value declaration is a function declaration, or a
   block-scoped variable or binding element, in the same file and outside the library, that ends before the
-  declaration begins. A read inside the declaration itself, or in a type position, isn't one.
+  declaration begins. A read inside the declaration itself isn't one, and neither is a read the emitter erases
+  (isInErasedPosition): inside a type, or a computed name in an interface or a type alias.
 - checkIdentifier reports TS2912 on every such read. TypeScript's own check counts a read inside a function as
   deferred and lets it through; holding every read to the order of the file means a function that reads a const is
   declared after it, and is itself read only after its own declaration.
