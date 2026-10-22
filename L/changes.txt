@@ -307,7 +307,7 @@ generic-relations (soundness: TypeScript's TS2322; 7905011b8)
 - The writing constraint of an indexed access target is taken only when its object type isn't generic, or under
   comparability.
 - signaturesRelatedTo erases type parameters in its pairwise comparison of two instantiations of the same anonymous
-  type only under comparability (the commit after c9ab45dbc).
+  type only under comparability (566a8f9e5).
 
 tuples (soundness: TypeScript's TS18048; a8277f220)
 - createNormalizedTupleType types a tuple whose optional element comes before a required one as the union of its
