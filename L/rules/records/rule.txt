@@ -14,9 +14,10 @@ into nothing there. Each witness's oracle finds undefined where its type says a 
 
 Obligation 1, an engine object's member in a record's place: TS2923
   Statement. A property of an engine object, one the library declares on an interface or a class, or a tuple's
-  length, doesn't stand in for a property a type outside the library declares. A record built from literals, and
-  a plain object the engine builds, which the library declares as a type literal, as an iterator result, have
-  their properties as data and still relate.
+  length, doesn't stand in for a property of a record type: a type literal, or any type declared outside the
+  library. A record built from literals, and a plain object the engine builds, which the library declares as a
+  type literal, as an iterator result, have their properties as data and still relate. A library function that
+  takes an engine object declares the engine's type, as String.raw takes a TemplateStringsArray.
   Mechanism. propertiesRelatedTo reports TS2923 when isEnginePropertyOf holds of the source's property and not of
   the target's, in every relation but comparability. isEngineDeclaredProperty follows a mapped or spread
   property's syntheticOrigin back, so Readonly of a record is data and Readonly of a Map isn't.

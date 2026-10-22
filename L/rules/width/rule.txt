@@ -93,22 +93,3 @@ Obligation 4, structure: TS2900
   Why it suffices. As for obligation 3.
   Witnesses:
     rel-implicit-index.ts              a record hiding count: 3, its values upper-cased
-
-Obligation 3, an inherited member the type doesn't declare: TS2921
-  Statement. A read of a name the object's type doesn't declare, which the checker would find on Object or
-  Function, is accepted only of a primitive, which holds no property of its own, or of an object literal's fresh
-  type, which names every property it has. A value of any other type may hold its own property at that name, of
-  any type, and the read finds it first.
-  Mechanism. checkInheritedMemberRead reports TS2921 for each member of a union that is neither primitive nor
-  exact and whose apparent type finds the name only through Object's or Function's members: getPropertyOfType
-  with the augmentation skipped finds nothing, and without it finds the inherited member. It runs on a property
-  access in checkPropertyAccessExpressionOrQualifiedName and on a value read in getPropertyTypeForIndexType.
-  Why it suffices. Object's and Function's members are added to every object type's lookup by getPropertyOfType,
-  and those two sites are where a value is read by name.
-  Witnesses:
-    chk-inherited-own-tostring.ts      a value holding its own toString: 5, read through a type that doesn't name it
-    chk-inherited-own-hasownproperty.ts  the same with hasOwnProperty
-  Rejected sound code, because the type is open:
-    inherited-literal-held-open.ts     a literal with no toString of its own, held open, its toString called
-  Controls:
-    inherited-declared-or-primitive.ts  a declared toString, a primitive's members, an array's, a literal's

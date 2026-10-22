@@ -475,7 +475,7 @@ interface StringConstructor {
      * @param template A well-formed template string call site representation.
      * @param substitutions A set of substitution values.
      */
-    raw(template: { raw: readonly string[] | ArrayLike<string>; }, ...substitutions: (string | number | bigint | boolean | null | undefined)[]): string; // L: each substitution is converted
+    raw(template: TemplateStringsArray | { raw: readonly string[] | ArrayLike<string>; }, ...substitutions: any[]): string; // L: a template's raw is own and not enumerable, so the engine's object isn't a record
 }
 
 interface Int8Array<TArrayBuffer extends ArrayBufferLike> {

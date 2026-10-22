@@ -2,10 +2,10 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds thirty diagnostics, changes the checker and two functions in utilities.ts that decide which
-files are checked, adds one internal type flag, declares readonly the new objects and collections the library
-hands out, deletes from the ES library every effect and every method that changes an object in place, and
-corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
+things: it adds twenty-seven diagnostics, changes the checker and two functions in utilities.ts that decide
+which files are checked, adds one internal type flag, declares readonly the new objects and collections the
+library hands out, deletes from the ES library every effect and every method that changes an object in place,
+and corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
 transformers, language service, command line and compiler options are unchanged, and no test baseline has been
 updated. L's rules have no compiler option: they are always on. Each change in code carries a comment that
 starts `// L:`, in checker.ts, types.ts and the lib, so `grep -rn '// L:' src` finds them. The entries() changes
@@ -17,9 +17,10 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Thirty new errors, from TS2892 to TS2923, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
-The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
-rules and TS2897 to definite-assignment.
+Twenty-seven new errors, from TS2892 to TS2923, each the code of one rule's mechanism in
+L/rules/<rule>/rule.txt. The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891
+and TS2894 to the write rules, TS2897 to definite-assignment, TS2918 and TS2921 to reads that open-record now
+types as unknown and width leaves to TypeScript, and TS2922 to conversions, which was withdrawn.
 
   TS2892  immutable-bindings
           '{0}' must be initialized where it is declared. In L, every binding is assigned once.
@@ -79,19 +80,10 @@ rules and TS2897 to definite-assignment.
   TS2917  width
           Type '{0}' belongs to an object literal and names every property its value has, so a value of type '{1}',
           which may hold more, isn't one.
-  TS2918  open-record
-          A key of type '{0}' may be '{1}', which every object inherits, so a read through an index signature may
-          find that instead of an entry. A Map holds entries by any key.
   TS2919  arity
           Parameter '{0}' is required, but the target can be called without it, so it would receive undefined.
   TS2920  any
           Parameter '{0}' takes '{1}', but the target passes '{2}', whose any promises it anything.
-  TS2921  width
-          '{0}' is inherited, but a value of type '{1}' may hold its own '{0}' of any type, since the type names
-          only some of its properties.
-  TS2922  conversions
-          '{0}' may be an object, and converting it to a primitive calls a Symbol.toPrimitive, valueOf or toString
-          it may hold as anything.
   TS2923  records
           Property '{0}' belongs to the engine's '{1}', not to data a record holds, so it doesn't satisfy '{0}' in
           '{2}'.
@@ -259,20 +251,20 @@ width (soundness: TS2915, TS2916 and TS2917; 82868af24)
 - typeRelatedToIndexInfo infers an index signature only for an exact source, and otherwise reports TS2916 beneath
   TypeScript's missing-index error.
 - The shortcut relating an empty object type to a mapped type with a ? modifier takes only an exact source.
-- checkInheritedMemberRead reports TS2921 on a read of a name the type doesn't declare that the lookup finds on
-  Object or Function, unless the value is a primitive or its type exact, from property access and from a value
-  read in getPropertyTypeForIndexType (0cde387d8).
 - getSignatureApplicabilityError's first pass, checkApplicableSignatureForJsxOpeningLikeElement's
   (b17ee7942), and unionOrIntersectionRelatedTo for a union target, keep an
   argument's or source's freshness instead of taking its regular type, and silence the excess-property check with
   excessPropertyChecksSilenced, saved and restored around each use. The regular type would be stricter than the
   fresh one checked after it, which TypeScript's overload resolution assumes never happens.
 
-open-record (soundness: TS2918 and TypeScript's TS2339 and TS2550; b4491c5d3)
-- checkIndexSignatureRead is new, with the names Object.prototype and Function.prototype give every object and
-  function (inheritedObjectNames and inheritedFunctionNames, at module level). It reports TS2918 when one of them
-  is assignable to the key of a value read through an index signature, from getPropertyTypeForIndexType (element
-  access and destructuring) and checkPropertyAccessExpressionOrQualifiedName (property access).
+open-record (soundness: TypeScript's TS2339, TS18046, TS2571 and TS2550; b4491c5d3, and as unknown typing in
+the commit after c43af225e)
+- isInheritedDictionaryRead is new, with the names Object.prototype and Function.prototype give every object and
+  function (inheritedObjectNames and inheritedFunctionNames, at module level). A value read of a dictionary, a type
+  whose index signature applies at an inherited name it doesn't declare, by a key that may be that name, is typed
+  unknown, from getPropertyTypeForIndexType (element access and destructuring) and
+  checkPropertyAccessExpressionOrQualifiedName (property access). A read by a literal key naming no inherited
+  member, a number or a template literal type gets the index signature's type with undefined, as before.
 - getIndexedAccessTypeOrUndefined no longer replaces a value read's key by string for a type with only a string
   index signature, so a literal key naming a member Object declares is typed as that member.
 
@@ -286,11 +278,6 @@ arity (soundness: TS2919; 02d3dfcd3)
   valueAssignableRelation alone, through a check mode 861f1fc84 deleted.)
 - The isTopSignature shortcut that related every function to a top signature is deleted; the StrictTopSignature
   guard for subtype reduction stays.
-
-conversions (soundness: TS2922 and TypeScript's TS2345 and TS2684; 9ad783be6)
-- isPrimitiveOnlyType, mayHoldConvertingPrimitive and checkConversionOperand are new. TS2922 is reported for an
-  operand that may be an object in an untagged template's substitution, + and unary +, < > <= >=, and == or !=
-  against an operand that may be a primitive other than null or undefined.
 
 records (soundness: TS2923 and TypeScript's TS2339; 078128b8e)
 - isEnginePropertyOf and isEngineDeclaredProperty are new: a property the library declares on an interface or a
@@ -377,10 +364,8 @@ stops compiling, which costs nothing L keeps.
 - ReturnType, Parameters, InstanceType and ConstructorParameters bound a function by (...args: never) => unknown
   (es5), which takes no argument list, so every function satisfies it under arity and the any parameter rule;
   ReturnType and InstanceType give unknown, not any, for a type that isn't one.
-- String's and Number's call and construct signatures take primitives (es5), String's call symbol too, and
-  String.raw's substitutions are primitives (es2015.core). join and toString on Array and ReadonlyArray, and
-  toSorted with no comparer (es2023.array, after the overload that takes one), take this: ArrayLike of the
-  primitives. Converting an object calls a method a value of an open type may hold as anything (conversions).
+- String.raw takes a TemplateStringsArray beside the record it declared (es2015.core): a template's raw is own and
+  not enumerable, so under records the engine's object is no record.
 - IteratorYieldResult and IteratorReturnResult (es2015.iterable), PromiseFulfilledResult and PromiseRejectedResult
   (es2020.promise), PropertyDescriptor and TypedPropertyDescriptor (es5) are type literals, not interfaces: the
   engine builds each as a plain object with own enumerable data, and records reads an interface as an engine object.

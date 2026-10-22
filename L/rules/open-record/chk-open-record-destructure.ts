@@ -2,5 +2,5 @@
 // inherited function.
 const counts: Readonly<Record<string, number>> = { a: 1 };
 const key: string = 'valueOf';
-const { [key]: hit } = counts; // rejected here: TS2918
-console.log(hit === undefined ? 0 : hit.toFixed());
+const { [key]: hit } = counts;
+console.log(hit === undefined ? 0 : hit.toFixed()); // rejected here: TS2339

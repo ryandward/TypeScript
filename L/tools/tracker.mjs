@@ -31,6 +31,9 @@ const lab = join(import.meta.dirname, '..');
 const repo = join(lab, '..');
 const RULES = join(lab, 'rules');
 const CATALOG = join(lab, 'catalog');
+// L/scope/ holds crashes outside the lab's claims, each under an assumption debt.txt states for all rules. They're
+// judged as catalog cases are, so one that stops crashing, or that the release starts to reject, is reported.
+const SCOPE = join(lab, 'scope');
 const CONSOLE = join(lab, 'tools', 'console.d.ts');
 const RELEASE = join(repo, 'lib/typescript.js');
 const LAB = join(repo, 'built/local/typescript.js');
@@ -57,7 +60,8 @@ const caseAt = (rule, file) => {
 const tsIn = (dir) => readdirSync(dir).filter((n) => n.endsWith('.ts')).sort();
 const cases = rules.flatMap((rule) => tsIn(rule.dir).map((n) => caseAt(rule, join(rule.dir, n))));
 const catalog = withCatalog && existsSync(CATALOG) ? tsIn(CATALOG).map((n) => caseAt(undefined, join(CATALOG, n))) : [];
-const everyCase = [...cases, ...catalog];
+const scoped = withCatalog && existsSync(SCOPE) ? tsIn(SCOPE).map((n) => caseAt(undefined, join(SCOPE, n))) : [];
+const everyCase = [...cases, ...catalog, ...scoped];
 // Every rule folder's case names, to find a catalog case that a rule's folder also holds.
 const ruleCaseNames = new Map(readRules(RULES).flatMap((r) => tsIn(r.dir).map((n) => [n, r.name])));
 
@@ -225,6 +229,7 @@ function judgeCatalog(c) {
 
 const judged = cases.map(judge);
 const catalogued = catalog.map(judgeCatalog);
+const outside = scoped.map(judgeCatalog);
 rmSync(work, { recursive: true, force: true });
 const of = (r) => judged.filter((c) => c.rule === r);
 const count = (r, kind, status) => of(r).filter((c) => c.kind === kind && (status === undefined || c.status === status)).length;
@@ -256,6 +261,9 @@ if (withCatalog) {
   const n = (status) => catalogued.filter((c) => c.status === status).length;
   out.push('', `The catalog holds ${catalogued.length} crashes no rule claims yet: ${n('open')} the lab accepts, ${n('rejected')} it rejects ` +
     `with no rule citing them, and ${n('broken')} broken.`);
+  const k = (status) => outside.filter((c) => c.status === status).length;
+  out.push('', `L/scope holds ${outside.length} crashes outside the lab's claims: ${k('open')} the lab accepts, ${k('rejected')} it ` +
+    `rejects, and ${k('broken')} broken.`);
 }
 // debt.txt files each item under a rule's name, lab or L-hooks, so a heading that names no rule is stale.
 const debt = existsSync(join(lab, 'debt.txt')) ? readFileSync(join(lab, 'debt.txt'), 'utf8').split('\n') : [];
@@ -273,7 +281,7 @@ const section = (title, from, status, detail) => {
   for (const c of listed) out.push(`- \`${c.name}\`${detail(c)}`);
 };
 const codes = (c) => [...new Set(c.lab.map((d) => `TS${d.chain[0].code}`))].join(', ');
-section('Broken cases', [...judged, ...catalogued], 'broken', (c) => `: ${c.problems.join('; ')}`);
+section('Broken cases', [...judged, ...catalogued, ...outside], 'broken', (c) => `: ${c.problems.join('; ')}`);
 section('Controls the lab rejects (false positives)', judged, 'failing', (c) => `: ${c.about} The lab says: ${head(c.lab[0])}`);
 section('Holes still open', judged, 'open', (c) => `: ${c.about}`);
 section('Witnesses closed', judged, 'closed', (c) => ` (${c.mechanism}): ${c.about}`);
@@ -281,7 +289,8 @@ section('Rejected as designed', judged, 'rejected as designed', (c) => ` (${c.me
 section('Regressions held', judged, 'held', (c) => ` (${c.mechanism}): ${c.about}`);
 section('Catalog: rejected by the lab, waiting for a rule to cite them', catalogued, 'rejected', (c) => ` (${codes(c)}): ${c.about}`);
 section('Catalog: open', catalogued, 'open', (c) => `: ${c.about}`);
+section('Outside the lab\'s claims (debt.txt, all rules)', outside, 'open', (c) => `: ${c.about}`);
 console.log(out.join('\n'));
 const fails = release.global.length || built.global.length || library.length || broken.length || staleDebt.length ||
-  [...judged, ...catalogued].some((c) => c.status === 'broken' || c.status === 'failing');
+  [...judged, ...catalogued, ...outside].some((c) => c.status === 'broken' || c.status === 'failing');
 process.exit(fails ? 1 : 0);

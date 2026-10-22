@@ -14,6 +14,7 @@ L/
     rule.txt         the rule's proof
     <case>.ts        one program, whose first line says what it is for
   catalog/           crashes TypeScript 6.0.3 accepts that no rule closes yet, one program each
+  scope/             crashes outside the lab's claims, each under an assumption debt.txt states for all rules
   lean/              machine-checked calculi that the proofs cite, with their own README
   tools/
     tracker.mjs      runs every case, checks it against its proof, and prints where each rule and the catalog stand

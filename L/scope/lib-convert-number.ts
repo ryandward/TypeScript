@@ -2,4 +2,4 @@
 type Named = { readonly name: string };
 const raw = { name: 'n', toString: 5, valueOf: 6 };
 const named: Named = raw;
-console.log(Number(named).toFixed()); // rejected here: TS2345
+console.log(Number(named).toFixed());

@@ -12,6 +12,14 @@ all rules
   open-record's inherited-name check doesn't know. Any of these makes a declaration false and voids every proof
   that rests on it. Nothing in the lab checks the realm; soundness is relative to a discipline in the shell that
   no tool enforces.
+- Every proof assumes no record holds its own property at a name every object inherits (toString, valueOf,
+  hasOwnProperty, constructor, Symbol.toPrimitive) unless its type declares that name. A value of an open type may
+  hold one, of any type, and a method call through the record's type, a template literal, +, ==, String(), join
+  and the rest of the implicit conversions find it before the inherited member. Refusing those forms would refuse
+  ordinary code for a record no ordinary program builds, so the lab doesn't; a value from outside reaches the core
+  through a parser at the boundary, which builds records from literals. A dictionary is the exception, since its
+  keys are data: open-record types a read at an inherited name as unknown. The crashes this assumption sets aside
+  are in L/scope/, which the tracker checks still crash.
 
 any
 - After a TS2900, the rejected operation's result is errorType, which carries any's flag, so
@@ -76,6 +84,10 @@ directives
 - The compiler option noCheck still skips the checker for the whole program, as a directive would for a file.
 
 parameters
+- An interface that extends ReadonlyArray, as TemplateStringsArray does, relates to a ReadonlyArray of a wider
+  element only structurally, where strict method parameters make concat's element type invariant; only a direct
+  reference gets TypeScript's covariance for arrays, so passing a TemplateStringsArray where a
+  readonly (string | number)[] is taken fails.
 - Array, ReadonlyArray and tuples are covariant because getVariances hard-codes them (arrayVariances), not because
   a measurement found it: includes, indexOf and lastIndexOf take T, and a measurement would call T invariant. The
   covariance holds because those only compare and the core's arrays have no writers, but it is trust in the
@@ -107,11 +119,6 @@ open-record
 - An indexed access type, T[K] in a type, isn't a read and isn't checked, so a library function typed through one
   reads past the check, as Reflect.get did. No other is known, but the library hasn't been searched for one.
 
-conversions
-- An interface that extends ReadonlyArray, as TemplateStringsArray does, relates to a ReadonlyArray of a wider
-  element only structurally, where strict method parameters make concat's element type invariant; only a direct
-  reference gets TypeScript's covariance for arrays. The converting methods take this: ArrayLike to step around
-  it, but passing a TemplateStringsArray where a readonly (string | number)[] is taken fails.
 
 records
 - A property is the engine's when the library declares it on an interface or a class, which is the library's

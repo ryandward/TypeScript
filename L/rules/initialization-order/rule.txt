@@ -55,12 +55,3 @@ Obligation 1, a read before its declaration: TS2912
     mutual-recursion-record.ts             two functions that call each other through one record
     erased-reads.ts                        computed names in a type literal and an interface, and typeof, naming a
                                            const declared below
-
-Obligation 2, an object converted by an operator: TS2922
-  Statement. An operator converts only a primitive (see conversions).
-  Mechanism. checkConversionOperand reports TS2922.
-  Why it suffices. conversions' argument: converting an object calls a method it may hold as anything.
-  Witnesses:
-    chk-tdz-concat-tostring.ts             the object + converts, whose toString reads the const
-    chk-tdz-template-tostring.ts           the object a template converts
-    chk-tdz-unary-valueof.ts               the object unary + converts

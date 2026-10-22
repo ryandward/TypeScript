@@ -2641,55 +2641,20 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         return typeHasCallOrConstructSignatures(type) ? concatenate(inheritedObjectNames, inheritedFunctionNames) : inheritedObjectNames;
     }
 
-    // L: a read through an index signature at a key that may name an inherited member finds that member, not an
-    // entry, since an object holds its entries and its prototype's members under the same keys. A Map holds entries
-    // apart from its members.
-    function checkIndexSignatureRead(objectType: Type, keyType: Type, errorNode: Node) {
-        const name = find(getInheritedNames(objectType), n => isTypeAssignableTo(getStringLiteralType(n), keyType));
-        if (name) {
-            error(errorNode, Diagnostics.A_key_of_type_0_may_be_1_which_every_object_inherits_so_a_read_through_an_index_signature_may_find_that_instead_of_an_entry_A_Map_holds_entries_by_any_key, typeToString(keyType), name);
-        }
-    }
-
-    // L: a read of a name the type doesn't declare, found on Object or Function, whose members every object inherits. A
-    // value of an open type may hold its own property there, of any type, and the read finds that first. A primitive
-    // holds no property of its own, and an object literal's fresh type names every property it has.
-    function checkInheritedMemberRead(type: Type, name: __String, errorNode: Node) {
-        for (const t of type.flags & TypeFlags.Union ? (type as UnionType).types : [type]) {
+    // L: a read of a dictionary, a type whose index signature applies at a name every object inherits and which doesn't
+    // declare that name itself, by a key that may be that name. An object holds its entries and its prototype's members
+    // under the same keys, so the read finds an entry, nothing, or the inherited member, and is unknown. A record
+    // without an index signature is judged as TypeScript judges it: its own property shadowing an inherited one is
+    // outside the lab's claims (debt.txt, all rules).
+    function isInheritedDictionaryRead(objectType: Type, keyType: Type): boolean {
+        return someType(objectType, t => {
             const apparent = getApparentType(t);
-            if (
-                !isPrimitiveValuedType(t) && !isExactObjectType(t) &&
-                !getPropertyOfType(apparent, name, /*skipObjectFunctionPropertyAugment*/ true) && getPropertyOfType(apparent, name)
-            ) {
-                error(errorNode, Diagnostics._0_is_inherited_but_a_value_of_type_1_may_hold_its_own_0_of_any_type_since_the_type_names_only_some_of_its_properties, unescapeLeadingUnderscores(name), typeToString(t));
-                return;
-            }
-        }
-    }
-
-    // L: a type every value of which is a primitive, which converts without calling anything: a string, number, bigint,
-    // boolean, symbol, null or undefined, a literal or enum of one, or an intersection with one, as a branded string.
-    // void and unknown may hold an object, and TypeScript reports a symbol where it can't convert.
-    function isPrimitiveOnlyType(type: Type): boolean {
-        const constraint = getBaseConstraintOrType(type);
-        return constraint.flags & TypeFlags.Union ? every((constraint as UnionType).types, isPrimitiveOnlyType) :
-            constraint.flags & TypeFlags.Intersection ? some((constraint as IntersectionType).types, isPrimitiveOnlyType) :
-            !!(constraint.flags & (TypeFlags.StringLike | TypeFlags.NumberLike | TypeFlags.BigIntLike | TypeFlags.BooleanLike | TypeFlags.ESSymbolLike | TypeFlags.Null | TypeFlags.Undefined | TypeFlags.Never));
-    }
-
-    // L: a type that may hold a primitive other than null or undefined, against which == converts an object.
-    function mayHoldConvertingPrimitive(type: Type): boolean {
-        return someType(getBaseConstraintOrType(type), t =>
-            !!(t.flags & (TypeFlags.StringLike | TypeFlags.NumberLike | TypeFlags.BigIntLike | TypeFlags.BooleanLike | TypeFlags.ESSymbolLike | TypeFlags.Unknown | TypeFlags.Any)) ||
-            !!(t.flags & TypeFlags.Object) && !holdsNoPrimitive(t));
-    }
-
-    // L: an operand an implicit conversion would call into: converting an object calls its Symbol.toPrimitive, valueOf
-    // or toString, which a value of an object type may hold as anything, its own property shadowing the inherited one.
-    function checkConversionOperand(type: Type, node: Node) {
-        if (!isPrimitiveOnlyType(type)) {
-            error(node, Diagnostics._0_may_be_an_object_and_converting_it_to_a_primitive_calls_a_Symbol_toPrimitive_valueOf_or_toString_it_may_hold_as_anything, typeToString(type));
-        }
+            return some(getInheritedNames(apparent), n => {
+                const name = escapeLeadingUnderscores(n);
+                return !!getApplicableIndexInfoForName(apparent, name) && !getPropertyOfType(apparent, name, /*skipObjectFunctionPropertyAugment*/ true) &&
+                    isTypeAssignableTo(getStringLiteralType(n), keyType);
+            });
+        });
     }
 
     // L: an object type other than the empty object type {}, whose facts say its values are objects.
@@ -19389,8 +19354,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             }
             const prop = getPropertyOfType(objectType, propName);
             if (prop) {
-                if (accessNode && accessFlags & AccessFlags.ExpressionPosition) {
-                    checkInheritedMemberRead(objectType, propName, getIndexNodeForAccessExpression(accessNode));
+                if (accessNode && accessFlags & AccessFlags.ExpressionPosition && isInheritedDictionaryRead(objectType, getStringLiteralType(unescapeLeadingUnderscores(propName)))) {
+                    return unknownType;
                 }
                 if (accessFlags & AccessFlags.ReportDeprecated && accessNode && prop.declarations && isDeprecatedSymbol(prop) && isUncalledFunctionReference(accessNode, prop)) {
                     const deprecatedNode = accessExpression?.argumentExpression ?? (isIndexedAccessTypeNode(accessNode) ? accessNode.indexType : accessNode);
@@ -19459,8 +19424,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     error(indexNode, Diagnostics.Type_0_cannot_be_used_as_an_index_type, typeToString(indexType));
                     return accessFlags & AccessFlags.IncludeUndefined ? getUnionType([indexInfo.type, missingType]) : indexInfo.type;
                 }
-                if (accessNode && accessFlags & AccessFlags.ExpressionPosition) {
-                    checkIndexSignatureRead(objectType, indexType, getIndexNodeForAccessExpression(accessNode));
+                if (accessNode && accessFlags & AccessFlags.ExpressionPosition && isInheritedDictionaryRead(objectType, indexType)) {
+                    return unknownType;
                 }
                 errorIfWritingToReadonlyIndex(indexInfo);
                 // When accessing an enum object with its own type,
@@ -19816,7 +19781,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         objectType = getReducedType(objectType);
         // If the object type has a string index signature and no other members we know that the result will
         // always be the type of that index signature and we can simplify accordingly. L: but not for a read of a value,
-        // whose key checkIndexSignatureRead needs to see.
+        // whose key isInheritedDictionaryRead needs to see.
         if (isStringIndexSignatureOnlyType(objectType) && !(indexType.flags & TypeFlags.Nullable) && isTypeAssignableToKind(indexType, TypeFlags.String | TypeFlags.Number) && !(accessFlags & AccessFlags.ExpressionPosition)) {
             indexType = stringType;
         }
@@ -35196,9 +35161,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             prop = getPropertyOfType(apparentType, right.escapedText, /*skipObjectFunctionPropertyAugment*/ isConstEnumObjectType(apparentType), /*includeTypeOnlyMembers*/ node.kind === SyntaxKind.QualifiedName);
         }
         markLinkedReferences(node, ReferenceHint.Property, prop, leftType);
-        if (prop && isPropertyAccessExpression(node)) {
-            checkInheritedMemberRead(leftType, prop.escapedName, right);
-        }
+        const inheritedDictionaryRead = !!prop && isPropertyAccessExpression(node) && isInheritedDictionaryRead(leftType, getStringLiteralType(unescapeLeadingUnderscores(prop.escapedName)));
 
         let propType: Type;
         if (!prop) {
@@ -35226,13 +35189,12 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (indexInfo.isReadonly && (isAssignmentTarget(node) || isDeleteTarget(node))) {
                 error(node, Diagnostics.Index_signature_in_type_0_only_permits_reading, typeToString(apparentType));
             }
-            if (isPropertyAccessExpression(node)) {
-                checkIndexSignatureRead(apparentType, getStringLiteralType(unescapeLeadingUnderscores(right.escapedText)), right);
-            }
-
             propType = indexInfo.type;
             if (compilerOptions.noUncheckedIndexedAccess && getAssignmentTargetKind(node) !== AssignmentKind.Definite) {
                 propType = getUnionType([propType, missingType]);
+            }
+            if (isPropertyAccessExpression(node) && isInheritedDictionaryRead(apparentType, getStringLiteralType(unescapeLeadingUnderscores(right.escapedText)))) {
+                propType = unknownType;
             }
             if (compilerOptions.noPropertyAccessFromIndexSignature && isPropertyAccessExpression(node)) {
                 error(right, Diagnostics.Property_0_comes_from_an_index_signature_so_it_must_be_accessed_with_0, unescapeLeadingUnderscores(right.escapedText));
@@ -35255,7 +35217,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 return errorType;
             }
 
-            propType = isThisPropertyAccessInConstructor(node, prop) ? autoType : writeOnly || isWriteOnlyAccess(node) ? getWriteTypeOfSymbol(prop) : getTypeOfSymbol(prop);
+            propType = inheritedDictionaryRead ? unknownType :
+                isThisPropertyAccessInConstructor(node, prop) ? autoType : writeOnly || isWriteOnlyAccess(node) ? getWriteTypeOfSymbol(prop) : getTypeOfSymbol(prop);
         }
 
         return getFlowTypeOfAccessExpression(node, prop, propType, right, checkMode);
@@ -40330,7 +40293,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     error(node.operand, Diagnostics.The_0_operator_cannot_be_applied_to_type_symbol, tokenToString(node.operator));
                 }
                 if (node.operator === SyntaxKind.PlusToken) {
-                    checkConversionOperand(operandType, node.operand);
                     if (maybeTypeOfKindConsideringBaseConstraint(operandType, TypeFlags.BigIntLike)) {
                         error(node.operand, Diagnostics.Operator_0_cannot_be_applied_to_type_1, tokenToString(node.operator), typeToString(getBaseTypeOfLiteralType(operandType)));
                     }
@@ -41145,9 +41107,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 if (leftType === silentNeverType || rightType === silentNeverType) {
                     return silentNeverType;
                 }
-                // L: + converts both operands to primitives before it adds or joins them.
-                checkConversionOperand(leftType, left);
-                checkConversionOperand(rightType, right);
 
                 if (!isTypeAssignableToKind(leftType, TypeFlags.StringLike) && !isTypeAssignableToKind(rightType, TypeFlags.StringLike)) {
                     leftType = checkNonNullType(leftType, left);
@@ -41200,9 +41159,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             case SyntaxKind.GreaterThanToken:
             case SyntaxKind.LessThanEqualsToken:
             case SyntaxKind.GreaterThanEqualsToken:
-                // L: a comparison converts both operands to primitives.
-                checkConversionOperand(leftType, left);
-                checkConversionOperand(rightType, right);
                 if (checkForDisallowedESSymbolOperand(operator)) {
                     leftType = getBaseTypeOfLiteralTypeForComparison(checkNonNullType(leftType, left));
                     rightType = getBaseTypeOfLiteralTypeForComparison(checkNonNullType(rightType, right));
@@ -41225,16 +41181,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 // control flow analysis it is possible for operands to temporarily have narrower types, and those narrower
                 // types may cause the operands to not be comparable. We don't want such errors reported (see #46475).
                 if (!(checkMode && checkMode & CheckMode.TypeOnly)) {
-                    // L: == converts an object to a primitive when the other operand is a primitive that isn't null or
-                    // undefined.
-                    if (operator === SyntaxKind.EqualsEqualsToken || operator === SyntaxKind.ExclamationEqualsToken) {
-                        if (mayHoldConvertingPrimitive(rightType)) {
-                            checkConversionOperand(leftType, left);
-                        }
-                        if (mayHoldConvertingPrimitive(leftType)) {
-                            checkConversionOperand(rightType, right);
-                        }
-                    }
                     if (
                         (isLiteralExpressionOfObject(left) || isLiteralExpressionOfObject(right)) &&
                         // only report for === and !== in JS, not == or !=
@@ -41620,10 +41566,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             const type = checkExpression(span.expression);
             if (maybeTypeOfKindConsideringBaseConstraint(type, TypeFlags.ESSymbolLike)) {
                 error(span.expression, Diagnostics.Implicit_conversion_of_a_symbol_to_a_string_will_fail_at_runtime_Consider_wrapping_this_expression_in_String);
-            }
-            // L: an untagged template converts each substitution to a string; a tag receives them unconverted.
-            if (node.parent.kind !== SyntaxKind.TaggedTemplateExpression) {
-                checkConversionOperand(type, span.expression);
             }
             texts.push(span.literal.text);
             types.push(isTypeAssignableTo(type, templateConstraintType) ? type : stringType);

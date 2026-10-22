@@ -4122,10 +4122,6 @@
         "category": "Error",
         "code": 2917
     },
-    "A key of type '{0}' may be '{1}', which every object inherits, so a read through an index signature may find that instead of an entry. A Map holds entries by any key.": {
-        "category": "Error",
-        "code": 2918
-    },
     "Parameter '{0}' is required, but the target can be called without it, so it would receive undefined.": {
         "category": "Error",
         "code": 2919
@@ -4133,14 +4129,6 @@
     "Parameter '{0}' takes '{1}', but the target passes '{2}', whose any promises it anything.": {
         "category": "Error",
         "code": 2920
-    },
-    "'{0}' is inherited, but a value of type '{1}' may hold its own '{0}' of any type, since the type names only some of its properties.": {
-        "category": "Error",
-        "code": 2921
-    },
-    "'{0}' may be an object, and converting it to a primitive calls a Symbol.toPrimitive, valueOf or toString it may hold as anything.": {
-        "category": "Error",
-        "code": 2922
     },
     "Property '{0}' belongs to the engine's '{1}', not to data a record holds, so it doesn't satisfy '{0}' in '{2}'.": {
         "category": "Error",

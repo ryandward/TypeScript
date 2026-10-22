@@ -1,47 +1,53 @@
 open-record
 kind: soundness
 
-Claim. If the lab accepts a program, a read through an index signature returns an entry of the index type, or
-nothing: never a member the object inherits.
+Claim. If the lab accepts a program, a read through an index signature is typed as what it may find: an entry or
+nothing, and unknown where the key may name a member every object inherits.
 
 Counterexample in plain TypeScript. An object holds its entries and its prototype's members under the same keys,
-so a Record<string, number> read at constructor, toString or __proto__ finds Object.prototype's member, and the
-index signature types it as a number. A key of type string may be any of those names. Reads by a literal key
-were typed through the index signature too, because getIndexedAccessTypeOrUndefined replaced any string key of a
-type with only a string index signature by string itself, losing the name. Each witness reads an inherited
-member as a number, and Node throws a TypeError.
+so a Record<string, number> read at constructor, toString or __proto__ finds Object.prototype's member, or an
+entry of that name, and the index signature types either as a number. A key of type string may be any of those
+names, and a literal key Object declares was typed as the index signature's too, since
+getIndexedAccessTypeOrUndefined replaced any string key of a type with only a string index signature by string
+itself. Each witness reads an inherited member as a number, and Node throws a TypeError.
 
-Obligation 1, a key that may name an inherited member: TS2918
-  Statement. A read through an index signature is accepted only if its key's type admits none of the names every
-  object inherits (Object.prototype's, and Function.prototype's for a callable type). A literal key naming none of
-  them, a number, or a template literal type such as `data-${string}` reads an entry; a key of type string may be
-  any name, and a Map holds entries apart from its members.
-  Mechanism. checkIndexSignatureRead reports TS2918 when one of those names is assignable to the key's type. It
-  runs on a value read through an index signature in getPropertyTypeForIndexType, which element access and
-  destructuring go through, and in checkPropertyAccessExpressionOrQualifiedName for a property access.
-  Why it suffices. A value of an index signature's type is an object literal or an object the library builds, on
-  Object.prototype or on no prototype, since prototypes leaves no other (see prototypes), and neither prototype has
-  a property keyed by a symbol. Every value read through an index signature goes through one of the two sites.
+Obligation 1, a read that may find an inherited member, used as an entry: TS2339 (TypeScript's code)
+  Statement. A read of a dictionary, a type whose index signature applies at a name every object inherits and which
+  doesn't declare that name itself, by a key that may be that name, is unknown. A literal key naming no inherited
+  member, a number, or a template literal type such as `data-${string}` reads an entry or nothing, the index
+  signature's type with undefined. A record without an index signature is judged as TypeScript judges it.
+  Mechanism. isInheritedDictionaryRead returns unknown for a value read through an index signature in
+  getPropertyTypeForIndexType (element access and destructuring) and in
+  checkPropertyAccessExpressionOrQualifiedName, and for a read of a name the type doesn't declare that the lookup
+  finds on Object or Function. A value read keeps its key: getIndexedAccessTypeOrUndefined no longer replaces it
+  by string. TypeScript then reports a use of the unknown as if it were an entry.
+  Why it suffices. Every value read by name goes through one of those two sites, and an unknown can be used only
+  after a narrowing that checks it.
   Witnesses:
     chk-open-record-dynamic-key.ts     a key of type string holding toString
     chk-open-record-destructure.ts     the same through destructuring by a computed key
     chk-open-record-proto-property.ts  __proto__ read as a property, which Object's declaration doesn't name
-  Rejected sound code, because a key of type string may be an inherited name:
-    dynamic-own-key.ts                 a key of type string holding a, an entry of the record
+    rule-open-record.ts                constructor read from a Record<string, number> by a literal key
   Controls:
     safe-keys.ts                       a literal, a number and a template literal type, each reading an entry
+    dynamic-own-key.ts                 a key of type string, its unknown narrowed to the entry
     map-lookup.ts                      a Map read by a key of type string, and Object.entries of a record
 
-Obligation 2, a literal key naming a declared inherited member: TS2339 (TypeScript's code)
-  Statement. A read by a literal key that names a member Object declares, such as constructor, is typed as that
-  member, not as an entry.
-  Mechanism. getIndexedAccessTypeOrUndefined no longer replaces a value read's key by string, so
-  getPropertyTypeForIndexType looks the name up and finds Object's declaration, as a property access does.
-  Why it suffices. The replacement was the only step that sent a literal key past the property lookup.
+Obligation 2, a read that may find an inherited member, called: TS18046 (TypeScript's code)
+  Statement. The same unknown, called.
+  Mechanism. As obligation 1; TypeScript reports a call of an unknown.
+  Why it suffices. As obligation 1.
   Witnesses:
-    rule-open-record.ts                constructor read from a Record<string, number>
+    chk-record-own-tostring.ts         a record whose literal had a toString entry, its toString called
 
-Obligation 3, a read the library types where no read is checked: TS2550 (TypeScript's code)
+Obligation 3, a read by a literal key that may find an inherited member, called: TS2571 (TypeScript's code)
+  Statement. The same, read by a literal key and called.
+  Mechanism. As obligation 1; TypeScript reports a call of an element access of type unknown.
+  Why it suffices. As obligation 1.
+  Regressions:
+    chk-record-own-tostring-element.ts  the toString entry read by a literal key, which the release refuses to call
+
+Obligation 4, a read the library types where no read is checked: TS2550 (TypeScript's code)
   Statement. No program calls Reflect.get, which reads a key as an element access does but types the result as
   T[P], an indexed access type that no read check sees. An element access reads by any key Reflect.get could.
   Mechanism. Reflect.get is deleted from the library; TypeScript reports a property the library lacks as TS2550
@@ -49,14 +55,3 @@ Obligation 3, a read the library types where no read is checked: TS2550 (TypeScr
   Why it suffices. Reflect.get is the library's only function that reads a property by a key it is handed.
   Witnesses:
     lib-reflect-get-inherited.ts       toString read from a Record<string, number> by Reflect.get
-
-Obligation 4, an inherited member the type doesn't declare: TS2921
-  Statement. A read of a name the type doesn't declare, found on Object, may find the value's own property (see
-  width).
-  Mechanism. checkInheritedMemberRead reports TS2921.
-  Why it suffices. width's argument: the type names only some of its value's properties.
-  Witnesses:
-    chk-record-own-tostring.ts         a record whose literal had a toString entry, its toString called
-    rule-open-record.ts                constructor read from a Record<string, number>
-  Regressions:
-    chk-record-own-tostring-element.ts  the same entry read by a literal key, which the release refuses to call
