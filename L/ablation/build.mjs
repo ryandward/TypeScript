@@ -7,7 +7,8 @@
 //
 // A label's mode says what reverting it means: full reverts the whole hunk; drop removes added lines [a, b] (1-based,
 // within the hunk); replace puts the hunk's deleted lines [c, d] (all of them when old is absent) in place of added
-// lines [a, b], and with b = a - 1 inserts them before added line a; text puts the selector's own lines there.
+// lines [a, b], and with b = a - 1 inserts them before added line a; text puts the selector's own lines there;
+// restore puts back the deleted lines in the ranges old lists, in order, where a pure deletion took them out.
 import { execFileSync } from 'node:child_process';
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -50,6 +51,10 @@ function revert(file, wanted) {
       else if (sel.mode === 'replace') {
         const old = sel.old ? h.removed.slice(sel.old[0] - 1, sel.old[1]) : h.removed;
         edits.push({ at: at + sel.lines[0] - 1, count: sel.lines[1] - sel.lines[0] + 1, put: old });
+      }
+      else if (sel.mode === 'restore') {
+        // A pure deletion's lines of one mechanism, put back in their original order where the hunk deleted them.
+        edits.push({ at, count: 0, put: sel.old.flatMap(([c, d]) => h.removed.slice(c - 1, d)) });
       }
       else if (sel.mode === 'text') {
         // Text written for the switch where neither side's lines can be taken whole, in the file's own line ending.

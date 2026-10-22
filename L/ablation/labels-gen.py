@@ -70,3 +70,104 @@ json.dump(labels, open(os.path.join(HERE, 'labels.json'), 'w'), indent=1, sort_k
 c = collections.Counter(s['label'] for v in labels.values() for s in v)
 print(len(labels), 'hunks;', len([l for l in c if l not in ('infra', 'complete')]), 'mechanisms')
 print(sorted(c.items()))
+
+# Pure deletions in the library, labelled member by member. A hunk-level label is right only when every member it
+# deletes belongs to one mechanism; a typed array's hunk, for one, deletes in-place methods (writes.2), toLocaleString
+# (effects) and prototype (prototypes.2) together. Each deleted line takes the label of the declaration it belongs to:
+# a JSDoc comment and a blank or a brace take the next declaration's, a signature's continuation lines its first
+# line's. A mechanism's lines are restored together, in their original order (mode restore).
+import re, subprocess
+def member_label(decl):
+    d = decl.strip()
+    if re.match(r'declare namespace Intl\b|namespace Intl\b', d): return 'effects'
+    m = re.match(r'(?:declare\s+)?(?:readonly\s+)?(?:function\s+|var\s+|const\s+|interface\s+|type\s+)?(?:\[Symbol\.(\w+)\]|(\w+))', d)
+    name = (m.group(1) or m.group(2)) if m else ''
+    # Date's local-time setters read the time zone, so they went with the effects; its UTC setters are writes
+    # (changes.txt). eval and the Function constructor run code from a string.
+    if re.match(r'(setMilliseconds|setSeconds|setMinutes|setHours|setDate|setMonth|setFullYear|setYear|eval|Function)$', name): return 'effects'
+    if re.match(r'(push|pop|shift|unshift|splice|sort|reverse|fill|copyWithin|add|delete|clear|set\w*|getOrInsert\w*|transfer\w*|resize|grow|write\w*|use|adopt|defer|move|lastIndex|compile)$', name): return 'writes.2'
+    if re.match(r'(assign|defineProperty|defineProperties|setPrototypeOf|preventExtensions|seal|freeze|deleteProperty)$', name): return 'writes.3'
+    if re.match(r'(toLocale\w*|getTimezoneOffset|localeCompare|random|now|toDateString|toTimeString)$', name): return 'effects'
+    if name in ('apply', 'call', 'bind'): return 'classes.4'
+    if name in ('prototype', 'create'): return 'prototypes.2'
+    if name in ('reduce', 'reduceRight'): return 'library-declarations.5'
+    return None
+ROOT = os.path.join(HERE, '..', '..')
+def old_hunks(f):
+    diff = subprocess.run(['git', 'diff', '-U0', 'v6.0.3', '--', f], capture_output=True, text=True, cwd=ROOT).stdout.replace('\r', '')
+    out = []
+    for line in diff.split('\n'):
+        if line.startswith('@@'): out.append({'old': [], 'new': []})
+        elif out and line.startswith('-'): out[-1]['old'].append(line[1:])
+        elif out and line.startswith('+'): out[-1]['new'].append(line[1:])
+    return out
+relabelled = 0
+for f in sorted({k.split('#')[0] for k in labels if k.startswith('src/lib/')}):
+    for k, h in enumerate(old_hunks(f)):
+        key = f'{f}#{k}'
+        sels = labels[key]
+        if 'intl' in f or 'temporal' in f:
+            labels[key] = [{'label': 'effects', 'mode': 'full'}]
+            continue
+        if any(not re.match(r'\s*(//|$)', t) for t in h['new']) or len(sels) != 1 or sels[0]['mode'] != 'full' or sels[0]['label'] in ('complete',) and not any(member_label(s) for s in h['old']):
+            continue
+        # The label of each line: a declaration's own, its continuation lines' from it, comments and braces the next's.
+        starts, cont = [], False
+        for i, s in enumerate(h['old']):
+            t = s.strip()
+            is_comment = not t or re.match(r'(/\*\*|\*|//|\}|\{)', t)
+            starts.append(None if is_comment or cont else member_label(t) or 'other')
+            if not is_comment: cont = not re.search(r'[;{}]\s*(//.*)?$', t)
+        # Everything after a deleted Intl namespace's opening line is part of it, whatever its members are named.
+        for i, t in enumerate(h['old']):
+            if re.match(r'\s*declare namespace Intl\b', t):
+                starts[i:] = ['effects' if x is not None else None for x in starts[i:]]
+                starts[i] = 'effects'
+                break
+        line_labels, nxt = [None] * len(h['old']), None
+        for i in range(len(h['old']) - 1, -1, -1):
+            if starts[i] is not None: nxt = starts[i]
+            line_labels[i] = nxt
+        prev = None
+        for i in range(len(h['old'])):
+            if line_labels[i] is None: line_labels[i] = prev
+            prev = line_labels[i] if starts[i] is not None or line_labels[i] is not None else prev
+        kinds = [x for x in set(line_labels) if x not in (None, 'other')]
+        fallback = sels[0]['label'] if sels[0]['label'] in kinds or not kinds else max(kinds, key=line_labels.count)
+        line_labels = [fallback if x in (None, 'other') else x for x in line_labels]
+        if set(line_labels) == {sels[0]['label']}: continue
+        groups = {}
+        for i, x in enumerate(line_labels):
+            if groups.get(x) and groups[x][-1][1] == i: groups[x][-1][1] = i + 1
+            else: groups.setdefault(x, []).append([i + 1, i + 1])
+        labels[key] = [{'label': x, 'mode': 'restore', 'old': rs} for x, rs in groups.items()]
+        relabelled += 1
+# es2020.string.d.ts's hunk changes matchAll (library-declarations.7) and deletes toLocaleLowerCase, toLocaleUpperCase
+# and localeCompare (effects).
+labels['src/lib/es2020.string.d.ts#1'] = [{'label': 'library-declarations.7', 'mode': 'replace', 'lines': [1, 1], 'old': [1, 1]},
+    {'label': 'effects', 'mode': 'replace', 'lines': [2, 1], 'old': [2, 15]}]
+# Corrections from the adversarial review (Codex, 2026-10-22), each checked against the hunk and changes.txt.
+L = 'src/lib/'
+def lab(key, *sels): labels[L + key] = list(sels)
+lab('es5.d.ts#33', {'label': 'effects', 'mode': 'replace', 'lines': [1, 0], 'old': [1, 2]},
+    {'label': 'library-declarations.6', 'mode': 'replace', 'lines': [1, 1], 'old': [3, 3]})
+lab('es5.d.ts#35', {'label': 'prototypes.2', 'mode': 'restore', 'old': [[1, 1]]})
+lab('es5.d.ts#43', {'label': 'library-declarations.6', 'mode': 'full'})
+lab('es5.d.ts#44', {'label': 'library-declarations.6', 'mode': 'full'})
+lab('es5.d.ts#50', {'label': 'writes.2', 'mode': 'full'})
+for k in (62, 63, 64, 65): lab(f'es5.d.ts#{k}', {'label': 'any.2', 'mode': 'full'})
+lab('es5.d.ts#88', {'label': 'complete', 'mode': 'full'})
+labels[L + 'es5.d.ts#58'] = [dict(x, label='library-declarations.6') if x['label'] == 'any.2' else x for x in labels[L + 'es5.d.ts#58']]
+lab('es2015.core.d.ts#7', {'label': 'complete', 'mode': 'full'})
+lab('es2025.iterator.d.ts#2', {'label': 'library-declarations.7', 'mode': 'replace', 'lines': [1, 1], 'old': [1, 1]},
+    {'label': 'library-declarations.5', 'mode': 'replace', 'lines': [5, 4], 'old': [8, 8]})
+lab('es2025.iterator.d.ts#3', {'label': 'writes.2', 'mode': 'full'})
+lab('es2015.iterable.d.ts#0', {'label': 'writes.2', 'mode': 'text', 'lines': [4, 12], 'text': [
+    'type IteratorYieldResult<TYield> = {', '    done?: false;', '    value: TYield;', '};', '',
+    'type IteratorReturnResult<TReturn> = {', '    done: true;', '    value: TReturn;', '};']})
+lab('es2015.iterable.d.ts#5', {'label': 'library-declarations.6', 'mode': 'replace', 'lines': [1, 1], 'old': [1, 1]})
+lab('esnext.disposable.d.ts#3', {'label': 'writes.3', 'mode': 'full'})
+lab('esnext.disposable.d.ts#5', {'label': 'writes.3', 'mode': 'full'})
+json.dump(labels, open(os.path.join(HERE, 'labels.json'), 'w'), indent=1, sort_keys=True)
+c = collections.Counter(s['label'] for v in labels.values() for s in v)
+print(relabelled, 'library hunks labelled member by member;', sorted(c.items()))
