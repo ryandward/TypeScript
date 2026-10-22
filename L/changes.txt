@@ -2,10 +2,10 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds twenty-six diagnostics, changes the checker and two functions in utilities.ts that decide which
-files are checked, adds one internal type flag, declares readonly the new objects and collections the library
-hands out, deletes from the ES library every effect and every method that changes an object in place, and
-corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
+things: it adds twenty-seven diagnostics, changes the checker and two functions in utilities.ts that decide
+which files are checked, adds one internal type flag, declares readonly the new objects and collections the
+library hands out, deletes from the ES library every effect and every method that changes an object in place,
+and corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
 transformers, language service, command line and compiler options are unchanged, and no test baseline has been
 updated. L's rules have no compiler option: they are always on. Each change in code carries a comment that
 starts `// L:`, in checker.ts, types.ts and the lib, so `grep -rn '// L:' src` finds them. The entries() changes
@@ -17,7 +17,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Twenty-six new errors, from TS2892 to TS2919, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+Twenty-seven new errors, from TS2892 to TS2920, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
 The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
 rules and TS2897 to definite-assignment.
 
@@ -84,6 +84,8 @@ rules and TS2897 to definite-assignment.
           find that instead of an entry. A Map holds entries by any key.
   TS2919  arity
           Parameter '{0}' is required, but the target can be called without it, so it would receive undefined.
+  TS2920  any
+          Parameter '{0}' takes '{1}', but the target types it any, which promises it anything.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -116,6 +118,8 @@ any (soundness: TS2898, TS2900; 8ac4d727f, 2adfd653a, 29e19bf5e, f0cb8e20c)
 - isSimpleTypeRelatedTo: under valueAssignableRelation, a source of type any relates only to unknown or a union of
   undefined, null and {}, and anywhere else reports TS2898. An uncheckedType source that fails to relate reports
   TS2898 as well.
+- compareSignaturesRelated compares a target parameter that is any itself (isAnyParameterType) as unknown, in
+  every relation, and reports TS2920 when the source's parameter refuses it (the commit after 816a609a5).
 - getBindingElementTypeFromParentType reads a parent of type any as uncheckedType, as checkExpression reads a value
   of type any, so a nested destructuring pattern, whose parent is a property's type and never an expression, takes
   apart an unknown (e0bd3fffd).
@@ -262,8 +266,8 @@ call-signature (soundness: TypeScript's TS2349; 3329cd10a)
 
 arity (soundness: TS2919; 02d3dfcd3)
 - compareSignaturesRelated reports TS2919 at a position the target may leave without an argument and the source
-  requires, when undefined doesn't relate to the source's parameter. SignatureCheckMode.MissingArguments is new:
-  signatureRelatedTo sets it for valueAssignableRelation, and a callback parameter's comparison carries it.
+  requires, when undefined doesn't relate to the source's parameter, in every relation. (02d3dfcd3 applied it to
+  valueAssignableRelation alone, through a check mode the commit after 816a609a5 deleted.)
 - The isTopSignature shortcut that related every function to a top signature is deleted; the StrictTopSignature
   guard for subtype reduction stays.
 
@@ -342,6 +346,9 @@ stops compiling, which costs nothing L keeps.
 - An iterator's flatMap takes a callback that returns no string, which it throws on (es2025.iterator).
 - WeakMap and WeakSet keys are objects: WeakKeyTypes has no symbol, since a registered symbol throws as a key
   (es2023.collection).
+- ReturnType, Parameters, InstanceType and ConstructorParameters bound a function by (...args: never) => unknown
+  (es5), which takes no argument list, so every function satisfies it under arity and the any parameter rule;
+  ReturnType and InstanceType give unknown, not any, for a type that isn't one.
 - Reflect.get is deleted (es2015.reflect): it reads a key as an element access does but types the result as an
   indexed access type, which no read check sees (open-record).
 - Array.from takes a string as itself (es2015.iterable), returning its code points, since a string is no longer

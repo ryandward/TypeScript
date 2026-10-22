@@ -12,26 +12,29 @@ parameters, and that type can be called with no arguments too. Each witness's fu
 undefined it receives, and Node throws a TypeError.
 
 Obligation 1, a parameter the target may leave out: TS2919
-  Statement. In a value flow, a function relates to a function type only if, at every position the type may be
-  called without an argument and the function requires one, the function's parameter takes undefined. A function
-  that takes fewer parameters than the type passes still relates: it ignores the rest. A type-level question,
-  such as a utility type's constraint, isn't a value flow.
+  Statement. A function relates to a function type only if, at every position the type may be called without an
+  argument and the function requires one, the function's parameter takes undefined, in every relation, a type
+  parameter's constraint included. A function that takes fewer parameters than the type passes still relates: it
+  ignores the rest. (...args: never) => unknown can't be called at all, since no argument list is a never, so
+  every function satisfies it, and the library's utility types use it; (...args: never[]) => unknown can be called
+  with no arguments, and only a function that requires none satisfies it.
   Mechanism. compareSignaturesRelated checks each position past the target's minimum argument count and within the
   source's, after comparing the types the target passes, and reports TS2919 when undefined doesn't relate to the
-  source's parameter. signatureRelatedTo sets SignatureCheckMode.MissingArguments for valueAssignableRelation
-  alone, and a callback parameter's comparison carries it. The isTopSignature shortcut is deleted, so a top
-  signature is compared like any other.
+  source's parameter. The isTopSignature shortcut is deleted, so a top signature is compared like any other; a
+  rest of type never is a rest position, which the check skips.
   Why it suffices. A call through the target passes at least the target's minimum argument count, so the source
-  receives undefined exactly at the positions this checks. Every function held as a function type got there by a
-  value flow, which valueAssignableRelation judges.
+  receives undefined exactly at the positions this checks, and every relation between function types compares
+  their parameters here, so no constraint or assignment lets a call leave out what the function requires.
   Witnesses:
     rel-rest-arity-function-type.ts    a function of one Point held as a function type with a rest parameter
     rel-rest-arity-call-signature.ts   the same as a call signature
     lib-rest-arity-math-max.ts         a function of one number held as typeof Math.max
     rel-top-signature.ts               a function of one string held as (...args: never[]) => unknown
+    chk-constraint-zero-arguments.ts   a function of a number under F extends (...args: never[]) => unknown, called
+                                       with none
   Rejected sound code, because the type allows a call with no argument:
     rest-called-with-one.ts            a function of one number, held as a rest type and called with one
   Controls:
     fewer-parameters.ts                a callback that takes fewer parameters than it is passed
     undefined-taking.ts                unknown, optional and default parameters left out
-    type-level-utility.ts              ReturnType of a function that requires an argument
+    type-level-utility.ts              ReturnType and Parameters of a function that requires an argument

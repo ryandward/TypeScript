@@ -1,5 +1,7 @@
-// control: A utility type bounded by (...args: any) => any still takes a function that requires an argument, since
-// a type-level question relates any in a parameter.
+// control: The library's utility types bound a function by (...args: never) => unknown, which takes no argument list,
+// so ReturnType and Parameters still take a function that requires an argument.
 type Result = ReturnType<(s: string) => number>;
+type Taken = Parameters<(s: string) => number>;
 const r: Result = 1;
-console.log(r);
+const t: Taken = ['s'];
+console.log(r, t);

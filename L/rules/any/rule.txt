@@ -39,15 +39,33 @@ Obligation 1, assignability: TS2898
     lib-object-values-interface.ts     Object.values on an interface returns any[]
     lib-promise-any-errors.ts          AggregateError.errors is any[]
     lib-generator-tnext-any.ts         yield is any when Generator's TNext is left to its default
-    lib-promise-catch-annotated.ts     catch hands its callback reason: any
     lib-allsettled-reason-any.ts       a callback claims a record for PromiseRejectedResult's reason: any
-    lib-json-stringify-replacer.ts     stringify hands its replacer value: any
-    lib-string-replace-callback.ts     replace hands its callback ...args: any[]
   Controls:
     unknown-checked.ts                 an any flowing into unknown, decided by typeof before it is read
-    function-constraint.ts             any written in a constraint, where no value of type any flows
   Rejected sound code, because soundness forces it:
     json-parse-number.ts               the text is a number, but only a parser could say so
+
+Obligation 3, a parameter typed any: TS2920
+  Statement. A function relates to a function type whose parameter is typed any only if its own parameter takes
+  unknown, in every relation. A parameter typed any says its caller may pass anything, and a type parameter's
+  constraint makes the generic body such a caller.
+  Mechanism. compareSignaturesRelated compares a target parameter that is any itself (isAnyParameterType, not
+  errorType or an instantiation's wildcard) as unknown, and reports TS2920 when the source's parameter refuses it.
+  The library's utility types bound a function by (...args: never) => unknown instead, which takes no argument
+  list at all, so every function satisfies it.
+  Why it suffices. Every relation between function types compares parameters in compareSignaturesRelated, so no
+  relation lets a parameter typed any vouch for a narrower one.
+  In Lean. ../../lean/mutants/subDown.callback-param, refuted under obligation 1, is this route in the calculus:
+  any assignable to a callback's parameter.
+  Witnesses:
+    lib-promise-catch-annotated.ts     catch hands its callback reason: any
+    lib-promise-any-errors.ts          the same, the callback annotated AggregateError
+    lib-json-stringify-replacer.ts     stringify hands its replacer value: any
+    lib-string-replace-callback.ts     replace hands its callback ...args: any[]
+    chk-any-constraint-call.ts         a function of a number under F extends (a: any) => unknown, called with a
+                                       string
+  Rejected sound code, because a constraint's any parameter promises the function anything:
+    function-constraint.ts             a function of a number under F extends (...args: any[]) => any, never called
 
 Obligation 2, structure: TS2900
   Statement. An operation that needs its operand to have a structure may be accepted only if every value of

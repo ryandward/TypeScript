@@ -1360,9 +1360,6 @@ export const enum SignatureCheckMode {
     IgnoreReturnTypes = 1 << 2,
     StrictArity = 1 << 3,
     StrictTopSignature = 1 << 4,
-    // L: set for a value flow, where a function held as the target type can be called with any argument list the type
-    // allows, so a parameter the target may leave out must take undefined.
-    MissingArguments = 1 << 5,
     Callback = BivariantCallback | StrictCallback,
 }
 
@@ -22024,6 +22021,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     /**
      * Returns true if `s` is `(...args: A) => R` where `A` is `any`, `any[]`, `never`, or `never[]`, and `R` is `any` or `unknown`.
      */
+    // L: a parameter type that is any itself, not errorType after a reported error or the wildcard of an instantiation.
+    function isAnyParameterType(type: Type): boolean {
+        return !!(type.flags & TypeFlags.Any) && type !== errorType && type !== wildcardType;
+    }
+
     function isTopSignature(s: Signature) {
         if (!s.typeParameters && (!s.thisParameter || isTypeAny(getTypeOfParameter(s.thisParameter))) && s.parameters.length === 1 && signatureHasRestParameter(s)) {
             const paramType = getTypeOfParameter(s.parameters[0]);
@@ -22095,7 +22097,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         for (let i = 0; i < paramCount; i++) {
             const sourceType = i === restIndex ? getRestOrAnyTypeAtPosition(source, i) : tryGetTypeAtPosition(source, i);
             // L: a parameter the target never passes still receives what a wider view of the target passes, which can be anything.
-            const targetType = i === restIndex ? getRestOrAnyTypeAtPosition(target, i) : tryGetTypeAtPosition(target, i) ?? (sourceType && unknownType);
+            const declaredTargetType = i === restIndex ? getRestOrAnyTypeAtPosition(target, i) : tryGetTypeAtPosition(target, i) ?? (sourceType && unknownType);
+            // L: a parameter the target types any promises the source anything, so the source's parameter has to take
+            // unknown, in every relation: a type parameter's constraint lets the body pass what the constraint allows.
+            const targetTypeIsAny = !!declaredTargetType && i !== restIndex && isAnyParameterType(declaredTargetType);
+            const targetType = targetTypeIsAny ? unknownType : declaredTargetType;
             if (sourceType && targetType && (sourceType !== targetType || checkMode & SignatureCheckMode.StrictArity)) {
                 // In order to ensure that any generic type Foo<T> is at least co-variant with respect to T no matter
                 // how Foo uses T, we need to relate parameters bi-variantly (given that parameters are input positions,
@@ -22110,7 +22116,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 const callbacks = sourceSig && targetSig && !getTypePredicateOfSignature(sourceSig) && !getTypePredicateOfSignature(targetSig) &&
                     getTypeFacts(sourceType, TypeFacts.IsUndefinedOrNull) === getTypeFacts(targetType, TypeFacts.IsUndefinedOrNull);
                 let related = callbacks ?
-                    compareSignaturesRelated(targetSig, sourceSig, (checkMode & (SignatureCheckMode.StrictArity | SignatureCheckMode.MissingArguments)) | SignatureCheckMode.StrictCallback, reportErrors, errorReporter, incompatibleErrorReporter, compareTypes, reportUnreliableMarkers) :
+                    compareSignaturesRelated(targetSig, sourceSig, (checkMode & SignatureCheckMode.StrictArity) | SignatureCheckMode.StrictCallback, reportErrors, errorReporter, incompatibleErrorReporter, compareTypes, reportUnreliableMarkers) :
                     compareTypes(targetType, sourceType, reportErrors);
                 // With strict arity, (x: number | undefined) => void is a subtype of (x?: number | undefined) => void
                 if (related && checkMode & SignatureCheckMode.StrictArity && i >= getMinArgumentCount(source) && i < getMinArgumentCount(target) && compareTypes(sourceType, targetType, /*reportErrors*/ false)) {
@@ -22118,7 +22124,12 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 }
                 if (!related) {
                     if (reportErrors) {
-                        errorReporter!(Diagnostics.Types_of_parameters_0_and_1_are_incompatible, unescapeLeadingUnderscores(getParameterNameAtPosition(source, i)), unescapeLeadingUnderscores(getParameterNameAtPosition(target, i)));
+                        if (targetTypeIsAny) {
+                            errorReporter!(Diagnostics.Parameter_0_takes_1_but_the_target_types_it_any_which_promises_it_anything, unescapeLeadingUnderscores(getParameterNameAtPosition(source, i)), typeToString(sourceType));
+                        }
+                        else {
+                            errorReporter!(Diagnostics.Types_of_parameters_0_and_1_are_incompatible, unescapeLeadingUnderscores(getParameterNameAtPosition(source, i)), unescapeLeadingUnderscores(getParameterNameAtPosition(target, i)));
+                        }
                     }
                     return Ternary.False;
                 }
@@ -22127,7 +22138,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             // L: an argument the target may be called without arrives as undefined, so a parameter the source requires
             // there must take undefined. A rest parameter or an optional one in the target leaves such a position. The
             // types the target passes are compared first, so this reports only a parameter they would satisfy.
-            if (checkMode & SignatureCheckMode.MissingArguments && sourceType && i !== restIndex && i >= getMinArgumentCount(target) && i < getMinArgumentCount(source) && !compareTypes(undefinedType, sourceType, /*reportErrors*/ false)) {
+            if (sourceType && i !== restIndex && i >= getMinArgumentCount(target) && i < getMinArgumentCount(source) && !compareTypes(undefinedType, sourceType, /*reportErrors*/ false)) {
                 if (reportErrors) {
                     errorReporter!(Diagnostics.Parameter_0_is_required_but_the_target_can_be_called_without_it_so_it_would_receive_undefined, unescapeLeadingUnderscores(getParameterNameAtPosition(source, i)));
                 }
@@ -24940,7 +24951,6 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         function signatureRelatedTo(source: Signature, target: Signature, erase: boolean, reportErrors: boolean, intersectionState: IntersectionState, incompatibleReporter: (source: Type, target: Type) => void): Ternary {
             const checkMode = relation === subtypeRelation ? SignatureCheckMode.StrictTopSignature :
                 relation === strictSubtypeRelation ? SignatureCheckMode.StrictTopSignature | SignatureCheckMode.StrictArity :
-                relation === valueAssignableRelation ? SignatureCheckMode.MissingArguments :
                 SignatureCheckMode.None;
             return compareSignaturesRelated(erase ? getErasedSignature(source) : source, erase ? getErasedSignature(target) : target, checkMode, reportErrors, reportError, incompatibleReporter, isRelatedToWorker, reportUnreliableMapper);
             function isRelatedToWorker(source: Type, target: Type, reportErrors?: boolean) {

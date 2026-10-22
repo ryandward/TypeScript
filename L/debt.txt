@@ -107,14 +107,6 @@ open-record
 - An indexed access type, T[K] in a type, isn't a read and isn't checked, so a library function typed through one
   reads past the check, as Reflect.get did. No other is known, but the library hasn't been searched for one.
 
-arity
-- A function's type-parameter constraint is judged as a type, where any relates and no argument goes missing, but
-  the body uses a value of that parameter as the constraint allows. A function of a number passes
-  F extends (a: any) => unknown and is called with a string (catalog/chk-any-constraint-call.ts), and a function
-  that requires an argument passes F extends (...args: any[]) => any and is called with none
-  (catalog/chk-constraint-zero-arguments.ts). The any rule's control function-constraint holds that any in a
-  constraint is harmless, which these two show is false.
-
 call-signature
 - A value typed Function can't be called now, even when it holds an ordinary function. Nobody has measured how
   much real code calls one; the core has to declare the signature of a function it is handed.

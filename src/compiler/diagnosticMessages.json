@@ -4130,6 +4130,10 @@
         "category": "Error",
         "code": 2919
     },
+    "Parameter '{0}' takes '{1}', but the target types it any, which promises it anything.": {
+        "category": "Error",
+        "code": 2920
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",
