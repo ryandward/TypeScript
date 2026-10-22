@@ -2,10 +2,10 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds twenty-three diagnostics, changes the checker and two functions in utilities.ts that decide
-which files are checked, adds one internal type flag, declares readonly the new objects and collections the
-library hands out, deletes from the ES library every effect and every method that changes an object in place,
-and corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
+things: it adds twenty-four diagnostics, changes the checker and two functions in utilities.ts that decide which
+files are checked, adds one internal type flag, declares readonly the new objects and collections the library
+hands out, deletes from the ES library every effect and every method that changes an object in place, and
+corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
 transformers, language service, command line and compiler options are unchanged, and no test baseline has been
 updated. L's rules have no compiler option: they are always on. Each change in code carries a comment that
 starts `// L:`, in checker.ts, types.ts and the lib, so `grep -rn '// L:' src` finds them. The entries() changes
@@ -17,7 +17,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Twenty-three new errors, from TS2892 to TS2916, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+Twenty-four new errors, from TS2892 to TS2917, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
 The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
 rules and TS2897 to definite-assignment.
 
@@ -76,6 +76,9 @@ rules and TS2897 to definite-assignment.
   TS2916  width
           Type '{0}' may hold properties it doesn't name, so L infers no index signature for it: only an object
           literal names every property it has.
+  TS2917  width
+          Type '{0}' belongs to an object literal and names every property its value has, so a value of type '{1}',
+          which may hold more, isn't one.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -222,9 +225,12 @@ prototypes (soundness: TS2914 and TypeScript's TS2339 and TS2550; b85ec04e5)
 - resolveAnonymousTypeMembers drops the prototype a class's static side gets from the binder, so Iterator, the
   library's one class, has none. The library's own prototype fields are deleted (below).
 
-width (soundness: TS2915 and TS2916; 82868af24)
-- isExactObjectType is new: a fresh object literal written without a spread, or a module's namespace object, the
-  types that name every property their values have.
+width (soundness: TS2915, TS2916 and TS2917; 82868af24)
+- isExactObjectType is new: a fresh object literal written without a spread, the one type that names every
+  property its values have. (82868af24 counted a module's namespace object too, but typeof m types any value.)
+- An exact target relates only to an exact source that names nothing it lacks (isExactWithin), or TS2917 is
+  reported, so subtype reduction in a conditional or array expression can't keep a fresh type over a wider
+  member (the commit after 37095f31a).
 - propertiesRelatedTo relates a target's optional property that the source doesn't name to what a value of the
   source may hold there, its index signature's type or unknown, unless the source is exact, and reports TS2915.
 - typeRelatedToIndexInfo infers an index signature only for an exact source, and otherwise reports TS2916 beneath

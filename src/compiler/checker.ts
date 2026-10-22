@@ -2626,14 +2626,19 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         return !!(type.flags & TypeFlags.Object) && !(getObjectFlags(type) & ObjectFlags.Anonymous && isEmptyObjectType(type as ObjectType));
     }
 
-    // L: an object type that names every property its values have: a fresh object literal written without a spread, or
-    // a module's namespace object. Any other object type may hold a value with more properties than it names.
+    // L: an object type that names every property its values have: the type of an object literal written without a
+    // spread, while it is fresh. Freshness marks only the type of the literal expression itself, and widening drops it
+    // wherever a declaration or an inference takes the type. Any other object type may hold a value with more
+    // properties than it names, as typeof m may for a module's namespace object.
     function isExactObjectType(type: Type): boolean {
         const objectFlags = getObjectFlags(type);
-        return !!(type.flags & TypeFlags.Object) && (
-            !!(objectFlags & ObjectFlags.FreshLiteral) && !(objectFlags & ObjectFlags.ContainsSpread) ||
-            !!(type.symbol && type.symbol.flags & SymbolFlags.ValueModule)
-        );
+        return !!(type.flags & TypeFlags.Object) && !!(objectFlags & ObjectFlags.FreshLiteral) && !(objectFlags & ObjectFlags.ContainsSpread);
+    }
+
+    // L: an exact source that names no property an exact target lacks, unless the target's index signature covers it.
+    function isExactWithin(source: Type, target: Type): boolean {
+        return isExactObjectType(source) &&
+            every(getPropertiesOfType(source), p => !!getPropertyOfObjectType(target, p.escapedName) || !!getApplicableIndexInfoForName(target, p.escapedName));
     }
 
     // L: a statement that declares a value with no implementation: an ambient variable, function, class, enum or
@@ -24139,6 +24144,16 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 ) {
                     if (reportErrors) {
                         reportError(Diagnostics.Type_0_is_primitive_and_L_holds_no_primitive_in_an_object_type_such_as_1_since_every_value_of_an_object_type_must_be_an_object, typeToString(source), typeToString(target));
+                    }
+                    return Ternary.False;
+                }
+                // L: an exact target, an object literal's own type, holds only that literal's value, so a source relates to
+                // it only if the source is exact too and names nothing the target doesn't. Subtype reduction relates the
+                // members of a conditional or array expression this way, and would otherwise let a wider value out under
+                // the literal's type, which says it names every property its value has.
+                if (relation !== identityRelation && relation !== comparableRelation && isExactObjectType(target) && !isExactWithin(source, target)) {
+                    if (reportErrors) {
+                        reportError(Diagnostics.Type_0_belongs_to_an_object_literal_and_names_every_property_its_value_has_so_a_value_of_type_1_which_may_hold_more_isn_t_one, typeToString(target), typeToString(source));
                     }
                     return Ternary.False;
                 }

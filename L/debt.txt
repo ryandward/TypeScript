@@ -83,9 +83,10 @@ narrowing
   the second branch. Testing the other member, `typeof x === 'string' ? [x] : x`, narrows both ways.
 
 width
-- An object literal's type is exact only while it is fresh, and the rule rests on TypeScript dropping freshness
-  whenever a value is held under a declared or inferred type. Inference, a ternary, an array literal and an
-  identity function each gave a wider value an open type when tried, which is evidence, not a proof.
+- An object literal's type is exact only while it is fresh. Reading the checker, freshness is set only by
+  checkObjectLiteral and dropped by widening, which every declaration and inference goes through, and the
+  exact-target check covers the one route left, a fresh type as a relation's target. That is an audit of where the
+  flag is set and cleared, not a proof that no path carries a fresh type to another value.
 - A generic mapped type target, Partial<T> with T a type parameter, is judged by TypeScript's own rules for
   generic mapped types, which this rule hasn't audited.
 - A relation cached while excess-property checks were silenced can hide an excess-property error later. L's

@@ -4118,6 +4118,10 @@
         "category": "Error",
         "code": 2916
     },
+    "Type '{0}' belongs to an object literal and names every property its value has, so a value of type '{1}', which may hold more, isn't one.": {
+        "category": "Error",
+        "code": 2917
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

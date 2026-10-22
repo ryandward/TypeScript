@@ -16,18 +16,21 @@ Obligation 1, an optional field the source doesn't name: TS2915
   Statement. A source relates to an optional property of the target that it doesn't name only if what a value of
   the source may hold there relates to the property's type: the type of the source's index signature for that
   name, or unknown. A type that names every property of its values, a fresh object literal written without a
-  spread or a module's namespace object, holds nothing there, and relates.
+  spread, holds nothing there, and relates.
   Mechanism. propertiesRelatedTo relates that type to the property's and reports TS2915 when it fails;
   isExactObjectType decides which types name every property. The shortcut that relates an empty object type to a
   mapped type with a ? modifier takes only an empty object literal. Overload resolution's first pass, and the
   members of a union target, keep an object literal's freshness and silence the excess-property check instead of
   taking its regular type (excessPropertyChecksSilenced), since the regular type would refuse what the fresh one
-  checked after them accepts.
+  checked after them accepts. A target that is exact relates only to a source that is exact too and names nothing
+  the target doesn't (isExactWithin), or TS2917 is reported; subtype reduction relates the members of a conditional
+  or array expression this way, and would otherwise keep a fresh literal's type over a wider member.
   Why it suffices. Every assignability and subtype judgment between object types compares properties in
   propertiesRelatedTo, which visits every property of the target; a property the source names is related as
-  before, and one it doesn't is related here. Freshness marks the type of an object literal expression, whose
-  value has exactly the properties the type names, and TypeScript drops it when the value is held under a
-  declared or inferred type (see debt.txt).
+  before, and one it doesn't is related here. Freshness is set only by checkObjectLiteral, on the type of the
+  literal expression, whose value has exactly the properties the type names. Widening drops it wherever a
+  declaration or an inference takes a type, so a fresh type can describe another value only as a relation's
+  target, and the exact-target check admits only a value it already describes.
   Witnesses:
     rel-optional-absent-iterator.ts    a record hiding return: 5, taken for an Iterator
     rel-optional-absent-own.ts         {} hiding onDone: a string, taken for a record of hooks
@@ -43,6 +46,8 @@ Obligation 1, an optional field the source doesn't name: TS2915
     rel-width-never-field-constraint.ts  the record passed to a type parameter bounded by return?: never
     rel-width-library-result.ts        an iterator result hiding report: 5, taken for one whose report is a function
     rel-width-partial-record.ts        {} hiding onDone: a string, returned as a Partial record of hooks
+    rel-width-fresh-reduction-optional.ts  a conditional whose literal's fresh type swallowed a value hiding
+                                       return: 5
   Rejected sound code, because the type names only some of the properties its values may have:
     named-literal.ts                   a literal held under its own open type, then taken for an Iterator
   Controls:
@@ -58,6 +63,8 @@ Obligation 2, an implicit index signature: TS2916
   isExactObjectType holds of it, and otherwise reports TS2916 beneath TypeScript's missing-index error.
   Why it suffices. typeRelatedToIndexInfo is the only place the relation infers an index signature, and the
   signature it infers covers exactly the properties the source names.
+  Witnesses:
+    rel-width-fresh-reduction-index.ts  a conditional whose literal's fresh type swallowed a value hiding b: 'x'
   Rejected sound code, because the type is open:
     alias-index-signature.ts           a record holding only title, under an open type, taken for a record of
                                        strings
