@@ -252,7 +252,7 @@ width (soundness: TS2915, TS2916 and TS2917; 82868af24)
 - The shortcut relating an empty object type to a mapped type with a ? modifier takes only an exact source.
 - checkInheritedMemberRead reports TS2921 on a read of a name the type doesn't declare that the lookup finds on
   Object or Function, unless the value is a primitive or its type exact, from property access and from a value
-  read in getPropertyTypeForIndexType (the commit after 0c168e1a0).
+  read in getPropertyTypeForIndexType (0cde387d8).
 - getSignatureApplicabilityError's first pass, and unionOrIntersectionRelatedTo for a union target, keep an
   argument's or source's freshness instead of taking its regular type, and silence the excess-property check with
   excessPropertyChecksSilenced, saved and restored around each use. The regular type would be stricter than the
