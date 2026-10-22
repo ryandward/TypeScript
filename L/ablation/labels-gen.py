@@ -8,11 +8,13 @@ checker = {}
 def put(idxs, lab):
     for i in idxs: checker[i] = lab
 put([0,2,3,4,5,6,13,14,15,24,26,27,38,40,42,51,99,119], 'infra')
-put([11,44,45], 'complete')
+put([11], 'complete')
 put([1,82], 'void.1'); put([7,21,22,23], 'records.3'); put([8,9,18,71,96,97,132,136], 'any.2'); put([10], 'prototypes.2')
 put([12], 'tuples.1'); put([16,17,19,98,100,101], 'open-record.1'); put([20], 'open-record.5'); put([25,36,37]+list(range(108,118)), 'any.1')
 put([28,35], 'arity.1'); put([29,30,32], 'parameters.1'); put([31], 'parameters.2'); put([33,34], 'any.3'); put([39,55,61,104,105,107], 'width.1')
-put([41], 'narrowing.1'); put([43,46], 'generic-relations.2'); put([47,48,49,50,57,58,59,66,67,68,69,70], 'generic-relations.3')
+# Hunks 44 and 45 pass the fuel of eight, which generic-relations' obligation 2 names: with the cutoff restored to
+# TypeScript's Maybe, a deeper comparison can reach a failure the release's cutoff at three never sees.
+put([41], 'narrowing.1'); put([43,44,45,46], 'generic-relations.2'); put([47,48,49,50,57,58,59,66,67,68,69,70], 'generic-relations.3')
 put([52,53,54,62,63], 'generic-relations.1'); put([60], 'records.2'); put([64,65], 'width.2'); put([72,81], 'narrowing.7'); put([73], 'number-strings.1')
 put([74,75,76,77], 'narrowing.2'); put([78,79], 'narrowing.4'); put([80,86], 'narrowing.6'); put([83,84,85], 'narrowing.8'); put([87,88], 'narrowing.5')
 put([89], 'initialization-order.1'); put([90], 'immutable-bindings.2'); put([91,92], 'classes.2'); put([93], 'prototypes.1'); put([94,95,128,135], 'records.1')

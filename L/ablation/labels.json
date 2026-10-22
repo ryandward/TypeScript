@@ -554,13 +554,13 @@
  ],
  "src/compiler/checker.ts#44": [
   {
-   "label": "complete",
+   "label": "generic-relations.2",
    "mode": "full"
   }
  ],
  "src/compiler/checker.ts#45": [
   {
-   "label": "complete",
+   "label": "generic-relations.2",
    "mode": "full"
   }
  ],
