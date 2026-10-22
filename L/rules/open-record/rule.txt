@@ -55,3 +55,29 @@ Obligation 4, a read the library types where no read is checked: TS2550 (TypeScr
   Why it suffices. Reflect.get is the library's only function that reads a property by a key it is handed.
   Witnesses:
     lib-reflect-get-inherited.ts       toString read from a Record<string, number> by Reflect.get
+
+Obligation 5, a read by a generic key that isn't a union of literals: TS2571 (TypeScript's code)
+  Statement. A value read by a key whose type is generic and whose base constraint isn't a union of literals may
+  miss, since the key can be instantiated with string or number, which makes the object a dictionary there: the
+  read is the indexed access type with undefined. Where the constraint may be a bare string, the key may also name
+  an inherited member, and the read is unknown. A constraint that is a union of literals names keys the object has.
+  Mechanism. getIndexedAccessTypeOrUndefined, deferring a value read by a generic index type, adds undefined to the
+  indexed access type, or gives unknown when an inherited name is assignable to the key's constraint. TypeScript
+  then reports a use of the unknown.
+  Why it suffices. A read by a generic key is deferred there and nowhere else, element access and destructuring
+  alike. K extends keyof T is constrained by string | number | symbol while T is generic, since T may be a
+  dictionary, so such a read is unknown too.
+  Witnesses:
+    chk-record-generic-key.ts          a Record over K read by a K that the caller makes string
+    chk-generic-keyof-mapped.ts        the same through a mapped type over K
+    chk-generic-key-other-parameter.ts  the same with K bounded by another type parameter
+  Controls:
+    generic-key-literals.ts            a generic key bounded by a union of literals
+    generic-key-number.ts              a generic key bounded by number, its undefined handled
+
+Obligation 6, a read by a generic key returned as the indexed access type: TS2322 (TypeScript's code)
+  Statement. The unknown a read by K extends keyof T gives isn't a T[K].
+  Mechanism. As obligation 5; TypeScript reports the unknown where a T[K] is returned.
+  Why it suffices. As obligation 5.
+  Rejected sound code, because K extends keyof T may be a bare string:
+    generic-keyof-get.ts               a key the object has, read and returned through K extends keyof T

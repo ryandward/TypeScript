@@ -19809,6 +19809,15 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (!type) {
                 indexedAccessTypes.set(id, type = createIndexedAccessType(objectType, indexType, persistentAccessFlags, aliasSymbol, aliasTypeArguments));
             }
+            // L: a value read by a generic key whose constraint isn't a union of literals may miss, since the key can be
+            // instantiated with string or number, which makes the object a dictionary at that key; and a key that may be
+            // a bare string may name a member every object inherits, so that read is unknown.
+            if (accessFlags & AccessFlags.ExpressionPosition && !(accessFlags & AccessFlags.Writing) && isGenericIndexType(indexType)) {
+                const keys = getBaseConstraintOrType(indexType);
+                if (!everyType(keys, t => !!(t.flags & (TypeFlags.StringLiteral | TypeFlags.NumberLiteral | TypeFlags.UniqueESSymbol | TypeFlags.Never)))) {
+                    return some(inheritedObjectNames, n => isTypeAssignableTo(getStringLiteralType(n), keys)) ? unknownType : getUnionType([type, missingType]);
+                }
+            }
 
             return type;
         }
