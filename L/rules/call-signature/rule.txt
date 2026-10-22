@@ -30,3 +30,13 @@ Obligation 1, call with a signature: TS2349 (TypeScript's code)
     function-held-arrow.ts             an arrow function held as Function, called
   Controls:
     typed-call.ts                      a callee with a call signature
+
+Obligation 2, new.target in a plain call: TS2722 (TypeScript's code)
+  Statement. new.target in a function, which may be called without new, is the function or undefined.
+  Mechanism. checkNewTargetMetaProperty adds undefined to its type in a function; in a constructor it stays the
+  class, which can't be called without new.
+  Why it suffices. new.target is typed there and nowhere else.
+  Witnesses:
+    chk-new-target-plain-call.ts       new.target called in a function called without new
+  Controls:
+    new-target-checked.ts              a function that tells new.target from undefined

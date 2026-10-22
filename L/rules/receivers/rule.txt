@@ -1,0 +1,26 @@
+receivers
+kind: soundness
+
+Claim. If the lab accepts a program, no method of an engine object's instance is called without its object.
+
+Counterexample in plain TypeScript. A method read off its object, as m.has, is typed as a function, but called alone
+it has no this, and the engine's methods for a Map, a Set, an array or a string refuse that. Passing set.has as a
+callback, an everyday slip, does it as well. Each witness calls such a method alone, and Node throws a TypeError.
+
+Obligation 1, an instance's method off its object: TS2924
+  Statement. A method the library declares on an interface no global value has as its type, which describes an
+  instance, or on a class without static, is read only where a call, a new or a tagged template invokes it, in
+  parentheses or through ?. too. A static, declared on the interface a global value has as its type, as Math's or a
+  constructor's, reads no this and passes freely.
+  Mechanism. checkReceiverMethodRead reports TS2924 for a read of such a method, by property access or by key, that
+  isInvokedWhereItStands refuses. getReceiverFreeInterfaces collects, once, the interfaces the library's global
+  declare var statements are typed with. A mapped or spread property follows its origin back.
+  Why it suffices. An instance's method reaches a value only by a read from its object, by name or by key, and both
+  sites check it; a spread or a rest drops it (see records).
+  Witnesses:
+    chk-unbound-lib-method.ts          a Map's has read off it, then called
+    chk-unbound-method-callback.ts     a Set's has passed as a callback
+  Rejected sound code, because a read that doesn't call a method takes it off its object:
+    method-read-unused.ts              an array's at read and only asked its type
+  Controls:
+    receiver-calls.ts                  calls where the method stands, statics as callbacks, a wrapper

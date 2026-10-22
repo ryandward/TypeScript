@@ -38,3 +38,13 @@ Obligation 1, a parameter the target may leave out: TS2919
     fewer-parameters.ts                a callback that takes fewer parameters than it is passed
     undefined-taking.ts                unknown, optional and default parameters left out
     type-level-utility.ts              ReturnType and Parameters of a function that requires an argument
+
+Obligation 2, a yield next may leave without a value: TS18048 (TypeScript's code)
+  Statement. A yield expression's value is the generator's TNext or undefined, since next() may be called with no
+  argument, as for-of always calls it.
+  Mechanism. checkYieldExpression adds undefined to the next type, the annotated generator's and the contextual one.
+  Why it suffices. A yield's value is typed there and nowhere else.
+  Witnesses:
+    chk-generator-next.ts              a yield that receives undefined from a next() with no argument
+  Controls:
+    generator-received.ts              a generator that handles the undefined

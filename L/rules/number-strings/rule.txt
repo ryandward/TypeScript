@@ -1,0 +1,22 @@
+number-strings
+kind: soundness
+
+Claim. If the lab accepts a program, a template literal type over number holds every string a number converts to.
+
+Counterexample in plain TypeScript. isValidNumberString holds a string valid for `${number}` only if it reads as a
+finite number, so `${number}` excludes "NaN", "Infinity" and "-Infinity", though a number converts to each. A
+discriminant test against one of them then drops the `${number}` member from a union, and each witness, built from a
+number that is NaN or infinite, reaches a branch typed as the other member, and Node throws a TypeError.
+
+Obligation 1, a string a number converts to: TS2339 (TypeScript's code)
+  Statement. `${number}` holds "NaN", "Infinity" and "-Infinity".
+  Mechanism. isValidNumberString accepts those three strings, so a discriminant test against one keeps the
+  `${number}` member, and a read only the other member has is reported.
+  Why it suffices. isValidNumberString decides which strings `${number}` holds, for assignability, comparability and
+  inference alike.
+  Witnesses:
+    rel-template-number-nan.ts         a reading of NaN, its unit tested against 'NaN'
+    rel-template-number-nan-as-const.ts  the same through an as const template
+    rel-template-number-infinity.ts    a reading of an infinity, its unit tested against 'Infinity'
+  Controls:
+    number-template.ts                 a number in a template, narrowed against a literal it can't be

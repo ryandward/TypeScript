@@ -2,6 +2,6 @@
 // leaves it undefined, and calling it throws.
 function named(): string {
   // Runtime: TypeError: new.target is not a function
-  return new.target();
+  return new.target(); // rejected here: TS2722
 }
 console.log(named());

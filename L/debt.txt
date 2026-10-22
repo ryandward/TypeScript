@@ -128,6 +128,11 @@ records
 - A value the shell hands the core can be any object, typed as a record: the boundary must parse it into a literal
   (see all rules).
 
+receivers
+- A static that reads this, as Promise.resolve or Promise.all, is declared on PromiseConstructor, the type of the
+  global Promise, so the rule takes it for one that doesn't, and passing Promise.resolve as a callback still
+  crashes. Telling those apart would take a mark the library doesn't have.
+
 call-signature
 - A value typed Function can't be called now, even when it holds an ordinary function. Nobody has measured how
   much real code calls one; the core has to declare the signature of a function it is handed.

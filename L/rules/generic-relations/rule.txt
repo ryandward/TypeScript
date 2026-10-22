@@ -1,0 +1,26 @@
+generic-relations
+kind: soundness
+
+Claim. If the lab accepts a program, a generic type relates to another only where every instantiation does.
+
+Counterexample in plain TypeScript. Two conditional types with the same extends type relate when their check
+types relate in either direction, though [A] and [B] with B extends A pick different branches wherever B
+satisfies the extends type and A doesn't. A value relates to T[K] when it relates to T[K]'s constraint for
+writing, though T extends { a: string | number } may narrow a to string. Each witness returns a value of the
+wrong branch or the wrong member, and Node throws a TypeError.
+
+Obligation 1, a generic type related through one of its instantiations: TS2322 (TypeScript's code)
+  Statement. Two conditional types with the same extends type relate only if their check types relate both ways,
+  so they pick the same branch for every instantiation. A value relates to T[K] through T[K]'s constraint for
+  writing only when T itself isn't generic: a generic K alone has a sound constraint, the intersection of what
+  every key holds.
+  Mechanism. structuredTypeRelatedToWorker requires both directions of checkTypesRelated for two conditional types,
+  and takes the writing constraint of an indexed access target only when its object type is its own base
+  constraint, or under comparability.
+  Why it suffices. These are the two branches of the relation that answered for every instantiation by looking at
+  one.
+  Witnesses:
+    rel-conditional-either.ts          [A] and [B] with B extends A, one picking number where the other picks string
+    rel-indexed-access-write.ts        42 returned as T['a'] for a T whose a is a string
+  Controls:
+    generic-relations-ok.ts            conditional types with the same check type; a T[K] whose object isn't generic

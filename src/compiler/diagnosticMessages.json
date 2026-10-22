@@ -4134,6 +4134,10 @@
         "category": "Error",
         "code": 2923
     },
+    "'{0}' is a method of the engine's '{1}' and reads its object as this, so it is read only to be called where it stands.": {
+        "category": "Error",
+        "code": 2924
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

@@ -2,7 +2,7 @@
 // then the yield receives undefined.
 function* asker(): Generator<number, string, string> {
   const answer = yield 1;
-  return answer.toUpperCase();
+  return answer.toUpperCase(); // rejected here: TS18048
 }
 const it = asker();
 it.next();

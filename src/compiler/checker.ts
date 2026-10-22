@@ -19357,6 +19357,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 if (accessNode && accessFlags & AccessFlags.ExpressionPosition && isInheritedDictionaryRead(objectType, getStringLiteralType(unescapeLeadingUnderscores(propName)))) {
                     return unknownType;
                 }
+                if (accessNode && accessFlags & AccessFlags.ExpressionPosition && !(accessFlags & AccessFlags.Writing)) {
+                    checkReceiverMethodRead(prop, objectType, accessNode, getIndexNodeForAccessExpression(accessNode));
+                }
                 if (accessFlags & AccessFlags.ReportDeprecated && accessNode && prop.declarations && isDeprecatedSymbol(prop) && isUncalledFunctionReference(accessNode, prop)) {
                     const deprecatedNode = accessExpression?.argumentExpression ?? (isIndexedAccessTypeNode(accessNode) ? accessNode.indexType : accessNode);
                     addDeprecatedSuggestion(deprecatedNode, prop.declarations, propName as string);
@@ -20397,6 +20400,59 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         }
         return !(getCheckFlags(prop) & CheckFlags.Mapped) &&
             some(prop.declarations, d => inDefaultLibrary(d) && !!d.parent && (isInterfaceDeclaration(d.parent) || isClassLike(d.parent)));
+    }
+
+    // L: the library's interfaces that a global value has as its type: a namespace object, as Math, or a constructor,
+    // as MapConstructor, whose methods are statics that don't read this. An instance's methods live on an interface no
+    // global value has, as Map or ReadonlySet, and read this.
+    var receiverFreeInterfaces: Set<Symbol> | undefined;
+    function getReceiverFreeInterfaces(): Set<Symbol> {
+        if (!receiverFreeInterfaces) {
+            const found = new Set<Symbol>();
+            for (const file of host.getSourceFiles()) {
+                if (!host.isSourceFileDefaultLibrary(file)) continue;
+                for (const statement of file.statements) {
+                    if (!isVariableStatement(statement)) continue;
+                    for (const declaration of statement.declarationList.declarations) {
+                        const type = declaration.type;
+                        const symbol = type && isTypeReferenceNode(type) ? resolveEntityName(type.typeName, SymbolFlags.Type, /*ignoreErrors*/ true) : undefined;
+                        if (symbol) found.add(symbol);
+                    }
+                }
+            }
+            receiverFreeInterfaces = found;
+        }
+        return receiverFreeInterfaces;
+    }
+
+    // L: a method of an engine object's instance, which reads this: one the library declares on an interface that no
+    // global value has as its type, or on a class without static. A mapped or spread property takes its origin's.
+    function isReceiverMethod(prop: Symbol): boolean {
+        const origin = prop.flags & SymbolFlags.Transient ? (prop as TransientSymbol).links.syntheticOrigin : undefined;
+        if (origin) {
+            return isReceiverMethod(origin);
+        }
+        return some(prop.declarations, d =>
+            inDefaultLibrary(d) && (
+                isMethodSignature(d) && isInterfaceDeclaration(d.parent) && !getReceiverFreeInterfaces().has(getSymbolOfDeclaration(d.parent)) ||
+                isMethodDeclaration(d) && isClassLike(d.parent) && !hasStaticModifier(d)
+            ));
+    }
+
+    // L: an expression that a call, a new or a tagged template invokes where it stands, so a method read there gets its
+    // object as this.
+    function isInvokedWhereItStands(node: Node): boolean {
+        while (isParenthesizedExpression(node.parent)) node = node.parent;
+        const parent = node.parent;
+        return (isCallExpression(parent) || isNewExpression(parent)) && parent.expression === node || isTaggedTemplateExpression(parent) && parent.tag === node;
+    }
+
+    // L: reading an engine instance's method other than to call it takes it off its object, and a call of it alone
+    // passes no this, which the engine refuses.
+    function checkReceiverMethodRead(prop: Symbol, objectType: Type, readNode: Node, errorNode: Node) {
+        if (isReceiverMethod(prop) && !isInvokedWhereItStands(readNode)) {
+            error(errorNode, Diagnostics._0_is_a_method_of_the_engine_s_1_and_reads_its_object_as_this_so_it_is_read_only_to_be_called_where_it_stands, symbolName(prop), typeToString(objectType));
+        }
     }
 
     function isSpreadableProperty(prop: Symbol): boolean {
@@ -23974,7 +24030,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     const indexType = (target as IndexedAccessType).indexType;
                     const baseObjectType = getBaseConstraintOfType(objectType) || objectType;
                     const baseIndexType = getBaseConstraintOfType(indexType) || indexType;
-                    if (!isGenericObjectType(baseObjectType) && !isGenericIndexType(baseIndexType)) {
+                    // L: not through a generic object's constraint: T extends { a: string | number } may narrow a to string, so
+                    // the constraint's T['a'] for writing says nothing of every T's. Only a generic key has a sound one.
+                    if (!isGenericObjectType(baseObjectType) && !isGenericIndexType(baseIndexType) && (baseObjectType === objectType || relation === comparableRelation)) {
                         const accessFlags = AccessFlags.Writing | (baseObjectType !== objectType ? AccessFlags.NoIndexSignatures : 0);
                         const constraint = getIndexedAccessTypeOrUndefined(baseObjectType, baseIndexType, accessFlags);
                         if (constraint) {
@@ -24199,9 +24257,11 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     }
                     // L: check types are type operands, not values, so they relate as types.
                     const checkTypesRelated = (s: Type, t: Type) => relation === valueAssignableRelation ? isTypeRelatedTo(s, t, assignableRelation) : !!isRelatedTo(s, t, RecursionFlags.Both);
+                    // L: and both ways. Related one way only, [A] and [B] with B extends A may pick different branches, since B can
+                    // satisfy the extends type where A doesn't; related both ways, they pick the same branch everywhere.
                     if (
                         isTypeIdenticalTo(sourceExtends, (target as ConditionalType).extendsType) &&
-                        (checkTypesRelated((source as ConditionalType).checkType, (target as ConditionalType).checkType) || checkTypesRelated((target as ConditionalType).checkType, (source as ConditionalType).checkType))
+                        checkTypesRelated((source as ConditionalType).checkType, (target as ConditionalType).checkType) && checkTypesRelated((target as ConditionalType).checkType, (source as ConditionalType).checkType)
                     ) {
                         if (result = isRelatedTo(instantiateType(getTrueTypeFromConditionalType(source as ConditionalType), mapper), getTrueTypeFromConditionalType(target as ConditionalType), RecursionFlags.Both, reportErrors)) {
                             result &= isRelatedTo(getFalseTypeFromConditionalType(source as ConditionalType), getFalseTypeFromConditionalType(target as ConditionalType), RecursionFlags.Both, reportErrors);
@@ -26889,6 +26949,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
      */
     function isValidNumberString(s: string, roundTripOnly: boolean): boolean {
         if (s === "") return false;
+        // L: a number converts to "NaN", "Infinity" or "-Infinity" as well, so `${number}` holds those strings.
+        if (s === "NaN" || s === "Infinity" || s === "-Infinity") return true;
         const n = +s;
         return isFinite(n) && (!roundTripOnly || "" + n === s);
     }
@@ -35171,6 +35233,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         }
         markLinkedReferences(node, ReferenceHint.Property, prop, leftType);
         const inheritedDictionaryRead = !!prop && isPropertyAccessExpression(node) && isInheritedDictionaryRead(leftType, getStringLiteralType(unescapeLeadingUnderscores(prop.escapedName)));
+        if (prop && isPropertyAccessExpression(node)) {
+            checkReceiverMethodRead(prop, leftType, node, right);
+        }
 
         let propType: Type;
         if (!prop) {
@@ -38597,9 +38662,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             const symbol = getSymbolOfDeclaration(container.parent);
             return getTypeOfSymbol(symbol);
         }
+        // L: a function, unlike a constructor, may be called without new, and then new.target is undefined.
         else {
             const symbol = getSymbolOfDeclaration(container);
-            return getTypeOfSymbol(symbol);
+            return getUnionType([getTypeOfSymbol(symbol), undefinedType]);
         }
     }
 
@@ -41525,9 +41591,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             return getIterationTypeOfIterable(use, IterationTypeKind.Return, yieldExpressionType, node.expression)
                 || anyType;
         }
+        // L: next() may be called with no argument, as for-of always calls it, and then the yield receives undefined.
         else if (returnType) {
-            return getIterationTypeOfGeneratorFunctionReturnType(IterationTypeKind.Next, returnType, isAsync)
-                || anyType;
+            const nextType = getIterationTypeOfGeneratorFunctionReturnType(IterationTypeKind.Next, returnType, isAsync);
+            return nextType ? getUnionType([nextType, undefinedType]) : anyType;
         }
         let type = getContextualIterationType(IterationTypeKind.Next, func);
         if (!type) {
@@ -41541,7 +41608,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 }
             });
         }
-        return type;
+        return getUnionType([type, undefinedType]);
 
         function checkYieldExpressionGrammar() {
             if (!(node.flags & NodeFlags.YieldContext)) {

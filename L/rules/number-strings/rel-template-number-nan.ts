@@ -7,5 +7,5 @@ type Reading = Measured | Failed;
 const reading = (n: number): Reading => ({ unit: `${n}`, size: n });
 const r = reading(0 / 0);
 // Runtime: TypeError: r.explain is not a function
-const said: string = r.unit === 'NaN' ? r.explain() : 'measured';
+const said: string = r.unit === 'NaN' ? r.explain() : 'measured'; // rejected here: TS2339
 console.log(said);
