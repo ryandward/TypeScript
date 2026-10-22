@@ -2,7 +2,7 @@
 // of the record copies nothing there.
 type Message = { readonly message: string };
 const held: Message = new Error('boom'); // rejected here: TS2923
-const copy: Message = { ...held };
+const copy: Message = { ...held }; // rejected here: TS2926
 const m: string = copy.message;
 if (typeof m !== 'string') throw new TypeError(`message is ${typeof m}`);
 console.log(m);

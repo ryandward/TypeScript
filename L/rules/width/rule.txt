@@ -93,3 +93,10 @@ Obligation 4, structure: TS2900
   Why it suffices. As for obligation 3.
   Witnesses:
     rel-implicit-index.ts              a record hiding count: 3, its values upper-cased
+
+Obligation 5, an object spread or rest: TS2926
+  Statement. No program copies an object by a spread (see records).
+  Mechanism. checkObjectLiteral reports TS2926 on a spread assignment.
+  Why it suffices. records' argument: a spread copies every property its value holds, named or not.
+  Witnesses:
+    rel-width-spread-copy.ts           a spread copy of a record hiding return: 5, taken for an Iterator

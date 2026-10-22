@@ -4142,6 +4142,10 @@
         "category": "Error",
         "code": 2925
     },
+    "L has no object spread or rest. A copy takes every property a value holds, which its type may not name, so a record names each property it takes.": {
+        "category": "Error",
+        "code": 2926
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

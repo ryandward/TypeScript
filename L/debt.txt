@@ -124,10 +124,17 @@ open-record
 records
 - A property is the engine's when the library declares it on an interface or a class, which is the library's
   convention rather than the engine's fact. A plain object the engine builds that the library still declares as an
-  interface, as a RegExpMatchArray's index and groups, is refused as a record's data and dropped from a spread,
-  which is sound but loses data.
+  interface, as a RegExpMatchArray's index and groups, is refused as a record's data, which is sound but loses
+  data.
 - A value the shell hands the core can be any object, typed as a record: the boundary must parse it into a literal
   (see all rules).
+- TS2926 rejects every object spread and rest, sound ones too: a spread followed by every property its type names,
+  or a merge of a record with a Partial of its own type. On TypeScript's own test cases it adds 905 diagnostics in
+  245 files, all of them TS2926, and changes no other.
+- TS2923 still refuses an own member that isn't enumerable, as an array's length, an error's message or a
+  function's name, though since TS2926 no reader the lab knows of misses one. Only a member on a prototype, as a
+  Map's size, still has a witness, through getOwnPropertyDescriptors; the rest is refused as the stricter claim,
+  not because a known crash needs it.
 
 receivers
 - A static that reads this, as Promise.resolve or Promise.all, is declared on PromiseConstructor, the type of the

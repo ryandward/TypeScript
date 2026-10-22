@@ -1,18 +1,57 @@
 records
 kind: soundness
 
-Claim. If the lab accepts a program, every property a record type names, one declared outside the library, is own
-enumerable data in each of its values, so a spread or a rest copies it; and a spread's type names no property the
-copy lacks.
+Claim. If the lab accepts a program, it copies no object's properties by a spread or a rest, and every property a
+record type names, one declared outside the library, is own enumerable data in each of its values. So no copy is
+typed by what its source's type names, and whatever reads a record's own properties finds each one its type names.
 
-Counterexample in plain TypeScript. A spread runs CopyDataProperties, which copies a value's own enumerable
-properties and nothing else, but getSpreadType keeps every property the source's type declares. An array's
-length is own and not enumerable, and its methods live on Array.prototype; a Map's size is a getter on
-Map.prototype; an error's message is own and not enumerable. So a copy of an array is typed with a length, a
-copy of a Map with a size, and an engine object held as a record whose type names those properties is copied
-into nothing there. Each witness's oracle finds undefined where its type says a number or a string, and throws.
+Counterexample in plain TypeScript. A spread runs CopyDataProperties, which copies every own enumerable property a
+value holds and nothing else, and an object rest does the same; getSpreadType and the rest type build the copy's
+type from the properties the source's type names. A type names only some of its value's properties, so a property
+written before a spread is overwritten by one the spread's type never mentions: { ...point, ...label } is typed
+with point's x, a number, and holds the x label hides, a string. A spread of a generic type is typed as the
+intersection of its parts, so a merge of two records that both hold x claims x is both, and a copy of a type
+parameter is typed as the parameter, so a copy of an array passes as an array. And the copy lacks whatever the
+source's type names that isn't own enumerable data: an array's length is own and not enumerable, an array's methods
+and a Map's size live on prototypes, an error's message is own and not enumerable. So a copy of an array is typed
+with a length, a copy of a Map with a size, and an engine object held as a record whose type names those properties
+is copied into nothing there. Object.getOwnPropertyDescriptors reads a value's own properties too, and types a
+descriptor for each property the type names, so a Map held as a record with a size has no descriptor there. Each
+witness's oracle finds a value of another type, or undefined, where its type says otherwise, and throws.
 
-Obligation 1, an engine object's member in a record's place: TS2923
+Obligation 1, an object spread or rest: TS2926
+  Statement. No object literal or JSX element holds a spread, and no object binding or assignment pattern takes a
+  rest. A record is copied by naming each property the copy takes. An array's spread and rest, a
+  tuple's, and a call's spread iterate their value instead of copying its properties, and stay.
+  Mechanism. checkObjectLiteral reports TS2926 on a spread assignment,
+  createJsxAttributesTypeFromAttributesProperty on a spread attribute, checkVariableLikeDeclaration on a binding
+  element with ... in an object binding pattern, and checkObjectLiteralDestructuringPropertyAssignment on a spread
+  assignment in an object assignment pattern. getSpreadType and the rest type still build a type for the copy, so
+  what a rejected program does with it is checked, but no program the lab accepts has one.
+  Why it suffices. CopyDataProperties runs for those four forms and for Object.assign, which writes deletes (see
+  writes). Every spread or rest the syntax has is one of the four or iterates.
+  Witnesses:
+    chk-spread-overwrite.ts            a record hiding x: a string, spread after a record whose x is a number
+    chk-spread-over-property.ts        the same record spread after x: 1 written in the literal
+    chk-spread-index-signature.ts      a record of strings, which may hold x, spread after x: 1
+    chk-spread-object.ts               a value of type object, which may hold anything, spread after x: 1
+    chk-spread-generic-overlap.ts      a generic merge of two records that both hold x, typed as their intersection
+    chk-spread-generic-array.ts        an array copied by a generic spread, typed as an array
+    chk-rest-generic-array.ts          an array copied by a generic rest
+    chk-rest-parameter.ts              the same rest, taken in a parameter's pattern
+    rel-record-holds-map.ts            a Map held as a record with a size, then spread
+    rel-record-holds-array.ts          an array held as a record with a length, then spread
+    rel-record-holds-error.ts          an Error held as a record with a message, then spread
+    rel-spread-array-length.ts         an array's spread, its length read
+    rel-spread-map-size.ts             a Map's spread, its size read
+  Rejected sound code, because a spread copies whatever its value holds:
+    record-update.ts                   a record's spread followed by every property it names
+  Controls:
+    array-spreads.ts                   an array's and a tuple's rest, an array's and a call's spread, and an object
+                                       pattern without a rest
+    record-data.ts                     a record copied by naming each property
+
+Obligation 2, an engine object's member in a record's place: TS2923
   Statement. A property of an engine object, one the library declares on an interface or a class, or a tuple's
   length, doesn't stand in for a property of a record type: a type literal, or any type declared outside the
   library. A record built from literals, and a plain object the engine builds, which the library declares as a
@@ -22,24 +61,30 @@ Obligation 1, an engine object's member in a record's place: TS2923
   the target's, in every relation but comparability. isEngineDeclaredProperty follows a mapped or spread
   property's syntheticOrigin back, so Readonly of a record is data and Readonly of a Map isn't.
   Why it suffices. Every assignability judgment between object types compares named properties in
-  propertiesRelatedTo, so an engine object reaches a record type only through one of them.
+  propertiesRelatedTo, so an engine object reaches a record type only through one of them. With obligation 1 in
+  place, a member on a prototype, as a Map's size, still has a reader that misses it: getOwnPropertyDescriptors. An
+  own member that isn't enumerable, as an array's length, has none the lab knows of: Object.keys, for-in and
+  getOwnPropertyNames read only names, getOwnPropertyDescriptors reads non-enumerable properties too,
+  JSON.stringify returns a string, and Object.values and Object.entries take a record only through an index
+  signature that an engine object held as one doesn't get (see width).
   Witnesses:
+    rel-record-descriptors.ts          a Map held as a record with a size, its descriptors read
     rel-record-holds-map.ts            a Map held as a record with a size, then spread
     rel-record-holds-array.ts          an array held as a record with a length, then spread
     rel-record-holds-error.ts          an Error held as a record with a message, then spread
   Rejected sound code, because an array isn't a record:
-    array-as-record.ts                 an array passed where { readonly length: number } is taken, never spread
+    array-as-record.ts                 an array passed where { readonly length: number } is taken, never copied
   Controls:
-    record-spreads.ts                  literal records, Readonly, array entries, tuple elements, an iterator result
+    record-data.ts                     literal records, Readonly, an iterator result, an array as an ArrayLike
 
-Obligation 2, an engine object's member through a spread: TS2339 (TypeScript's code)
+Obligation 3, an engine object's member through a spread: TS2339 (TypeScript's code)
   Statement. A spread's or a rest's type drops the source's engine members, and keeps its data: a record's
   properties, an array's index signature, a tuple's elements.
   Mechanism. getSpreadType, getAnonymousPartialType and the rest type skip a property isEnginePropertyOf holds of,
   so a read of it on the copy finds no property, which TypeScript reports.
-  Why it suffices. Those are the three places a spread or rest type is built from a source's properties.
+  Why it suffices. Those are the three places a spread or rest type is built from a source's properties. Since
+  obligation 1, each of them types only a copy in a program the lab already rejects, and this keeps what that
+  program reads off the copy true.
   Witnesses:
     rel-spread-array-length.ts         an array's spread, its length read
     rel-spread-map-size.ts             a Map's spread, its size read
-  Controls:
-    record-spreads.ts                  an array's spread keeps its entries, a tuple's its elements

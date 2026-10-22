@@ -126,6 +126,7 @@ the TS2898 message, A_value_of_type_any_was_never_checked. Every L change carrie
 Obligation 4, an engine object's member in a record's place: TS2923
   Statement. A function's name is no record's own enumerable data (see records).
   Mechanism. propertiesRelatedTo reports TS2923.
-  Why it suffices. records' argument: a spread of the record would copy no name from a function.
+  Why it suffices. records' argument: a function's name is own and not enumerable, and a record's properties are
+  data.
   Witnesses:
     flow-typeof-function.ts            a function held as a record with a name

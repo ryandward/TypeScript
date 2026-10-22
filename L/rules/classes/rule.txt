@@ -127,3 +127,11 @@ Obligation 7, a prototype from the library: TS2339 (TypeScript's code)
   Why it suffices. prototypes' argument: a class's prototype holds none of the fields its instances get.
   Witnesses:
     chk-prototype-field.ts             an instance field read off the class's prototype
+
+Obligation 8, an object spread or rest: TS2926
+  Statement. No program copies an object by a spread (see records).
+  Mechanism. checkObjectLiteral reports TS2926 on a spread assignment.
+  Why it suffices. records' argument: a spread copies only own enumerable properties, and a method lives on the
+  prototype.
+  Witnesses:
+    chk-spread-interface-methods.ts    a spread drops the prototype's method its type keeps

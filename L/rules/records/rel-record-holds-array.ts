@@ -2,7 +2,7 @@
 // record copies nothing there.
 type Counted = { readonly length: number };
 const held: Counted = [1, 2]; // rejected here: TS2923
-const copy: Counted = { ...held };
+const copy: Counted = { ...held }; // rejected here: TS2926
 const n: number = copy.length;
 if (typeof n !== 'number') throw new TypeError(`length is ${typeof n}`);
 console.log(n);

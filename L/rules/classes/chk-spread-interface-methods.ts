@@ -9,5 +9,5 @@ class English { // rejected here: TS2902
   }
 }
 const g: Greeter = new English();
-const copy = { ...g };
+const copy = { ...g }; // rejected here: TS2926
 console.log(copy.greet());

@@ -2,7 +2,7 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds twenty-nine diagnostics, changes the checker and two functions in utilities.ts that decide
+things: it adds thirty diagnostics, changes the checker and two functions in utilities.ts that decide
 which files are checked, adds one internal type flag, declares readonly the new objects and collections the
 library hands out, deletes from the ES library every effect and every method that changes an object in place,
 and corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
@@ -17,7 +17,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Twenty-nine new errors, from TS2892 to TS2925, each the code of one rule's mechanism in
+Thirty new errors, from TS2892 to TS2926, each the code of one rule's mechanism in
 L/rules/<rule>/rule.txt. The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891
 and TS2894 to the write rules, TS2897 to definite-assignment, TS2918 and TS2921 to reads that open-record now
 types as unknown and width leaves to TypeScript, and TS2922 to conversions, which was withdrawn.
@@ -92,6 +92,9 @@ types as unknown and width leaves to TypeScript, and TS2922 to conversions, whic
           where it stands.
   TS2925  generic-relations
           Type '{0}' and type '{1}' nest deeper than the comparison follows, so L doesn't assume they relate.
+  TS2926  records
+          L has no object spread or rest. A copy takes every property a value holds, which its type may not name,
+          so a record names each property it takes.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -288,12 +291,17 @@ arity (soundness: TS2919; 02d3dfcd3)
   guard for subtype reduction stays.
 - checkYieldExpression adds undefined to a yield's value, since next() may be called with no argument (7905011b8).
 
-records (soundness: TS2923 and TypeScript's TS2339; 078128b8e)
+records (soundness: TS2926, TS2923 and TypeScript's TS2339; 078128b8e)
 - isEnginePropertyOf and isEngineDeclaredProperty are new: a property the library declares on an interface or a
   class, followed back through a mapped or spread property's syntheticOrigin, or a tuple's length.
 - propertiesRelatedTo reports TS2923 when an engine property stands in for one a type outside the library declares.
 - getSpreadType, getAnonymousPartialType and the rest type skip engine properties, as CopyDataProperties copies
   only own enumerable ones.
+- checkObjectLiteral reports TS2926 on a spread assignment, createJsxAttributesTypeFromAttributesProperty on a
+  spread attribute, checkVariableLikeDeclaration on an object binding pattern's rest, and
+  checkObjectLiteralDestructuringPropertyAssignment on an object assignment pattern's rest. getSpreadType still
+  keeps a property the right part's type doesn't name, as if its value held nothing there, and types a generic
+  spread as the intersection of its parts; it now types only copies in programs the lab rejects.
 
 number-strings (soundness: TypeScript's TS2339; 7905011b8)
 - isValidNumberString accepts "NaN", "Infinity" and "-Infinity", which a number converts to, as `${number}`.
@@ -315,7 +323,8 @@ generic-relations (soundness: TS2925 and TypeScript's TS2322; 7905011b8, d2279c3
   with the same type arguments whose families relate, G<T> to H<T> over the type parameters themselves. Each
   relation keeps the families' answers in familyRelations; a family being related further out is assumed as
   Unknown, and an answer that rests on an assumption isn't kept (familiesInProgress, outermostFamilyAssumed).
-- recursiveTypeRelatedTo passes isDeeplyNestedType relationDepthFuel, eight, where TypeScript let it default to three.
+- recursiveTypeRelatedTo passes isDeeplyNestedType relationDepthFuel, eight, where TypeScript let it default to
+  three.
 - getVariancesWorker measures the greatest fixed point: every type parameter starts assumed independent, or as its
   modifiers declare (getDeclaredVariance), and each pass measures every parameter (measureVariance) under the
   assumptions in varianceAssumptions, then weakens each to its meet with what was measured (meetVariances), until a
@@ -367,10 +376,10 @@ which L doesn't write.
 - webworker.generated.d.ts: the same for the eight of those it declares: CSSNumericArray, CSSTransformValue,
   CSSUnparsedValue, FormData, Headers, StylePropertyMapReadOnly, URLSearchParams and FileSystemDirectoryHandle.
 
-Promise's T is declared out (d2279c30a), and so are IteratorObject's T and ReadonlyMap's V (db9cbb44f), so their variances
-come from the declarations, which checkVarianceAnnotations holds against their members. An iterator took a T in
-only through the predicate overloads of filter and find, whose S was bounded by T, and the overload of reduce whose
-initial value was a T; each now names the iterator's element type as a U of its own, fixed through this. The
+Promise's T is declared out (d2279c30a), and so are IteratorObject's T and ReadonlyMap's V (db9cbb44f), so their
+variances come from the declarations, which checkVarianceAnnotations holds against their members. An iterator took a
+T in only through the predicate overloads of filter and find, whose S was bounded by T, and the overload of reduce
+whose initial value was a T; each now names the iterator's element type as a U of its own, fixed through this. The
 measurement had made every iterator, generator and Map invariant in what it hands out because of them.
 
 - es5.d.ts, es2015.iterable.d.ts, es2015.symbol.wellknown.d.ts and es2018.promise.d.ts: interface Promise<out T>.

@@ -34110,6 +34110,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 }
             }
             else if (memberDecl.kind === SyntaxKind.SpreadAssignment) {
+                // L: a spread copies every own enumerable property its value holds, which its type may not name, so the core has none.
+                error(memberDecl, Diagnostics.L_has_no_object_spread_or_rest_A_copy_takes_every_property_a_value_holds_which_its_type_may_not_name_so_a_record_names_each_property_it_takes);
                 if (languageVersion < LanguageFeatureMinimumTarget.ObjectAssign) {
                     checkExternalEmitHelpers(memberDecl, ExternalEmitHelpers.Assign);
                 }
@@ -34349,6 +34351,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 }
                 else {
                     Debug.assert(attributeDecl.kind === SyntaxKind.JsxSpreadAttribute);
+                    // L: a spread attribute copies its value's properties into the props as a spread does (see checkObjectLiteral).
+                    error(attributeDecl, Diagnostics.L_has_no_object_spread_or_rest_A_copy_takes_every_property_a_value_holds_which_its_type_may_not_name_so_a_record_names_each_property_it_takes);
                     if (attributesTable.size > 0) {
                         spread = getSpreadType(spread, createJsxAttributesTypeHelper(), attributes.symbol, objectFlags, /*readonly*/ false);
                         attributesTable = createSymbolTable();
@@ -40803,6 +40807,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             return checkDestructuringAssignment(property.kind === SyntaxKind.ShorthandPropertyAssignment ? property : property.initializer, type);
         }
         else if (property.kind === SyntaxKind.SpreadAssignment) {
+            // L: an object rest copies the value's own enumerable properties as a spread does (see checkObjectLiteral).
+            error(property, Diagnostics.L_has_no_object_spread_or_rest_A_copy_takes_every_property_a_value_holds_which_its_type_may_not_name_so_a_record_names_each_property_it_takes);
             if (propertyIndex < properties.length - 1) {
                 error(property, Diagnostics.A_rest_element_must_be_last_in_a_destructuring_pattern);
             }
@@ -45646,6 +45652,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 return;
             }
 
+            // L: an object rest copies the value's own enumerable properties as a spread does (see checkObjectLiteral).
+            if (isObjectBindingPattern(node.parent) && node.dotDotDotToken) {
+                error(node, Diagnostics.L_has_no_object_spread_or_rest_A_copy_takes_every_property_a_value_holds_which_its_type_may_not_name_so_a_record_names_each_property_it_takes);
+            }
             if (isObjectBindingPattern(node.parent) && node.dotDotDotToken && languageVersion < LanguageFeatureMinimumTarget.ObjectSpreadRest) {
                 checkExternalEmitHelpers(node, ExternalEmitHelpers.Rest);
             }
