@@ -91,12 +91,13 @@ parameters
 - Array, ReadonlyArray and tuples are covariant because getVariances hard-codes them (arrayVariances), not because
   a measurement found it: includes, indexOf and lastIndexOf take T, and a measurement would call T invariant. The
   covariance holds because those only compare and the core's arrays have no writers, but it is trust in the
-  library, not a measurement. A Map's key, a Set's element and an iterator's T are measured, and invariant.
+  library, not a measurement. A Map's key, a Set's element and an iterator's T are measured, and invariant. An
+  iterator's filter takes a predicate typed value is S for an S extends T, and relating two such generic
+  signatures needs each T's S to satisfy the other's constraint. A Map's value reaches its iterators through
+  entries() and values(), so it is invariant too: a ReadonlyMap<string, Map<string, number>> isn't a
+  ReadonlyMap<string, ReadonlyMap<string, number>>, though a Map<string, number> is a ReadonlyMap<string, number>.
 - Inference (inferFromSignature) still records method positions as bivariant. It chooses type arguments; the
   relation then checks them one way.
-- The library's forEach declares thisArg?: any, and the parameter relation reads that any as a promise to the
-  callback, so a ReadonlyMap<string, Map<string, number>> isn't a ReadonlyMap<string, ReadonlyMap<string, number>>
-  (TS2920), though a Map<string, number> is a ReadonlyMap<string, number>.
 
 initialization-order
 - The rule sees one file. A cycle of imports runs one module's code before another's has finished, so a binding
