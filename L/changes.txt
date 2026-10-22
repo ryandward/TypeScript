@@ -304,7 +304,7 @@ receivers (soundness: TS2924; 7905011b8)
   static, is reported unless a call, a new or a tagged template invokes it where it stands, from property access
   and from a value read by key in getPropertyTypeForIndexType.
 
-generic-relations (soundness: TS2925 and TypeScript's TS2322; 7905011b8, d2279c30a)
+generic-relations (soundness: TS2925 and TypeScript's TS2322; 7905011b8, d2279c30a, db9cbb44f)
 - Two conditional types with the same extends type relate only if their check types relate both ways.
 - The writing constraint of an indexed access target is taken only when its object type isn't generic, or under
   comparability.
@@ -367,7 +367,7 @@ which L doesn't write.
 - webworker.generated.d.ts: the same for the eight of those it declares: CSSNumericArray, CSSTransformValue,
   CSSUnparsedValue, FormData, Headers, StylePropertyMapReadOnly, URLSearchParams and FileSystemDirectoryHandle.
 
-Promise's T is declared out (d2279c30a), and so are IteratorObject's T and ReadonlyMap's V, so their variances
+Promise's T is declared out (d2279c30a), and so are IteratorObject's T and ReadonlyMap's V (db9cbb44f), so their variances
 come from the declarations, which checkVarianceAnnotations holds against their members. An iterator took a T in
 only through the predicate overloads of filter and find, whose S was bounded by T, and the overload of reduce whose
 initial value was a T; each now names the iterator's element type as a U of its own, fixed through this. The
