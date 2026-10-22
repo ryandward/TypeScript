@@ -376,8 +376,8 @@ interface String {
 }
 
 interface StringConstructor {
-    new (value?: any): String;
-    (value?: any): string;
+    new (value?: string | number | bigint | boolean | null | undefined): String; // L: converting an object calls a toString it may hold as anything
+    (value?: string | number | bigint | boolean | null | undefined | symbol): string;
     fromCharCode(...codes: number[]): string;
 }
 
@@ -428,8 +428,8 @@ interface Number {
 }
 
 interface NumberConstructor {
-    new (value?: any): Number;
-    (value?: any): number;
+    new (value?: string | number | bigint | boolean | null | undefined): Number; // L: converting an object calls a valueOf it may hold as anything
+    (value?: string | number | bigint | boolean | null | undefined): number;
 
     /** The largest number that can be represented in JavaScript. Equal to approximately 1.79E+308. */
     readonly MAX_VALUE: number;
@@ -902,7 +902,7 @@ interface ReadonlyArray<T> {
     /**
      * Returns a string representation of an array.
      */
-    toString(): string;
+    toString(this: ArrayLike<string | number | bigint | boolean | null | undefined>): string; // L: it converts each element, which calls an object's own toString
     /**
      * Combines two or more arrays.
      * @param items Additional items to add to the end of array1.
@@ -917,7 +917,7 @@ interface ReadonlyArray<T> {
      * Adds all the elements of an array separated by the specified separator string.
      * @param separator A string used to separate one element of an array from the next in the resulting String. If omitted, the array elements are separated with a comma.
      */
-    join(separator?: string): string;
+    join(this: ArrayLike<string | number | bigint | boolean | null | undefined>, separator?: string): string;
     /**
      * Returns a section of an array.
      * @param start The beginning of the specified portion of the array.
@@ -1022,7 +1022,7 @@ interface Array<T> {
     /**
      * Returns a string representation of an array.
      */
-    toString(): string;
+    toString(this: ArrayLike<string | number | bigint | boolean | null | undefined>): string;
     /**
      * Combines two or more arrays.
      * This method returns a new array without modifying any existing arrays.
@@ -1039,7 +1039,7 @@ interface Array<T> {
      * Adds all the elements of an array into a string, separated by the specified separator string.
      * @param separator A string used to separate one element of the array from the next in the resulting string. If omitted, the array elements are separated with a comma.
      */
-    join(separator?: string): string;
+    join(this: ArrayLike<string | number | bigint | boolean | null | undefined>, separator?: string): string;
     /**
      * Returns a copy of a section of an array.
      * For both start and end, a negative index can be used to indicate an offset from the end of the array.

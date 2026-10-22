@@ -107,6 +107,12 @@ open-record
 - An indexed access type, T[K] in a type, isn't a read and isn't checked, so a library function typed through one
   reads past the check, as Reflect.get did. No other is known, but the library hasn't been searched for one.
 
+conversions
+- An interface that extends ReadonlyArray, as TemplateStringsArray does, relates to a ReadonlyArray of a wider
+  element only structurally, where strict method parameters make concat's element type invariant; only a direct
+  reference gets TypeScript's covariance for arrays. The converting methods take this: ArrayLike to step around
+  it, but passing a TemplateStringsArray where a readonly (string | number)[] is taken fails.
+
 call-signature
 - A value typed Function can't be called now, even when it holds an ordinary function. Nobody has measured how
   much real code calls one; the core has to declare the signature of a function it is handed.

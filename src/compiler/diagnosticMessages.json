@@ -4138,6 +4138,10 @@
         "category": "Error",
         "code": 2921
     },
+    "'{0}' may be an object, and converting it to a primitive calls a Symbol.toPrimitive, valueOf or toString it may hold as anything.": {
+        "category": "Error",
+        "code": 2922
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

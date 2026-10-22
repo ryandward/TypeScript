@@ -2667,6 +2667,31 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         }
     }
 
+    // L: a type every value of which is a primitive, which converts without calling anything: a string, number, bigint,
+    // boolean, symbol, null or undefined, a literal or enum of one, or an intersection with one, as a branded string.
+    // void and unknown may hold an object, and TypeScript reports a symbol where it can't convert.
+    function isPrimitiveOnlyType(type: Type): boolean {
+        const constraint = getBaseConstraintOrType(type);
+        return constraint.flags & TypeFlags.Union ? every((constraint as UnionType).types, isPrimitiveOnlyType) :
+            constraint.flags & TypeFlags.Intersection ? some((constraint as IntersectionType).types, isPrimitiveOnlyType) :
+            !!(constraint.flags & (TypeFlags.StringLike | TypeFlags.NumberLike | TypeFlags.BigIntLike | TypeFlags.BooleanLike | TypeFlags.ESSymbolLike | TypeFlags.Null | TypeFlags.Undefined | TypeFlags.Never));
+    }
+
+    // L: a type that may hold a primitive other than null or undefined, against which == converts an object.
+    function mayHoldConvertingPrimitive(type: Type): boolean {
+        return someType(getBaseConstraintOrType(type), t =>
+            !!(t.flags & (TypeFlags.StringLike | TypeFlags.NumberLike | TypeFlags.BigIntLike | TypeFlags.BooleanLike | TypeFlags.ESSymbolLike | TypeFlags.Unknown | TypeFlags.Any)) ||
+            !!(t.flags & TypeFlags.Object) && !holdsNoPrimitive(t));
+    }
+
+    // L: an operand an implicit conversion would call into: converting an object calls its Symbol.toPrimitive, valueOf
+    // or toString, which a value of an object type may hold as anything, its own property shadowing the inherited one.
+    function checkConversionOperand(type: Type, node: Node) {
+        if (!isPrimitiveOnlyType(type)) {
+            error(node, Diagnostics._0_may_be_an_object_and_converting_it_to_a_primitive_calls_a_Symbol_toPrimitive_valueOf_or_toString_it_may_hold_as_anything, typeToString(type));
+        }
+    }
+
     // L: an object type other than the empty object type {}, whose facts say its values are objects.
     function holdsNoPrimitive(type: Type): boolean {
         return !!(type.flags & TypeFlags.Object) && !(getObjectFlags(type) & ObjectFlags.Anonymous && isEmptyObjectType(type as ObjectType));
@@ -40277,6 +40302,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     error(node.operand, Diagnostics.The_0_operator_cannot_be_applied_to_type_symbol, tokenToString(node.operator));
                 }
                 if (node.operator === SyntaxKind.PlusToken) {
+                    checkConversionOperand(operandType, node.operand);
                     if (maybeTypeOfKindConsideringBaseConstraint(operandType, TypeFlags.BigIntLike)) {
                         error(node.operand, Diagnostics.Operator_0_cannot_be_applied_to_type_1, tokenToString(node.operator), typeToString(getBaseTypeOfLiteralType(operandType)));
                     }
@@ -41091,6 +41117,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 if (leftType === silentNeverType || rightType === silentNeverType) {
                     return silentNeverType;
                 }
+                // L: + converts both operands to primitives before it adds or joins them.
+                checkConversionOperand(leftType, left);
+                checkConversionOperand(rightType, right);
 
                 if (!isTypeAssignableToKind(leftType, TypeFlags.StringLike) && !isTypeAssignableToKind(rightType, TypeFlags.StringLike)) {
                     leftType = checkNonNullType(leftType, left);
@@ -41143,6 +41172,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             case SyntaxKind.GreaterThanToken:
             case SyntaxKind.LessThanEqualsToken:
             case SyntaxKind.GreaterThanEqualsToken:
+                // L: a comparison converts both operands to primitives.
+                checkConversionOperand(leftType, left);
+                checkConversionOperand(rightType, right);
                 if (checkForDisallowedESSymbolOperand(operator)) {
                     leftType = getBaseTypeOfLiteralTypeForComparison(checkNonNullType(leftType, left));
                     rightType = getBaseTypeOfLiteralTypeForComparison(checkNonNullType(rightType, right));
@@ -41165,6 +41197,16 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 // control flow analysis it is possible for operands to temporarily have narrower types, and those narrower
                 // types may cause the operands to not be comparable. We don't want such errors reported (see #46475).
                 if (!(checkMode && checkMode & CheckMode.TypeOnly)) {
+                    // L: == converts an object to a primitive when the other operand is a primitive that isn't null or
+                    // undefined.
+                    if (operator === SyntaxKind.EqualsEqualsToken || operator === SyntaxKind.ExclamationEqualsToken) {
+                        if (mayHoldConvertingPrimitive(rightType)) {
+                            checkConversionOperand(leftType, left);
+                        }
+                        if (mayHoldConvertingPrimitive(leftType)) {
+                            checkConversionOperand(rightType, right);
+                        }
+                    }
                     if (
                         (isLiteralExpressionOfObject(left) || isLiteralExpressionOfObject(right)) &&
                         // only report for === and !== in JS, not == or !=
@@ -41550,6 +41592,10 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             const type = checkExpression(span.expression);
             if (maybeTypeOfKindConsideringBaseConstraint(type, TypeFlags.ESSymbolLike)) {
                 error(span.expression, Diagnostics.Implicit_conversion_of_a_symbol_to_a_string_will_fail_at_runtime_Consider_wrapping_this_expression_in_String);
+            }
+            // L: an untagged template converts each substitution to a string; a tag receives them unconverted.
+            if (node.parent.kind !== SyntaxKind.TaggedTemplateExpression) {
+                checkConversionOperand(type, span.expression);
             }
             texts.push(span.literal.text);
             types.push(isTypeAssignableTo(type, templateConstraintType) ? type : stringType);

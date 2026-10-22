@@ -2,4 +2,4 @@
 // is a function, and the checker accepts any object there.
 const odd = { toString: 5, valueOf: 5 } as const;
 // Runtime: TypeError: Cannot convert object to primitive value
-console.log(`${odd}`);
+console.log(`${odd}`); // rejected here: TS2922

@@ -2,7 +2,7 @@
 // R<(x: T) => string>, structuredTypeRelatedToWorker answers TernaryUnknown, and R is measured covariant.
 type R<T> = { readonly val: T; next(): R<(x: T) => string> };
 function tower<T>(v: T): R<T> {
-  return { val: v, next: () => tower((x: T) => String(x)) };
+  return { val: v, next: () => tower((x: T) => typeof x) };
 }
 const start: R<string> = {
   val: 'a',

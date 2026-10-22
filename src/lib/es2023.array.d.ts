@@ -36,7 +36,8 @@ interface Array<T> {
      * [11, 2, 22, 1].toSorted((a, b) => a - b) // [1, 2, 11, 22]
      * ```
      */
-    toSorted(compareFn?: (a: T, b: T) => number): T[];
+    toSorted(compareFn: (a: T, b: T) => number): T[];
+    toSorted(this: ArrayLike<string | number | bigint | boolean | null | undefined>): T[]; // L: without a comparer it converts each element to a string
 
     /**
      * Copies an array and removes elements and, if necessary, inserts new elements in their place. Returns the copied array.
@@ -114,7 +115,8 @@ interface ReadonlyArray<T> {
      * [11, 2, 22, 1].toSorted((a, b) => a - b) // [1, 2, 11, 22]
      * ```
      */
-    toSorted(compareFn?: (a: T, b: T) => number): T[];
+    toSorted(compareFn: (a: T, b: T) => number): T[];
+    toSorted(this: ArrayLike<string | number | bigint | boolean | null | undefined>): T[]; // L: without a comparer it converts each element to a string
 
     /**
      * Copies an array and removes elements while, if necessary, inserting new elements in their place, returning the remaining elements.

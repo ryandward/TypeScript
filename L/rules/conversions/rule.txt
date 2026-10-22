@@ -1,0 +1,62 @@
+conversions
+kind: soundness
+
+Claim. If the lab accepts a program, no implicit conversion to a primitive runs a method a value holds as something
+else: every value converted is a primitive, which converts without calling anything.
+
+Counterexample in plain TypeScript. Converting an object to a primitive calls its Symbol.toPrimitive, valueOf or
+toString, and a value of an open type may hold its own property at any of those names, of any type, shadowing the
+inherited one. A template literal, + with a string, unary +, == against a number, <, String(), Number(), String.raw,
+join, an array's toString and toSorted with no comparer each convert, and the checker or the library takes an
+object there. Each witness's value holds toString: 5 and valueOf: 6, and Node throws a TypeError.
+
+Obligation 1, an object converted by an operator: TS2922
+  Statement. An untagged template's substitution, an operand of + or unary +, an operand of < > <= >=, and an
+  operand of == or != whose other operand may be a primitive other than null or undefined, is accepted only if its
+  type is primitive-only: a string, number, bigint, boolean, symbol, null or undefined, a literal or enum of one, or
+  an intersection with one. unknown, void and {} may hold an object.
+  Mechanism. checkConversionOperand reports TS2922 for an operand isPrimitiveOnlyType refuses, from
+  checkTemplateExpression (not under a tag, which receives its substitutions unconverted),
+  checkPrefixUnaryExpression, and checkBinaryLikeExpressionWorker's +, comparison and equality cases;
+  mayHoldConvertingPrimitive decides when == converts.
+  Why it suffices. These are the operators that convert an operand to a primitive. An object index or computed key
+  is refused by TypeScript already, and so is - or ~ on an object.
+  Witnesses:
+    chk-convert-template.ts            a template substitution
+    chk-toprimitive-template.ts        the same with an object literal held as const
+    chk-convert-plus.ts                + with a string
+    chk-convert-unary-plus.ts          unary +
+    chk-convert-loose-equal.ts         == against a number
+    chk-convert-relational.ts          <
+  Rejected sound code, because the type is open:
+    record-held-open.ts                a record holding a literal with no toString of its own, in a template
+  Controls:
+    primitive-conversions.ts           primitives through each operator and function; a tag, == null, a comparer
+
+Obligation 2, an object converted by a library function: TS2345 (TypeScript's code)
+  Statement. String(), Number() and String.raw take primitives only.
+  Mechanism. src/lib/es5.d.ts declares String's and Number's call and construct signatures over primitives,
+  String's call with symbol too, which it converts without calling anything, and es2015.core declares String.raw's
+  substitutions over primitives.
+  Why it suffices. These are the library's functions that convert an argument of any type; the others declare a
+  primitive parameter already.
+  Witnesses:
+    lib-convert-string.ts              String()
+    lib-convert-number.ts              Number()
+    lib-convert-string-raw.ts          String.raw's substitution
+  Controls:
+    primitive-conversions.ts           String of a number
+
+Obligation 3, an array of objects converted by a library method: TS2684 (TypeScript's code)
+  Statement. join, an array's toString, and toSorted with no comparer apply only to an array of primitives.
+  Mechanism. es5 declares join and toString on Array and ReadonlyArray with this: ArrayLike of the primitives, and
+  es2023.array declares toSorted with no comparer the same way, after the overload that takes one. ArrayLike, not
+  readonly T[], because an interface that extends ReadonlyArray, as TemplateStringsArray does, relates to it only
+  structurally, where concat's parameter makes the element type invariant.
+  Why it suffices. These are the array methods that convert their elements; toLocaleString is deleted.
+  Witnesses:
+    lib-convert-join.ts                join
+    lib-convert-array-tostring.ts      an array's toString
+    lib-convert-tosorted.ts            toSorted with no comparer
+  Controls:
+    primitive-conversions.ts           join of numbers, toSorted of strings, toSorted of records with a comparer

@@ -3,7 +3,7 @@
 // R is therefore measured covariant although R<(x: T) => string> makes it invariant.
 interface R<T> { readonly val: T; next(): R<(x: T) => string> }
 function tower<T>(v: T): R<T> {
-  return { val: v, next: () => tower((x: T) => String(x)) };
+  return { val: v, next: () => tower((x: T) => typeof x) };
 }
 const start: R<string> = {
   val: 'a',

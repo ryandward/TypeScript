@@ -127,3 +127,10 @@ Obligation 10, an inherited member the type doesn't declare: TS2921
   Why it suffices. width's argument: the type names only some of its value's properties.
   Witnesses:
     lib-esnext-groupby-null-proto.ts   hasOwnProperty read from Object.groupBy's null-prototype result
+
+Obligation 11, an object converted by an operator: TS2922
+  Statement. An operator converts only a primitive (see conversions).
+  Mechanism. checkConversionOperand reports TS2922.
+  Why it suffices. conversions' argument: converting an object calls a method it may hold as anything.
+  Witnesses:
+    lib-esnext-groupby-template.ts     Object.groupBy's null-prototype result in a template

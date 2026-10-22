@@ -2,10 +2,10 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds twenty-eight diagnostics, changes the checker and two functions in utilities.ts that decide
-which files are checked, adds one internal type flag, declares readonly the new objects and collections the
-library hands out, deletes from the ES library every effect and every method that changes an object in place,
-and corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
+things: it adds twenty-nine diagnostics, changes the checker and two functions in utilities.ts that decide which
+files are checked, adds one internal type flag, declares readonly the new objects and collections the library
+hands out, deletes from the ES library every effect and every method that changes an object in place, and
+corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
 transformers, language service, command line and compiler options are unchanged, and no test baseline has been
 updated. L's rules have no compiler option: they are always on. Each change in code carries a comment that
 starts `// L:`, in checker.ts, types.ts and the lib, so `grep -rn '// L:' src` finds them. The entries() changes
@@ -17,7 +17,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Twenty-eight new errors, from TS2892 to TS2921, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+Twenty-nine new errors, from TS2892 to TS2922, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
 The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
 rules and TS2897 to definite-assignment.
 
@@ -89,6 +89,9 @@ rules and TS2897 to definite-assignment.
   TS2921  width
           '{0}' is inherited, but a value of type '{1}' may hold its own '{0}' of any type, since the type names
           only some of its properties.
+  TS2922  conversions
+          '{0}' may be an object, and converting it to a primitive calls a Symbol.toPrimitive, valueOf or toString
+          it may hold as anything.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -281,6 +284,11 @@ arity (soundness: TS2919; 02d3dfcd3)
 - The isTopSignature shortcut that related every function to a top signature is deleted; the StrictTopSignature
   guard for subtype reduction stays.
 
+conversions (soundness: TS2922 and TypeScript's TS2345 and TS2684; the commit after 7d745587a)
+- isPrimitiveOnlyType, mayHoldConvertingPrimitive and checkConversionOperand are new. TS2922 is reported for an
+  operand that may be an object in an untagged template's substitution, + and unary +, < > <= >=, and == or !=
+  against an operand that may be a primitive other than null or undefined.
+
 Rules with no checker change: effects and library-declarations are built in the library alone (below), and
 optional-field is a specification only.
 
@@ -359,6 +367,10 @@ stops compiling, which costs nothing L keeps.
 - ReturnType, Parameters, InstanceType and ConstructorParameters bound a function by (...args: never) => unknown
   (es5), which takes no argument list, so every function satisfies it under arity and the any parameter rule;
   ReturnType and InstanceType give unknown, not any, for a type that isn't one.
+- String's and Number's call and construct signatures take primitives (es5), String's call symbol too, and
+  String.raw's substitutions are primitives (es2015.core). join and toString on Array and ReadonlyArray, and
+  toSorted with no comparer (es2023.array, after the overload that takes one), take this: ArrayLike of the
+  primitives. Converting an object calls a method a value of an open type may hold as anything (conversions).
 - Reflect.get is deleted (es2015.reflect): it reads a key as an element access does but types the result as an
   indexed access type, which no read check sees (open-record).
 - Array.from takes a string as itself (es2015.iterable), returning its code points, since a string is no longer
