@@ -1,0 +1,24 @@
+tuples
+kind: soundness
+
+Claim. If the lab accepts a program, a tuple type places each element where every value of it holds that element.
+
+Counterexample in plain TypeScript. createNormalizedTupleType turns an optional element that comes before a
+required one into a required element, so a spread of [string, number?] followed by a Cell is typed
+[string, number, Cell], with the Cell third. A value whose optional element is absent holds the Cell second, and
+each witness reads the third place, by index, by an array pattern or by an object pattern, and finds nothing there.
+
+Obligation 1, an element an absent optional element moves: TS18048 (TypeScript's code)
+  Statement. A tuple whose optional element comes before a required one is the union of its layouts, each such
+  element present or absent; with more than four such elements it is an array of what its elements hold.
+  Mechanism. createNormalizedTupleType builds a tuple for each subset of those optional elements, each present one
+  required and each absent one left out, and returns their union, or the array past four. A read of a place one
+  layout lacks is then possibly undefined, which TypeScript reports.
+  Why it suffices. Every tuple type, written or made by a spread, is normalized there.
+  Witnesses:
+    rel-tuple-optional-spread-index.ts  the third place read by index
+    rel-tuple-optional-spread-destructure.ts  the same through an array pattern
+    rel-tuple-optional-spread-object-pattern.ts  the same through an object pattern keyed by the index
+    rel-tuple-optional-spread-nested.ts  the same inside a list of tuples widened to the optional one
+  Controls:
+    layout-narrowed.ts                 the place before the optional element, the same in every layout

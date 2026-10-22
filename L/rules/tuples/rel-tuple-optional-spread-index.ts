@@ -5,5 +5,6 @@ const loosen = <T extends readonly [string, number?]>(t: T): readonly [string, n
 const head = loosen(['x']);
 const cell: Cell = { n: 1 };
 const row = [...head, cell] as const;
+const last = row[2];
 // Runtime: TypeError: Cannot read properties of undefined (reading 'n')
-console.log(row[2].n);
+console.log(last.n); // rejected here: TS18048

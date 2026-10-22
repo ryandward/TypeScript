@@ -18108,9 +18108,29 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 addElement(type, flags, target.labeledElementDeclarations?.[i]);
             }
         }
-        // Turn optional elements preceding the last required element into required elements
-        for (let i = 0; i < lastRequiredIndex; i++) {
-            if (expandedFlags[i] & ElementFlags.Optional) expandedFlags[i] = ElementFlags.Required;
+        // L: an optional element before a required one may be absent, which moves every element after it, so turning it
+        // required would type a later place by the wrong element. The tuple is the union of its layouts instead, each
+        // such element present or absent; past four of them, an array of what its elements hold.
+        const shifting = filter(expandedFlags.map((_, i) => i), i => i < lastRequiredIndex && !!(expandedFlags[i] & ElementFlags.Optional));
+        if (shifting.length > 4) {
+            return createArrayType(getUnionType(expandedTypes), target.readonly);
+        }
+        if (shifting.length) {
+            const layouts: Type[] = [];
+            for (let present = 0; present < 1 << shifting.length; present++) {
+                const types: Type[] = [];
+                const flags: ElementFlags[] = [];
+                const declarations: (NamedTupleMember | ParameterDeclaration | undefined)[] = [];
+                for (let i = 0; i < expandedTypes.length; i++) {
+                    const k = shifting.indexOf(i);
+                    if (k >= 0 && !(present & (1 << k))) continue;
+                    types.push(expandedTypes[i]);
+                    flags.push(k >= 0 ? ElementFlags.Required : expandedFlags[i]);
+                    declarations.push(expandedDeclarations[i]);
+                }
+                layouts.push(createTupleType(types, flags, target.readonly, declarations));
+            }
+            return getUnionType(layouts);
         }
         if (firstRestIndex >= 0 && firstRestIndex < lastOptionalOrRestIndex) {
             // Turn elements between first rest and last optional/rest into a single rest element

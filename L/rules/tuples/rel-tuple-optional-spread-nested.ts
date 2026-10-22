@@ -4,6 +4,6 @@ type Head = readonly [string, number?];
 const shorts: readonly (readonly [string])[] = [['x']];
 const heads: readonly Head[] = shorts;
 const cell: Cell = { n: 1 };
-const rows: readonly (readonly [string, number | undefined, Cell])[] = heads.map((h) => [...h, cell] as const);
+const rows = heads.map((h) => [...h, cell] as const);
 // Runtime: TypeError: Cannot read properties of undefined (reading 'n')
-console.log(rows.map(([label, count, last]) => [label, last.n]));
+console.log(rows.map(([label, count, last]) => [label, last.n])); // rejected here: TS18048

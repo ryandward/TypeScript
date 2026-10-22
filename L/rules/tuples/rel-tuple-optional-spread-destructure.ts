@@ -1,9 +1,9 @@
-// witness: The same, with the place taken by an object pattern keyed by its index.
+// witness: The same, with the place taken by an array pattern.
 type Cell = { readonly n: number };
 const loosen = <T extends readonly [string, number?]>(t: T): readonly [string, number?] => t;
 const head = loosen(['x']);
 const cell: Cell = { n: 1 };
 const row = [...head, cell] as const;
-const { 2: last } = row;
+const [label, count, last] = row;
 // Runtime: TypeError: Cannot read properties of undefined (reading 'n')
-console.log(last.n);
+console.log(label, last.n); // rejected here: TS18048
