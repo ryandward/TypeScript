@@ -4,6 +4,5 @@ type Labels<K extends string> = { readonly [P in K]: string };
 function label<K extends string>(table: Labels<K>, key: K): string {
   return table[key].toUpperCase();
 }
-const known = { a: "alpha" };
 const asked: string = "zzz";
-console.log(label(known, asked));
+console.log(label({ a: "alpha" }, asked));

@@ -3,5 +3,5 @@
 type Labels = { readonly title: string };
 const wide = { title: 'a', count: 3 };
 const narrow: Labels = wide;
-const parts: readonly string[] = Object.values(narrow);
+const parts: readonly string[] = Object.values(narrow); // rejected here: TS2898
 console.log(parts.map((s) => s.toUpperCase()));

@@ -3,6 +3,5 @@
 function lookup<T extends string, K extends T>(table: Readonly<Record<T, string>>, key: K): string {
   return table[key].toUpperCase(); // TypeError: Cannot read properties of undefined (reading 'toUpperCase')
 }
-const labels = { a: 'alpha' };
 const wanted: string = 'c';
-console.log(lookup<string, string>(labels, wanted));
+console.log(lookup<string, string>({ a: 'alpha' }, wanted));

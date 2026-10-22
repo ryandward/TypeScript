@@ -1522,6 +1522,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     var varianceTypeParameter: TypeParameter | undefined;
     var isInferencePartiallyBlocked = false;
     var withinUnreachableCode = false;
+    // L: set while overload resolution relates arguments whose parameter types aren't fully inferred yet (#17041).
+    var excessPropertyChecksSilenced = false;
     var reportedUnreachableNodes: Set<Node> | undefined;
 
     var emptySymbols = createSymbolTable();
@@ -2622,6 +2624,16 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     // L: an object type other than the empty object type {}, whose facts say its values are objects.
     function holdsNoPrimitive(type: Type): boolean {
         return !!(type.flags & TypeFlags.Object) && !(getObjectFlags(type) & ObjectFlags.Anonymous && isEmptyObjectType(type as ObjectType));
+    }
+
+    // L: an object type that names every property its values have: a fresh object literal written without a spread, or
+    // a module's namespace object. Any other object type may hold a value with more properties than it names.
+    function isExactObjectType(type: Type): boolean {
+        const objectFlags = getObjectFlags(type);
+        return !!(type.flags & TypeFlags.Object) && (
+            !!(objectFlags & ObjectFlags.FreshLiteral) && !(objectFlags & ObjectFlags.ContainsSpread) ||
+            !!(type.symbol && type.symbol.flags & SymbolFlags.ValueModule)
+        );
     }
 
     // L: a statement that declares a value with no implementation: an ambient variable, function, class, enum or
@@ -22898,7 +22910,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             ) return Ternary.True;
 
             if (source.flags & TypeFlags.StructuredOrInstantiable || target.flags & TypeFlags.StructuredOrInstantiable) {
-                const isPerformingExcessPropertyChecks = !(intersectionState & IntersectionState.Target) && (isObjectLiteralType(source) && getObjectFlags(source) & ObjectFlags.FreshLiteral);
+                const isPerformingExcessPropertyChecks = !excessPropertyChecksSilenced && !(intersectionState & IntersectionState.Target) && (isObjectLiteralType(source) && getObjectFlags(source) & ObjectFlags.FreshLiteral);
                 if (isPerformingExcessPropertyChecks) {
                     if (hasExcessProperties(source as FreshObjectLiteralType, target, reportErrors)) {
                         if (reportErrors) {
@@ -23172,7 +23184,16 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 // L: a primitive is told why when an object type in the union is what refuses it.
                 const elaborate = !(source.flags & TypeFlags.Primitive) && !(target.flags & TypeFlags.Primitive) ||
                     isPrimitiveValuedType(source) && some((target as UnionType).types, holdsNoPrimitive);
-                return typeRelatedToSomeType(getRegularTypeOfObjectLiteral(source), target as UnionType, reportErrors && elaborate, intersectionState);
+                // L: the source keeps its freshness, which says it names every property it has. The excess property check,
+                // already made against the whole union, is silenced for the members, which is all the regular type did.
+                const saveSilenced = excessPropertyChecksSilenced;
+                excessPropertyChecksSilenced = true;
+                try {
+                    return typeRelatedToSomeType(source, target as UnionType, reportErrors && elaborate, intersectionState);
+                }
+                finally {
+                    excessPropertyChecksSilenced = saveSilenced;
+                }
             }
             if (target.flags & TypeFlags.Intersection) {
                 return typeRelatedToEachType(source, target as IntersectionType, reportErrors, IntersectionState.Target);
@@ -24097,8 +24118,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 }
             }
             else {
-                // An empty object type is related to any mapped type that includes a '?' modifier.
-                if (relation !== subtypeRelation && relation !== strictSubtypeRelation && isPartialMappedType(target) && isEmptyObjectType(source)) {
+                // An empty object type is related to any mapped type that includes a '?' modifier. L: only an empty object
+                // literal, since any other empty type may hold a value with the mapped type's properties, at any type.
+                if (relation !== subtypeRelation && relation !== strictSubtypeRelation && isPartialMappedType(target) && isEmptyObjectType(source) && isExactObjectType(source)) {
                     return Ternary.True;
                 }
                 if (isGenericMappedType(target)) {
@@ -24667,6 +24689,24 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                         }
                         result &= related;
                     }
+                    // L: an optional property the source doesn't name holds, in a value of the source, whatever its index
+                    // signature says, or anything at all: a type may name fewer properties than its values have. Only a
+                    // type that names every property of its values says the property is absent.
+                    else if (!sourceProp && targetProp.flags & SymbolFlags.Optional && relation !== comparableRelation) {
+                        const unnamedType = getApplicableIndexInfoForName(source, name)?.type ?? (isExactObjectType(source) ? undefined : unknownType);
+                        if (!unnamedType) {
+                            continue;
+                        }
+                        const targetPropType = getNonMissingTypeOfSymbol(targetProp);
+                        const related = isRelatedTo(unnamedType, targetPropType, RecursionFlags.Both, /*reportErrors*/ false, /*headMessage*/ undefined, intersectionState);
+                        if (!related) {
+                            if (reportErrors) {
+                                reportError(Diagnostics.Type_0_doesn_t_name_property_1_so_a_value_of_it_may_hold_2_there_but_type_3_takes_only_4, typeToString(source), symbolToString(targetProp), typeToString(unnamedType), typeToString(target), typeToString(targetPropType));
+                            }
+                            return Ternary.False;
+                        }
+                        result &= related;
+                    }
                 }
             }
             return result;
@@ -24941,8 +24981,13 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             // Intersection constituents are never considered to have an inferred index signature. Also, in the strict subtype relation,
             // only fresh object literals are considered to have inferred index signatures. This ensures { [x: string]: xxx } <: {} but
             // not vice-versa. Without this rule, those types would be mutual strict subtypes.
-            if (!(intersectionState & IntersectionState.Source) && (relation !== strictSubtypeRelation || getObjectFlags(source) & ObjectFlags.FreshLiteral) && isObjectTypeWithInferableIndex(source)) {
+            // L: and only a type that names every property of its values has one, since another may hold a value with
+            // properties its index signature would have to cover.
+            if (!(intersectionState & IntersectionState.Source) && isExactObjectType(source) && isObjectTypeWithInferableIndex(source)) {
                 return membersRelatedToIndexInfo(source, targetInfo, reportErrors, intersectionState);
+            }
+            if (reportErrors && !(intersectionState & IntersectionState.Source) && isObjectTypeWithInferableIndex(source)) {
+                reportError(Diagnostics.Type_0_may_hold_properties_it_doesn_t_name_so_L_infers_no_index_signature_for_it_Colon_only_an_object_literal_names_every_property_it_has, typeToString(source));
             }
             if (reportErrors) {
                 reportError(Diagnostics.Index_signature_for_type_0_is_missing_in_type_1, typeToString(targetInfo.keyType), typeToString(source));
@@ -36233,18 +36278,27 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (arg.kind !== SyntaxKind.OmittedExpression) {
                 const paramType = getTypeAtPosition(signature, i);
                 const argType = checkExpressionWithContextualType(arg, paramType, /*inferenceContext*/ undefined, checkMode);
-                // If one or more arguments are still excluded (as indicated by CheckMode.SkipContextSensitive),
-                // we obtain the regular type of any object literal arguments because we may not have inferred complete
-                // parameter types yet and therefore excess property checks may yield false positives (see #17041).
-                const checkArgType = checkMode & CheckMode.SkipContextSensitive ? getRegularTypeOfObjectLiteral(argType) : argType;
                 const effectiveCheckArgumentNode = getEffectiveCheckNode(arg);
                 // L: a void result may hold anything, and a parameter typed void takes only undefined.
-                if (relation === valueAssignableRelation && someType(paramType, t => !!(t.flags & TypeFlags.Void)) && someType(checkArgType, t => !!(t.flags & TypeFlags.Void))) {
+                if (relation === valueAssignableRelation && someType(paramType, t => !!(t.flags & TypeFlags.Void)) && someType(argType, t => !!(t.flags & TypeFlags.Void))) {
                     return reportErrors ? [createDiagnosticForNode(effectiveCheckArgumentNode, Diagnostics.A_void_result_may_hold_anything_and_a_parameter_typed_void_takes_only_undefined)] : emptyArray;
                 }
-                if (!checkTypeRelatedToAndOptionallyElaborate(checkArgType, paramType, relation, reportErrors ? effectiveCheckArgumentNode : undefined, effectiveCheckArgumentNode, headMessage, containingMessageChain, errorOutputContainer)) {
+                // If one or more arguments are still excluded (as indicated by CheckMode.SkipContextSensitive),
+                // we may not have inferred complete parameter types yet and therefore excess property checks may yield
+                // false positives (see #17041). L: so they are silenced, and the argument keeps its fresh type, which says
+                // it names every property it has: its regular type would be stricter than the fresh one checked later.
+                const saveSilenced = excessPropertyChecksSilenced;
+                excessPropertyChecksSilenced ||= !!(checkMode & CheckMode.SkipContextSensitive);
+                let related: boolean;
+                try {
+                    related = checkTypeRelatedToAndOptionallyElaborate(argType, paramType, relation, reportErrors ? effectiveCheckArgumentNode : undefined, effectiveCheckArgumentNode, headMessage, containingMessageChain, errorOutputContainer);
+                }
+                finally {
+                    excessPropertyChecksSilenced = saveSilenced;
+                }
+                if (!related) {
                     Debug.assert(!reportErrors || !!errorOutputContainer.errors, "parameter should have errors when reporting errors");
-                    maybeAddMissingAwaitInfo(arg, checkArgType, paramType);
+                    maybeAddMissingAwaitInfo(arg, argType, paramType);
                     return errorOutputContainer.errors || emptyArray;
                 }
             }

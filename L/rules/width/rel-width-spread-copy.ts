@@ -5,7 +5,7 @@ type NextOnly = { readonly next: () => IteratorResult<number> };
 const raw = { next: (): IteratorResult<number> => ({ done: false, value: 1 }), return: 5 };
 const narrow: NextOnly = raw;
 const copy = { ...narrow };
-const it: Iterator<number> = copy;
+const it: Iterator<number> = copy; // rejected here: TS2915
 const iterable: Iterable<number> = { [Symbol.iterator]: (): Iterator<number> => it };
 for (const n of iterable) { // TypeError: Result of the Symbol.iterator method's return is not a function (from break)
   console.log(n);

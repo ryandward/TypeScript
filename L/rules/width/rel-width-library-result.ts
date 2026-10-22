@@ -3,5 +3,5 @@
 // is an optional function.
 const raw = { done: false as const, value: 1, report: 5 };
 const result: IteratorYieldResult<number> = raw;
-const seen: { readonly value: number; readonly report?: () => string } = result;
+const seen: { readonly value: number; readonly report?: () => string } = result; // rejected here: TS2915
 console.log(seen.report?.()); // TypeError: seen.report is not a function

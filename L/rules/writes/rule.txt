@@ -110,3 +110,12 @@ Obligation 4, an accessor is not narrowed: TS2339 (TypeScript's code)
     flow-setter-assign.ts                  a setter assigned, then the property read as what was assigned
   Rejected sound code, because nothing in a getter's type says two reads agree:
     getter-returning-stored-state.ts       a getter that always returns the same value
+
+Obligation 5, an implicit index signature: TS2916
+  Statement. A type has an index signature it doesn't declare only if it names every property of its values (see
+  width).
+  Mechanism. typeRelatedToIndexInfo infers no index signature for an open type, so the widening is refused.
+  Why it suffices. width's argument: the widened name would claim every key of a value whose type names only some.
+  Witnesses:
+    rel-index-signature-delete.ts      a record widened to a writable index signature
+    rel-readonly-through-index-signature.ts  a readonly record widened to a writable index signature

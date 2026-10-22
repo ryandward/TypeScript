@@ -7,4 +7,4 @@ type Num = { readonly v: number };
 const read = (r: Plain | Tagged): string => (r.kind === undefined ? r.v.toFixed() : r.s.trim());
 const wide = { v: 1, kind: 'tagged' as const };
 const n: Num = wide;
-console.log(read(n)); // TypeError: Cannot read properties of undefined (reading 'trim')
+console.log(read(n)); // TypeError: Cannot read properties of undefined (reading 'trim') // rejected here: TS2915

@@ -2,10 +2,10 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds twenty-one diagnostics, changes the checker and two functions in utilities.ts that decide which
-files are checked, adds one internal type flag, declares readonly the new objects and collections the library
-hands out, deletes from the ES library every effect and every method that changes an object in place, and
-corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
+things: it adds twenty-three diagnostics, changes the checker and two functions in utilities.ts that decide
+which files are checked, adds one internal type flag, declares readonly the new objects and collections the
+library hands out, deletes from the ES library every effect and every method that changes an object in place,
+and corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
 transformers, language service, command line and compiler options are unchanged, and no test baseline has been
 updated. L's rules have no compiler option: they are always on. Each change in code carries a comment that
 starts `// L:`, in checker.ts, types.ts and the lib, so `grep -rn '// L:' src` finds them. The entries() changes
@@ -17,7 +17,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Twenty-one new errors, from TS2892 to TS2914, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+Twenty-three new errors, from TS2892 to TS2916, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
 The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
 rules and TS2897 to definite-assignment.
 
@@ -70,6 +70,12 @@ rules and TS2897 to definite-assignment.
   TS2914  prototypes
           L has no prototypes. A __proto__ key sets the object's prototype instead of making the property its type
           names.
+  TS2915  width
+          Type '{0}' doesn't name property '{1}', so a value of it may hold '{2}' there, but type '{3}' takes only
+          '{4}'.
+  TS2916  width
+          Type '{0}' may hold properties it doesn't name, so L infers no index signature for it: only an object
+          literal names every property it has.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -215,6 +221,19 @@ prototypes (soundness: TS2914 and TypeScript's TS2339 and TS2550; b85ec04e5)
   which sets the object's prototype and makes no property.
 - resolveAnonymousTypeMembers drops the prototype a class's static side gets from the binder, so Iterator, the
   library's one class, has none. The library's own prototype fields are deleted (below).
+
+width (soundness: TS2915 and TS2916; the commit after 21bde73e7)
+- isExactObjectType is new: a fresh object literal written without a spread, or a module's namespace object, the
+  types that name every property their values have.
+- propertiesRelatedTo relates a target's optional property that the source doesn't name to what a value of the
+  source may hold there, its index signature's type or unknown, unless the source is exact, and reports TS2915.
+- typeRelatedToIndexInfo infers an index signature only for an exact source, and otherwise reports TS2916 beneath
+  TypeScript's missing-index error.
+- The shortcut relating an empty object type to a mapped type with a ? modifier takes only an exact source.
+- getSignatureApplicabilityError's first pass, and unionOrIntersectionRelatedTo for a union target, keep an
+  argument's or source's freshness instead of taking its regular type, and silence the excess-property check with
+  excessPropertyChecksSilenced, saved and restored around each use. The regular type would be stricter than the
+  fresh one checked after it, which TypeScript's overload resolution assumes never happens.
 
 Rules with no checker change: effects and library-declarations are built in the library alone (below),
 optional-field is a specification only, and call-signature isn't built (its witness is open; see debt.txt).

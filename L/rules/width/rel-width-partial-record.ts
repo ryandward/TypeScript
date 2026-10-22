@@ -5,7 +5,7 @@ type Hooks = Partial<Record<'onDone', () => string>>;
 const raw = { onDone: 'not a function' };
 const hiddenObj: {} = raw;
 const mk = () => hiddenObj;
-const getHooks: () => Hooks = mk;
+const getHooks: () => Hooks = mk; // rejected here: TS2915
 const run = (): string => {
   const done = getHooks().onDone;
   if (done === undefined) return 'none';

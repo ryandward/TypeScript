@@ -4110,6 +4110,14 @@
         "category": "Error",
         "code": 2914
     },
+    "Type '{0}' doesn't name property '{1}', so a value of it may hold '{2}' there, but type '{3}' takes only '{4}'.": {
+        "category": "Error",
+        "code": 2915
+    },
+    "Type '{0}' may hold properties it doesn't name, so L infers no index signature for it: only an object literal names every property it has.": {
+        "category": "Error",
+        "code": 2916
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

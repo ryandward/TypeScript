@@ -82,6 +82,17 @@ narrowing
 - The false branch of Array.isArray removes nothing now, so `Array.isArray(x) ? x : [x]` leaves the array type in
   the second branch. Testing the other member, `typeof x === 'string' ? [x] : x`, narrows both ways.
 
+width
+- An object literal's type is exact only while it is fresh, and the rule rests on TypeScript dropping freshness
+  whenever a value is held under a declared or inferred type. Inference, a ternary, an array literal and an
+  identity function each gave a wider value an open type when tried, which is evidence, not a proof.
+- A generic mapped type target, Partial<T> with T a type parameter, is judged by TypeScript's own rules for
+  generic mapped types, which this rule hasn't audited.
+- A relation cached while excess-property checks were silenced can hide an excess-property error later. L's
+  soundness doesn't rest on that check, since exactness reads freshness.
+- A read through a string index signature can find a member every object inherits, as constructor
+  (catalog/rule-open-record.ts), at a literal key or a computed one.
+
 call-signature
 - Not built, so chk-call-narrowed-function.ts is open: the release and the lab both call a Function with no
   signature, and Node throws when it holds a constructor. Nobody has measured how much real code calls a value
@@ -96,6 +107,11 @@ lab
   the commit before) was a script in the scratchpad, not a tool in the repo.
 - The tracker doesn't run the Lean, and rule.txt names its mutants by hand, so a renamed mutant goes
   unnoticed.
+- The import from L-hooks' witnesses/exemptions took only the programs that crash. The 28 that ran without a
+  crash were set aside by that alone, but a program can hold a value outside its static type and still run, so
+  each needs judging by type.
+- A witness proves a hole by crashing, and only the catalog's crashes are tracked, so a rule's reach is argued
+  in its proof, not counted: no tracker number says that a hole without a crashing witness is closed.
 
 L-hooks
 - The hooks reject the any keyword, and the let and var keywords, by name. The lab allows all three: it judges

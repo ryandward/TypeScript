@@ -2,5 +2,5 @@
 interface Hooks { readonly onDone?: () => string }
 const raw = { onDone: 'not a function' };
 const hidden: {} = raw;
-const hooks: Hooks = hidden;
+const hooks: Hooks = hidden; // rejected here: TS2915
 console.log(hooks.onDone?.());

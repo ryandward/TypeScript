@@ -3,6 +3,5 @@
 function lookup<K extends string>(table: Readonly<Record<K, string>>, key: K): string {
   return table[key].toUpperCase();
 }
-const labels = { a: "alpha", b: "beta" };
 const wanted: string = "c";
-console.log(lookup(labels, wanted));
+console.log(lookup({ a: "alpha", b: "beta" }, wanted));

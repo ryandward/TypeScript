@@ -4,7 +4,7 @@
 type NextOnly = { readonly next: () => IteratorResult<number> };
 const raw = { next: (): IteratorResult<number> => ({ done: false, value: 1 }), return: 5 };
 const narrow: NextOnly = raw;
-const iterable: Iterable<number> = { [Symbol.iterator]: (): Iterator<number> => ({ ...narrow }) };
+const iterable: Iterable<number> = { [Symbol.iterator]: (): Iterator<number> => ({ ...narrow }) }; // rejected here: TS2915
 for (const n of iterable) { // TypeError: number 5 is not a function (break calls the hidden return)
   console.log(n);
   break;

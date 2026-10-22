@@ -3,4 +3,4 @@
 type Labels = { readonly title: string; readonly body: string };
 const raw = { title: 'T', body: 'B', count: 3 };
 const labels: Labels = raw;
-console.log(Object.values(labels).map((v) => v.toUpperCase()).join(','));
+console.log(Object.values(labels).map((v) => v.toUpperCase()).join(',')); // rejected here: TS2900

@@ -3,7 +3,7 @@
 type NextOnly = { readonly next: () => IteratorResult<number> };
 const raw = { next: (): IteratorResult<number> => ({ done: false, value: 1 }), return: 5 };
 const nextOnly: NextOnly = raw;
-const it: Iterator<number> = nextOnly;
+const it: Iterator<number> = nextOnly; // rejected here: TS2915
 const iterable: Iterable<number> = { [Symbol.iterator]: () => it };
 for (const n of iterable) {
   console.log(n);

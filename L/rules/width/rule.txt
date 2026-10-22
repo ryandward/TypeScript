@@ -1,0 +1,84 @@
+width
+kind: soundness
+
+Claim. If the lab accepts a program, no type says what a value holds at a property the type doesn't name, unless
+the type names every property its values have. An optional field the source doesn't name, and an index signature
+inferred from the properties a type names, are read as unknown.
+
+Counterexample in plain TypeScript. A type may name fewer properties than its values have: a record holding next
+and return: 5 is a value of { readonly next: ... }. propertiesRelatedTo skips a target's optional property that the
+source doesn't name, as if the value lacked it, so that record passes as an Iterator, and for-of calls its return
+when a loop breaks. isObjectTypeWithInferableIndex gives a type literal an index signature built from the
+properties it names, so a record typed { readonly title: string } and holding count: 3 passes as a record of
+strings, and Object.values reads 3 as a string. Node throws a TypeError for each witness.
+
+Obligation 1, an optional field the source doesn't name: TS2915
+  Statement. A source relates to an optional property of the target that it doesn't name only if what a value of
+  the source may hold there relates to the property's type: the type of the source's index signature for that
+  name, or unknown. A type that names every property of its values, a fresh object literal written without a
+  spread or a module's namespace object, holds nothing there, and relates.
+  Mechanism. propertiesRelatedTo relates that type to the property's and reports TS2915 when it fails;
+  isExactObjectType decides which types name every property. The shortcut that relates an empty object type to a
+  mapped type with a ? modifier takes only an empty object literal. Overload resolution's first pass, and the
+  members of a union target, keep an object literal's freshness and silence the excess-property check instead of
+  taking its regular type (excessPropertyChecksSilenced), since the regular type would refuse what the fresh one
+  checked after them accepts.
+  Why it suffices. Every assignability and subtype judgment between object types compares properties in
+  propertiesRelatedTo, which visits every property of the target; a property the source names is related as
+  before, and one it doesn't is related here. Freshness marks the type of an object literal expression, whose
+  value has exactly the properties the type names, and TypeScript drops it when the value is held under a
+  declared or inferred type (see debt.txt).
+  Witnesses:
+    rel-optional-absent-iterator.ts    a record hiding return: 5, taken for an Iterator
+    rel-optional-absent-own.ts         {} hiding onDone: a string, taken for a record of hooks
+    rel-width-spread-copy.ts           a spread copy of a record hiding return: 5, taken for an Iterator
+    rel-width-spread-literal.ts        the same spread written where an Iterator is returned
+    rel-width-computed-key.ts          return: 5 under a computed key of type string, in a fresh literal
+    rel-width-template-key.ts          the same under a key of a template literal type
+    rel-width-function-return.ts       a record hiding return: 5, returned by a function typed to return an Iterator
+    rel-width-optional-parameter.ts    a function taking an Iterator, typed to take the narrower record
+    rel-width-optional-constraint.ts   the record passed to a type parameter bounded by Iterator
+    rel-width-never-field.ts           a record hiding kind: 'tagged', taken for one whose kind is absent
+    rel-width-never-field-parameter.ts  a function taking return?: never, typed to take the narrower record
+    rel-width-never-field-constraint.ts  the record passed to a type parameter bounded by return?: never
+    rel-width-library-result.ts        an iterator result hiding report: 5, taken for one whose report is a function
+    rel-width-partial-record.ts        {} hiding onDone: a string, returned as a Partial record of hooks
+  Rejected sound code, because the type names only some of the properties its values may have:
+    named-literal.ts                   a literal held under its own open type, then taken for an Iterator
+  Controls:
+    literal-iterator.ts                an object literal written where an Iterator is taken
+    literal-options.ts                 empty and partial literals where every field is optional
+    optional-unknown.ts                any record where an optional field takes unknown
+    index-signature-source.ts          a source whose index signature covers the optional field
+    literal-callback-overload.ts       an object literal beside a callback in an overloaded call
+
+Obligation 2, an implicit index signature: TS2916
+  Statement. A type has an index signature it doesn't declare only if it names every property of its values.
+  Mechanism. typeRelatedToIndexInfo infers an index signature from a source's properties only when
+  isExactObjectType holds of it, and otherwise reports TS2916 beneath TypeScript's missing-index error.
+  Why it suffices. typeRelatedToIndexInfo is the only place the relation infers an index signature, and the
+  signature it infers covers exactly the properties the source names.
+  Rejected sound code, because the type is open:
+    alias-index-signature.ts           a record holding only title, under an open type, taken for a record of
+                                       strings
+  Controls:
+    literal-values.ts                  Object.values of an object literal, read at its values' type
+    literal-callback-overload.ts       Array.from over { length: 3 }, an ArrayLike only through an inferred index
+
+Obligation 3, assignability: TS2898
+  Statement. Object.values or Object.entries of an open type returns any's elements, which flow nowhere (see any).
+  Mechanism. With no inferred index signature, Object.values and Object.entries fall to their overloads over {},
+  which return any[] and [string, any][], and the any rule reports their elements where they flow.
+  Why it suffices. Those overloads are the only others, and the any rule judges every flow of any.
+  Witnesses:
+    lib-object-values-alias-width.ts   a record hiding count: 3, its values read as strings
+    lib-object-entries-alias-width.ts  the same through Object.entries
+  Rejected sound code, because the type is open:
+    alias-values.ts                    Object.values of a record holding only title
+
+Obligation 4, structure: TS2900
+  Statement. A value read out of Object.values of an open type is unknown, and has no structure to use (see any).
+  Mechanism. The same fallback to the overload over {}, whose any elements checkExpression reads as unknown.
+  Why it suffices. As for obligation 3.
+  Witnesses:
+    rel-implicit-index.ts              a record hiding count: 3, its values upper-cased
