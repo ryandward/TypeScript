@@ -125,7 +125,7 @@ any (soundness: TS2898, TS2900; 8ac4d727f, 2adfd653a, 29e19bf5e, f0cb8e20c)
   every relation, and reports TS2920 when the source's parameter refuses it (861f1fc84). It also relates every
   other parameter as a value flow, under valueAssignableRelation, so an any nested in it is refused too; the
   nested relation is started once (isTypeRelatedAsParameterValue and relatingParameterAsValue), since a fresh
-  relation's recursion guards don't see the outer one's (the commit after 0caaf143d).
+  relation's recursion guards don't see the outer one's (7bebec6c6).
 - getBindingElementTypeFromParentType reads a parent of type any as uncheckedType, as checkExpression reads a value
   of type any, so a nested destructuring pattern, whose parent is a property's type and never an expression, takes
   apart an unknown (e0bd3fffd).
