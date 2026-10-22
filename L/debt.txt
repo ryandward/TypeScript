@@ -1,8 +1,17 @@
 Technical debt
 
-Each item says what is wrong, where it shows, and what it costs. An item about one rule is filed under the
-rule's name. lab is the checker and the tooling as a whole, and L-hooks is the hooks, where they no longer
-match the lab.
+Each item says what is wrong, where it shows, and what it costs. all rules is what every proof assumes. An
+item about one rule is filed under the rule's name. lab is the checker and the tooling as a whole, and L-hooks
+is the hooks, where they no longer match the lab.
+
+all rules
+- Every proof assumes an unpolluted realm: the built-ins the core calls are the ones ECMAScript specifies,
+  unmodified, so the library's declarations describe them. The core can't change a built-in, since L has no
+  writes and no prototypes, but the shell runs in the same realm as ordinary TypeScript, npm code included, and
+  can replace a method, patch an iterator, or add a property to Object.prototype, which also adds a name
+  open-record's inherited-name check doesn't know. Any of these makes a declaration false and voids every proof
+  that rests on it. Nothing in the lab checks the realm; soundness is relative to a discipline in the shell that
+  no tool enforces.
 
 any
 - After a TS2900, the rejected operation's result is errorType, which carries any's flag, so
@@ -93,8 +102,8 @@ width
   soundness doesn't rest on that check, since exactness reads freshness.
 
 open-record
-- The inherited names are the spec's, written into the checker. A shell that adds a property to Object.prototype,
-  as prototype pollution does, adds a name the check doesn't know.
+- The inherited names are the spec's, written into the checker, so they hold only in an unpolluted realm (see all
+  rules).
 - An indexed access type, T[K] in a type, isn't a read and isn't checked, so a library function typed through one
   reads past the check, as Reflect.get did. No other is known, but the library hasn't been searched for one.
 
