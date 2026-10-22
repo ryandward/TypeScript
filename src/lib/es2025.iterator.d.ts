@@ -19,7 +19,10 @@ type IteratorObjectConstructor = typeof Iterator;
 
 declare global {
     // Global `IteratorObject<T, TReturn, TNext>` interface that can be augmented by polyfills
-    interface IteratorObject<T, TReturn, TNext> {
+    // L: T is declared covariant. The predicate overloads of filter and find bound their S by an element type U of
+    // their own, which this fixes to the iterator's T at a call, instead of by T: a T in S's bound made T invariant, and
+    // so a Map's values, though nothing in an iterator takes a T in.
+    interface IteratorObject<out T, TReturn, TNext> {
         /**
          * Returns this iterator.
          */
@@ -35,7 +38,7 @@ declare global {
          * Creates an iterator whose values are those from this iterator for which the provided predicate returns true.
          * @param predicate A function that accepts up to two arguments to be used to test values from the underlying iterator.
          */
-        filter<S extends T>(predicate: (value: T, index: number) => value is S): IteratorObject<S, undefined, unknown>;
+        filter<U, S extends U>(this: IteratorObject<U, unknown, never>, predicate: (value: U, index: number) => value is S): IteratorObject<S, undefined, unknown>;
 
         /**
          * Creates an iterator whose values are those from this iterator for which the provided predicate returns true.
@@ -60,8 +63,9 @@ declare global {
          * @param callback A function that accepts up to two arguments to be used to transform values from the underlying iterator into new iterators or iterables to be flattened into the result.
          */
         flatMap<U>(callback: (value: T, index: number) => Iterator<U, unknown, undefined> | (Iterable<U, unknown, undefined> & object)): IteratorObject<U, undefined, unknown>;
-        // L: no overload without an initial value: on an empty list it throws
-        reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number) => T, initialValue: T): T;
+        // L: no overload without an initial value: on an empty list it throws. The element type U is fixed by this, as in
+        // filter, since an initialValue of T took a T in and made T invariant: a reduce into U accepts every T below U.
+        reduce<U>(this: IteratorObject<U, unknown, never>, callbackfn: (previousValue: U, currentValue: U, currentIndex: number) => U, initialValue: U): U;
 
         /**
          * Calls the specified callback function for all the elements in this iterator. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
@@ -104,7 +108,7 @@ declare global {
          * order, until it finds one where predicate returns true. If such an element is found, find
          * immediately returns that element value. Otherwise, find returns undefined.
          */
-        find<S extends T>(predicate: (value: T, index: number) => value is S): S | undefined;
+        find<U, S extends U>(this: IteratorObject<U, unknown, never>, predicate: (value: U, index: number) => value is S): S | undefined;
         find(predicate: (value: T, index: number) => unknown): T | undefined;
 
         readonly [Symbol.toStringTag]: string;

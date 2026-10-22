@@ -1,7 +1,7 @@
-// rejected sound code: A generator widened. What it yields only comes out of it, but as an iterator it has
-// reduce(callbackfn, initialValue: T), and a method that takes T makes T invariant.
+// control: A generator widened. What it yields only comes out of it, and its reduce from an initial value of the
+// wider type takes the wider type through its own U, not T.
 function* letters(): Generator<string, void, unknown> {
   yield 'a';
 }
-const wide: Generator<string | number, void, unknown> = letters(); // rejected here: TS2322
+const wide: Generator<string | number, void, unknown> = letters();
 console.log(wide.toArray().length);

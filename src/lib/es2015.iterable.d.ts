@@ -46,7 +46,7 @@ interface IterableIterator<T, TReturn = any, TNext = any> extends Iterator<T, TR
 /**
  * Describes an {@link Iterator} produced by the runtime that inherits from the intrinsic `Iterator.prototype`.
  */
-interface IteratorObject<T, TReturn = unknown, TNext = unknown> extends Iterator<T, TReturn, TNext> {
+interface IteratorObject<out T, TReturn = unknown, TNext = unknown> extends Iterator<T, TReturn, TNext> {
     [Symbol.iterator](): IteratorObject<T, TReturn, TNext>;
 }
 
@@ -160,7 +160,7 @@ interface Map<K, V> {
     values(): MapIterator<V>;
 }
 
-interface ReadonlyMap<K, V> {
+interface ReadonlyMap<K, out V> {
     /** Returns an iterable of entries in the map. */
     [Symbol.iterator](): MapIterator<readonly [K, V]>;
 

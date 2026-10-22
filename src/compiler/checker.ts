@@ -1529,8 +1529,15 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     var withinUnreachableCode = false;
     // L: set while overload resolution relates arguments whose parameter types aren't fully inferred yet (#17041).
     var excessPropertyChecksSilenced = false;
-    // L: the variances getVariancesWorker assumes for a generic type while it measures it, one per type parameter.
+    // L: the variances getVariancesWorker assumes for a generic type while it measures it, one per type parameter; the
+    // types whose assumptions the measurement under way has consulted; and the variances measured under another type's
+    // assumption, which relate type arguments only as Unknown.
     var varianceAssumptions = new Map<Symbol, VarianceFlags[]>();
+    var consultedAssumptions: Set<Symbol> | undefined;
+    var conditionalVariances = new Set<readonly VarianceFlags[]>();
+    // L: how many instantiations with the same recursion identity a comparison follows on each side before it is cut
+    // off. A cut-off comparison fails (recursiveTypeRelatedTo), so the fuel buys proofs and costs time, never soundness.
+    var relationDepthFuel = 8;
     // L: generic families G<T> to H<T> proven or refuted at the depth cutoff, by relation; the families being related,
     // outermost first; and the outermost of them that the proofs under way have assumed.
     var familyRelations = new Map<Map<string, RelationComparisonResult>, Map<string, Ternary>>();
@@ -16743,11 +16750,27 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         // where different generations of the same type parameter are in scope). This leads to a lot of new type
         // identities, and potentially a lot of work comparing those identities, so here we create an instantiation
         // that uses the original type identities for all unconstrained type parameters.
-        return getSignatureInstantiation(
-            signature,
-            map(signature.typeParameters, tp => tp.target && !getConstraintOfTypeParameter(tp.target) ? tp.target : tp),
-            isInJSFile(signature.declaration),
-        );
+        // L: and for each constrained one whose constraint, with those type parameters replaced, is its original's: in
+        // filter<U, S extends U>, S's clone is bounded by U's clone, which becomes U, so S's clone becomes S. Replacing a
+        // type parameter by one with the same constraint renames it, and the signature means what it did. A constraint
+        // the instantiation changed, as S extends T's for some T, keeps its clone. Leaving S's clone bounded by U's clone
+        // while U's clone became U left no inference for S, and no instantiation of such a method related to another.
+        const typeParameters = signature.typeParameters!;
+        const canonical = typeParameters.map(tp => tp.target && !getConstraintOfTypeParameter(tp.target) ? tp.target : tp);
+        let renamed = true;
+        while (renamed) {
+            renamed = false;
+            const mapper = createTypeMapper(typeParameters, canonical.slice());
+            for (let i = 0; i < typeParameters.length; i++) {
+                const tp = typeParameters[i];
+                const constraint = canonical[i] === tp && tp.target && getConstraintOfTypeParameter(tp);
+                if (constraint && instantiateType(constraint, mapper) === getConstraintOfTypeParameter(tp.target!)) {
+                    canonical[i] = tp.target!;
+                    renamed = true;
+                }
+            }
+        }
+        return getSignatureInstantiation(signature, canonical, isInJSFile(signature.declaration));
     }
 
     function getBaseSignature(signature: Signature) {
@@ -23525,8 +23548,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             const related = isTypeRelatedTo(createTypeReference(sourceTarget, parameters), createTypeReference(targetTarget, parameters), relation);
             familiesInProgress.pop();
             // A proof that assumed a family further out, or an assumed variance, holds only if they do, so it answers
-            // Unknown and isn't recorded. A failure is recorded unless a variance was assumed: assuming a family
-            // only grants relations.
+            // Unknown and isn't recorded. A failure is recorded unless a variance was assumed, as in
+            // recursiveTypeRelatedTo.
             const conditional = outermostFamilyAssumed < depth || varianceAssumptions.size > 0;
             outermostFamilyAssumed = Math.min(saveOutermost, outermostFamilyAssumed);
             if (!related) {
@@ -23547,6 +23570,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         // where nothing is assumed. A success answers Unknown, which keeps it out of the relation's cache.
         function relateByAssumedVariance(symbol: Symbol | undefined, sources: readonly Type[], targets: readonly Type[], intersectionState: IntersectionState): Ternary {
             const assumed = symbol && varianceAssumptions.get(symbol);
+            if (assumed) {
+                consultedAssumptions?.add(symbol!);
+            }
             let related: Ternary | undefined = assumed ? typeArgumentsRelatedTo(sources, targets, assumed, /*reportErrors*/ false, intersectionState) : undefined;
             if (related === undefined) {
                 related = Ternary.True;
@@ -23762,12 +23788,12 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             if (recursionFlags & RecursionFlags.Source) {
                 sourceStack[sourceDepth] = source;
                 sourceDepth++;
-                if (!(expandingFlags & ExpandingFlags.Source) && isDeeplyNestedType(source, sourceStack, sourceDepth)) expandingFlags |= ExpandingFlags.Source;
+                if (!(expandingFlags & ExpandingFlags.Source) && isDeeplyNestedType(source, sourceStack, sourceDepth, relationDepthFuel)) expandingFlags |= ExpandingFlags.Source;
             }
             if (recursionFlags & RecursionFlags.Target) {
                 targetStack[targetDepth] = target;
                 targetDepth++;
-                if (!(expandingFlags & ExpandingFlags.Target) && isDeeplyNestedType(target, targetStack, targetDepth)) expandingFlags |= ExpandingFlags.Target;
+                if (!(expandingFlags & ExpandingFlags.Target) && isDeeplyNestedType(target, targetStack, targetDepth, relationDepthFuel)) expandingFlags |= ExpandingFlags.Target;
             }
             let originalHandler: typeof outofbandVarianceMarkerHandler;
             let propagatingVarianceFlags = 0 as RelationComparisonResult;
@@ -23832,8 +23858,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             else {
                 // A false result goes straight into global cache (when something is false under
                 // assumptions it will also be false without assumptions)
-                // L: except an assumed variance (getVariancesWorker), which can withhold a relation as well as grant one:
-                // a parameter not yet measured is assumed invariant, and the failure can be that assumption's.
+                // L: except while a variance is assumed (getVariancesWorker). The assumptions are never weaker than the
+                // variances finally measured, but one marked unmeasurable or unreliable relates type arguments by
+                // identity, where the relation it stands for falls back to comparing structure.
                 if (!varianceAssumptions.size) {
                     relation.set(id, RelationComparisonResult.Failed | propagatingVarianceFlags);
                 }
@@ -24034,7 +24061,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 const targetTypes = fillMissingTypeArguments(target.aliasTypeArguments, params, minParams, isInJSFile(source.aliasSymbol.valueDeclaration));
                 const varianceResult = relateVariances(sourceTypes, targetTypes, variances, intersectionState);
                 if (varianceResult !== undefined) {
-                    return varianceResult;
+                    // L: variances measured under another type's assumption hold only while it does.
+                    return varianceResult && conditionalVariances.has(variances) ? Ternary.Unknown : varianceResult;
                 }
             }
 
@@ -24469,7 +24497,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     }
                     const varianceResult = relateVariances(getTypeArguments(source as TypeReference), getTypeArguments(target as TypeReference), variances, intersectionState);
                     if (varianceResult !== undefined) {
-                        return varianceResult;
+                        // L: variances measured under another type's assumption hold only while it does.
+                        return varianceResult && conditionalVariances.has(variances) ? Ternary.Unknown : varianceResult;
                     }
                 }
                 else if (isReadonlyArrayType(target) ? everyType(source, isArrayOrTupleType) : isArrayType(target) && everyType(source, t => isTupleType(t) && !t.target.readonly)) {
@@ -25477,79 +25506,103 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     // L: variances are measured and cached per relation. For a value, `in` and `out` are measured, not trusted.
     function getVariancesWorker(symbol: Symbol, typeParameters: readonly TypeParameter[] = emptyArray): VarianceFlags[] {
         const links = getSymbolLinks(symbol);
-        if (!links.variances) {
-            tracing?.push(tracing.Phase.CheckTypes, "getVariancesWorker", { arity: typeParameters.length, id: getTypeId(getDeclaredTypeOfSymbol(symbol)) });
-            const oldVarianceComputation = inVarianceComputation;
-            const saveResolutionStart = resolutionStart;
-            if (!inVarianceComputation) {
-                inVarianceComputation = true;
-                resolutionStart = resolutionTargets.length;
-            }
-            links.variances = emptyArray;
-            const variances: VarianceFlags[] = [];
-            for (const tp of typeParameters) {
-                const modifiers = getTypeParameterModifiers(tp);
-                let variance = modifiers & ModifierFlags.Out ?
-                    modifiers & ModifierFlags.In ? VarianceFlags.Invariant : VarianceFlags.Covariant :
-                    modifiers & ModifierFlags.In ? VarianceFlags.Contravariant : undefined;
-                if (variance === undefined) {
-                    let unmeasurable = false;
-                    let unreliable = false;
-                    const oldHandler = outofbandVarianceMarkerHandler;
-                    outofbandVarianceMarkerHandler = onlyUnreliable => onlyUnreliable ? unreliable = true : unmeasurable = true;
-                    // We first compare instantiations where the type parameter is replaced with
-                    // marker types that have a known subtype relationship. From this we can infer
-                    // invariance, covariance, contravariance or bivariance.
-                    const typeWithSuper = createMarkerType(symbol, tp, markerSuperType);
-                    const typeWithSub = createMarkerType(symbol, tp, markerSubType);
-                    // L: each test assumes the variance it tests for the parameter, the measured variance for the ones
-                    // before it and invariance for the ones after, and a recursive reference to the type relates its
-                    // arguments by that assumption: coinduction that checks what it assumes, where TypeScript assumed
-                    // the reference related whatever its arguments.
-                    const savedAssumption = varianceAssumptions.get(symbol);
-                    const assume = (tested: VarianceFlags) =>
-                        varianceAssumptions.set(symbol, typeParameters.map((_, j) => j < variances.length ? variances[j] : j === variances.length ? tested : VarianceFlags.Invariant));
-                    assume(VarianceFlags.Covariant);
-                    const covariant = isTypeAssignableTo(typeWithSub, typeWithSuper);
-                    assume(VarianceFlags.Contravariant);
-                    const contravariant = isTypeAssignableTo(typeWithSuper, typeWithSub);
-                    variance = (covariant ? VarianceFlags.Covariant : 0) | (contravariant ? VarianceFlags.Contravariant : 0);
-                    // If the instantiations appear to be related bivariantly it may be because the
-                    // type parameter is independent (i.e. it isn't witnessed anywhere in the generic
-                    // type). To determine this we compare instantiations where the type parameter is
-                    // replaced with marker types that are known to be unrelated.
-                    if (variance === VarianceFlags.Bivariant) {
-                        assume(VarianceFlags.Independent);
-                        if (isTypeAssignableTo(createMarkerType(symbol, tp, markerOtherType), typeWithSuper)) {
-                            variance = VarianceFlags.Independent;
-                        }
-                    }
-                    if (savedAssumption) {
-                        varianceAssumptions.set(symbol, savedAssumption);
-                    }
-                    else {
-                        varianceAssumptions.delete(symbol);
-                    }
-                    outofbandVarianceMarkerHandler = oldHandler;
-                    if (unmeasurable || unreliable) {
-                        if (unmeasurable) {
-                            variance |= VarianceFlags.Unmeasurable;
-                        }
-                        if (unreliable) {
-                            variance |= VarianceFlags.Unreliable;
-                        }
-                    }
-                }
-                variances.push(variance);
-            }
-            if (!oldVarianceComputation) {
-                inVarianceComputation = false;
-                resolutionStart = saveResolutionStart;
-            }
-            links.variances = variances;
-            tracing?.pop({ variances: variances.map(Debug.formatVariance) });
+        if (links.variances) {
+            return links.variances;
         }
-        return links.variances;
+        tracing?.push(tracing.Phase.CheckTypes, "getVariancesWorker", { arity: typeParameters.length, id: getTypeId(getDeclaredTypeOfSymbol(symbol)) });
+        const oldVarianceComputation = inVarianceComputation;
+        const saveResolutionStart = resolutionStart;
+        if (!inVarianceComputation) {
+            inVarianceComputation = true;
+            resolutionStart = resolutionTargets.length;
+        }
+        links.variances = emptyArray;
+        // L: the variances are the greatest fixed point of the measurement. Every type parameter starts assumed
+        // independent, or as its modifiers declare, and each pass measures every parameter, with a recursive reference
+        // to the type relating its type arguments by the assumption (relateByAssumedVariance), then weakens each
+        // assumption to what was measured. A pass that changes nothing has found variances the declaration bears out.
+        // TypeScript assumed the reference related whatever its arguments and never checked it.
+        const saveConsulted = consultedAssumptions;
+        const consulted = consultedAssumptions = new Set<Symbol>();
+        let variances = typeParameters.map(tp => getDeclaredVariance(tp) ?? VarianceFlags.Independent);
+        while (true) {
+            varianceAssumptions.set(symbol, variances);
+            const assumed = variances;
+            const weakened = typeParameters.map((tp, i) => meetVariances(assumed[i], getDeclaredVariance(tp) ?? measureVariance(symbol, tp)));
+            if (weakened.every((variance, i) => variance === assumed[i])) {
+                break;
+            }
+            variances = weakened;
+        }
+        varianceAssumptions.delete(symbol);
+        consultedAssumptions = saveConsulted;
+        consulted.delete(symbol);
+        consulted.forEach(other => saveConsulted?.add(other));
+        if (!oldVarianceComputation) {
+            inVarianceComputation = false;
+            resolutionStart = saveResolutionStart;
+        }
+        // L: variances measured under the assumption of a type still being measured further out hold only if that
+        // assumption does, so they aren't kept, and a relation through them answers Unknown, which no cache records.
+        if (consulted.size) {
+            links.variances = undefined;
+            conditionalVariances.add(variances);
+        }
+        else {
+            links.variances = variances;
+        }
+        if (!inVarianceComputation) {
+            conditionalVariances.clear();
+        }
+        tracing?.pop({ variances: variances.map(Debug.formatVariance) });
+        return variances;
+    }
+
+    function getDeclaredVariance(tp: TypeParameter): VarianceFlags | undefined {
+        const modifiers = getTypeParameterModifiers(tp);
+        return modifiers & ModifierFlags.Out ?
+            modifiers & ModifierFlags.In ? VarianceFlags.Invariant : VarianceFlags.Covariant :
+            modifiers & ModifierFlags.In ? VarianceFlags.Contravariant : undefined;
+    }
+
+    // L: the greatest variance below both: independent is above bivariant, which is above covariant and contravariant,
+    // which are above invariant, and either one's unmeasurable and unreliable flags carry over.
+    function meetVariances(a: VarianceFlags, b: VarianceFlags): VarianceFlags {
+        const va = a & VarianceFlags.VarianceMask;
+        const vb = b & VarianceFlags.VarianceMask;
+        const variance = va === VarianceFlags.Independent ? vb : vb === VarianceFlags.Independent ? va : va & vb;
+        return variance | ((a | b) & VarianceFlags.AllowsStructuralFallback);
+    }
+
+    function measureVariance(symbol: Symbol, tp: TypeParameter): VarianceFlags {
+        let unmeasurable = false;
+        let unreliable = false;
+        const oldHandler = outofbandVarianceMarkerHandler;
+        outofbandVarianceMarkerHandler = onlyUnreliable => onlyUnreliable ? unreliable = true : unmeasurable = true;
+        // We first compare instantiations where the type parameter is replaced with
+        // marker types that have a known subtype relationship. From this we can infer
+        // invariance, covariance, contravariance or bivariance.
+        const typeWithSuper = createMarkerType(symbol, tp, markerSuperType);
+        const typeWithSub = createMarkerType(symbol, tp, markerSubType);
+        let variance = (isTypeAssignableTo(typeWithSub, typeWithSuper) ? VarianceFlags.Covariant : 0) |
+            (isTypeAssignableTo(typeWithSuper, typeWithSub) ? VarianceFlags.Contravariant : 0);
+        // If the instantiations appear to be related bivariantly it may be because the
+        // type parameter is independent (i.e. it isn't witnessed anywhere in the generic
+        // type). To determine this we compare instantiations where the type parameter is
+        // replaced with marker types that are known to be unrelated.
+        if (variance === VarianceFlags.Bivariant && isTypeAssignableTo(createMarkerType(symbol, tp, markerOtherType), typeWithSuper)) {
+            variance = VarianceFlags.Independent;
+        }
+        outofbandVarianceMarkerHandler = oldHandler;
+        if (unmeasurable || unreliable) {
+            if (unmeasurable) {
+                variance |= VarianceFlags.Unmeasurable;
+            }
+            if (unreliable) {
+                variance |= VarianceFlags.Unreliable;
+            }
+        }
+        return variance;
     }
 
     function createMarkerType(symbol: Symbol, source: TypeParameter, target: Type) {

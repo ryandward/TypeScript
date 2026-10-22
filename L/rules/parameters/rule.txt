@@ -15,7 +15,9 @@ Each witness is such a program, and Node crashes on it.
 
 A function that takes fewer arguments than its caller passes is fine: JavaScript drops the rest, and the function
 reads none of them. A method that takes T makes T invariant, even where the method only compares the argument, as a
-set's has does: three programs that can't go wrong are rejected below for it, and the relation stays as it is.
+set's has does: a program that can't go wrong is rejected below for it, and the relation stays as it is. Where the
+library took a T in only to hand it back, as an iterator's reduce did with its initial value, the declaration says
+so without a T (es2025.iterator), and the iterator is covariant.
 
 Obligation 1, a parameter relates one way: TS2322 (TypeScript's code)
   Statement. Every parameter of a source signature accepts what the target's parameter accepts, and nothing is
@@ -26,7 +28,9 @@ Obligation 1, a parameter relates one way: TS2322 (TypeScript's code)
   measures through the relation, so a type parameter used in a method's parameter is measured contravariant there.
   src/lib declares Iterator's and AsyncIterator's return and throw as taking never, and Generator and AsyncGenerator
   inherit them: a TReturn taken in made TReturn invariant, which stopped an array from being an Iterable, but the
-  declarations stay, since for-of calls return when a loop breaks and must not meet one that isn't a function.
+  declarations stay, since for-of calls return when a loop breaks and must not meet one that isn't a function. An
+  iterator's reduce with an initial value of its element type fixes that type as a U of its own through this, a
+  U the iterator's T relates to, instead of taking a T.
   Why it suffices. Every relation between two signatures goes through compareSignaturesRelated, and variance is
   measured with the same relation.
   Witnesses:
@@ -36,13 +40,13 @@ Obligation 1, a parameter relates one way: TS2322 (TypeScript's code)
     rel-bivariant-callback-return.ts   a callback's return related both ways under a method
   Rejected sound code, because a method that takes T makes T invariant:
     readonly-set-widened.ts            a ReadonlySet widened, through has(value: T)
-    iterator-widened.ts                an iterator widened, through reduce's initialValue: T
-    generator-widened.ts               a generator widened, through the same reduce
   Regressions:
     lib-iterator-return-number.ts      an iterator whose return is a number, which the release's Iterator rejects
   Controls:
     fewer-arguments.ts                 a callback that takes fewer arguments than map passes
     wider-parameter.ts                 a function whose parameter is wider than its type asks
+    iterator-widened.ts                an iterator widened, its reduce into the wider type
+    generator-widened.ts               a generator widened, through the same reduce
 
 Obligation 2, a parameter the target never passes: TS2322 (TypeScript's code)
   Statement. A source parameter at a position the target has no parameter for is related as receiving unknown,

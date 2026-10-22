@@ -315,11 +315,18 @@ generic-relations (soundness: TS2925 and TypeScript's TS2322; 7905011b8, d2279c3
   with the same type arguments whose families relate, G<T> to H<T> over the type parameters themselves. Each
   relation keeps the families' answers in familyRelations; a family being related further out is assumed as
   Unknown, and an answer that rests on an assumption isn't kept (familiesInProgress, outermostFamilyAssumed).
-- getVariancesWorker records in varianceAssumptions, for each test of a type parameter, the variance under test, the
-  measured variances of the parameters before it and invariance for those after. Where getVariances or
-  getAliasVariances returns emptyArray, which TypeScript answered Unknown whatever the type arguments,
-  relateByAssumedVariance, new, relates them by that assumption, or both ways where none is recorded, and answers
-  Unknown on success. recursiveTypeRelatedTo doesn't record a failure while a variance is assumed.
+- recursiveTypeRelatedTo passes isDeeplyNestedType relationDepthFuel, eight, where TypeScript let it default to three.
+- getVariancesWorker measures the greatest fixed point: every type parameter starts assumed independent, or as its
+  modifiers declare (getDeclaredVariance), and each pass measures every parameter (measureVariance) under the
+  assumptions in varianceAssumptions, then weakens each to its meet with what was measured (meetVariances), until a
+  pass changes nothing. Where getVariances or getAliasVariances returns emptyArray, which TypeScript answered
+  Unknown whatever the type arguments, relateByAssumedVariance, new, relates them by the assumption, or both ways
+  where none is recorded, and answers Unknown on success. A measurement that consulted another type's assumption
+  (consultedAssumptions) isn't kept in the symbol's links, and a relation through its variances answers Unknown
+  (conditionalVariances). recursiveTypeRelatedTo doesn't record a failure while a variance is assumed.
+- createCanonicalSignature replaces a constrained type parameter's clone by its original too, where the clone's
+  constraint, with the type parameters already replaced, is the original's, so that two instantiations of a method
+  such as filter<U, S extends U> relate.
 
 tuples (soundness: TypeScript's TS18048; a8277f220)
 - createNormalizedTupleType types a tuple whose optional element comes before a required one as the union of its
@@ -360,11 +367,19 @@ which L doesn't write.
 - webworker.generated.d.ts: the same for the eight of those it declares: CSSNumericArray, CSSTransformValue,
   CSSUnparsedValue, FormData, Headers, StylePropertyMapReadOnly, URLSearchParams and FileSystemDirectoryHandle.
 
-Promise's T is declared out (d2279c30a), so its variance comes from the declaration, which checkVarianceAnnotations holds
-against Promise's members, instead of a measurement through then's recursive Promise, which generic-relations now
-measures by assumption.
+Promise's T is declared out (d2279c30a), and so are IteratorObject's T and ReadonlyMap's V, so their variances
+come from the declarations, which checkVarianceAnnotations holds against their members. An iterator took a T in
+only through the predicate overloads of filter and find, whose S was bounded by T, and the overload of reduce whose
+initial value was a T; each now names the iterator's element type as a U of its own, fixed through this. The
+measurement had made every iterator, generator and Map invariant in what it hands out because of them.
 
 - es5.d.ts, es2015.iterable.d.ts, es2015.symbol.wellknown.d.ts and es2018.promise.d.ts: interface Promise<out T>.
+- es2015.iterable.d.ts, es2025.iterator.d.ts and esnext.disposable.d.ts: interface IteratorObject<out T, TReturn,
+  TNext>.
+- es2015.collection.d.ts and es2015.iterable.d.ts: interface ReadonlyMap<K, out V>.
+- es2025.iterator.d.ts: filter<U, S extends U>(this: IteratorObject<U, unknown, never>, predicate: (value: U, index:
+  number) => value is S), find likewise, and reduce<U>(this: IteratorObject<U, unknown, never>, callbackfn:
+  (previousValue: U, currentValue: U, currentIndex: number) => U, initialValue: U): U.
 
 
 The library's effects (src/lib; 8ab65f25b)

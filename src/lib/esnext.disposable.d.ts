@@ -164,7 +164,7 @@ interface AsyncDisposableStackConstructor {
     new (): AsyncDisposableStack;
 }
 
-interface IteratorObject<T, TReturn, TNext> extends Disposable {
+interface IteratorObject<out T, TReturn, TNext> extends Disposable {
 }
 
 interface AsyncIteratorObject<T, TReturn, TNext> extends AsyncDisposable {

@@ -1,5 +1,5 @@
-// rejected sound code: An iterator widened. Its reduce(callbackfn, initialValue: T) only feeds the start to the
-// callback, which reads it as the wider type, but a method that takes T makes T invariant.
+// control: An iterator widened. Its reduce only feeds the start to the callback, which reads it as the wider type,
+// and the declaration says so through a U of its own instead of taking T.
 const letters: ArrayIterator<string> = ['a', 'b'].values();
-const wide: IteratorObject<string | number, undefined, unknown> = letters; // rejected here: TS2322
+const wide: IteratorObject<string | number, undefined, unknown> = letters;
 console.log(wide.toArray().length);

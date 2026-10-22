@@ -39,43 +39,51 @@ Obligation 2, a comparison cut off at depth: TS2925
   whose families relate: G<T> to H<T>, with the type parameters themselves for T, which then holds for every A. A
   comparison that comes back to a pair it is already comparing still relates, as TypeScript has it: that is
   coinduction over a regular type, and nothing below it is left uncompared.
-  Mechanism. Where isDeeplyNestedType marks both stacks and TypeScript answered Ternary.Maybe, recursiveTypeRelatedTo
-  calls relateFamilyAtCutoff and reports TS2925 when it fails. relateFamilyAtCutoff relates the two families in a
-  relation of their own and keeps the answer in familyRelations, by relation. A family already being related is
-  assumed, as Ternary.Unknown, which no cache records, and a proof that assumed a family further out, or a variance
-  getVariancesWorker assumed, answers Unknown and isn't kept.
+  Mechanism. Where isDeeplyNestedType, given relationDepthFuel, eight, marks both stacks and TypeScript answered
+  Ternary.Maybe after three, recursiveTypeRelatedTo calls relateFamilyAtCutoff and reports TS2925 when it fails.
+  relateFamilyAtCutoff relates the two families in a relation of their own and keeps the answer in
+  familyRelations, by relation. A family already being related is assumed, as Ternary.Unknown, which no cache
+  records, and a proof that assumed a family further out, or a variance getVariancesWorker assumed, answers
+  Unknown and isn't kept.
   Why it suffices. TypeScript's Maybe at the cutoff was the one answer the relation gave about levels it never
   compared. The family relation compares every level of G<T> and H<T>, and assumes the pair it is proving only
   below the levels it has compared, so it is coinduction over the family, as the cycle above is over a pair. Where
-  it assumes something not yet proven, its answer is Unknown until that proof ends.
+  it assumes something not yet proven, its answer is Unknown until that proof ends. The fuel decides only how
+  much is proven before the cutoff, since what the cutoff leaves unproven fails.
   Witnesses:
-    rel-deeply-nested.ts               two chains that agree for three levels and differ on the fourth
+    rel-deeply-nested.ts               two chains that agree for nine levels and differ on the tenth
   Controls:
     recursive-relations-ok.ts          a regular recursive type widened, and a Set viewed as a ReadonlySet
+    variance-fixed-point.ts            six aliased boxes into a recursive union, which the fuel follows to the end
   Rejected sound code, because the cutoff fires where nothing is wrong:
-    cutoff-unproven.ts                 two families that never read T, and six aliased boxes into a recursive union
+    cutoff-unproven.ts                 two families that never read T and nest different arguments at every level
 
 Obligation 3, a variance measured through the type's own reference: TS2322 (TypeScript's code)
-  Statement. While a generic type's variance is measured, a reference to the type inside its own declaration relates
-  its type arguments by the variance under test for the parameter being measured, the measured variance for the
-  parameters before it, and invariance for the parameters after, which aren't measured yet. A variance stands only
-  if the declaration relates under that assumption. A variance the declaration states, as Promise's out T, is
-  checked against the declaration instead of measured.
-  Mechanism. getVariancesWorker records the assumption in varianceAssumptions for each of its tests, and
-  structuredTypeRelatedToWorker, where getVariances or getAliasVariances returns emptyArray, relates the type
-  arguments by it in relateByAssumedVariance, or both ways where nothing is assumed, and answers Ternary.Unknown on
-  success, which no cache records. A failure found while a variance is assumed isn't recorded either, since the
-  assumed invariance of a later parameter can be its cause. The library declares Promise's T out, which
-  checkVarianceAnnotations holds against Promise's declaration.
+  Statement. A generic type's variances are the greatest the declaration bears out: assuming them, every reference
+  to the type inside its own declaration relates its type arguments by them, and the measurement finds them again.
+  A variance the declaration states, as Promise's out T, is checked against the declaration instead of measured.
+  Variances measured while another type's measurement is under way, through that type's assumed variances, hold
+  only if those do, and nothing keeps them.
+  Mechanism. getVariancesWorker starts every type parameter assumed independent, or as its modifiers declare,
+  records the assumption in varianceAssumptions, and measures every parameter in a pass, where
+  structuredTypeRelatedToWorker relates the type arguments of a reference whose getVariances or getAliasVariances
+  is still emptyArray by the assumption, in relateByAssumedVariance, answering Ternary.Unknown on success. Each pass
+  weakens every assumption to its meet with what was measured (meetVariances), and the pass that changes nothing
+  ends the measurement. A measurement that consulted another type's assumption (consultedAssumptions) isn't kept
+  in the symbol's links, and a relation through its variances answers Unknown (conditionalVariances). A failure
+  found while a variance is assumed isn't recorded either. checkVarianceAnnotations holds Promise's out T,
+  IteratorObject's out T and ReadonlyMap's out V against their declarations, which relate only because
+  createCanonicalSignature renames a constrained type parameter whose constraint it preserves, as filter's S
+  extends U.
   Why it suffices. TypeScript answered Unknown whatever the type arguments were, which assumed the type independent
-  of every parameter without checking it. Here each test assumes what it tests and checks the declaration under
-  that assumption, so a measured variance is one the declaration bears out: coinduction over the type's own
-  references. The parameters after the one being measured are assumed invariant, the strongest demand, so no test
-  passes on a variance the measurement hasn't found.
+  of every parameter without checking it, and kept a variance measured through another type's unfinished one. Here
+  the measurement descends from the strongest assumption and stops only where the declaration bears out what it
+  assumes, which is coinduction over the type's own references, and a variance that rests on an unfinished
+  measurement is used only as Unknown, which stays inside that measurement.
   Witnesses:
     rel-variance-recursive.ts          a type invariant through its own reference, widened as if covariant
     rel-alias-variance-recursive.ts    the same type as an alias
+    rel-variance-mutual.ts             a type measured covariant through another's unfinished covariance, and kept
   Controls:
     recursive-relations-ok.ts          a recursive interface measured covariant, and a Promise widened
-  Rejected sound code, because the measurement assumes one variance at a time:
-    variance-phantom.ts                a type that reads its parameter only through itself, measured covariant
+    variance-fixed-point.ts            a type independent of its parameter, and one covariant in two that swap

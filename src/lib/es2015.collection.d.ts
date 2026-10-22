@@ -25,7 +25,8 @@ interface MapConstructor {
 }
 declare var Map: MapConstructor;
 
-interface ReadonlyMap<K, V> {
+// L: V is declared covariant: a ReadonlyMap hands its values out and takes none in.
+interface ReadonlyMap<K, out V> {
     forEach(callbackfn: (value: V, key: K, map: ReadonlyMap<K, V>) => void, thisArg?: any): void;
     get(key: K): V | undefined;
     has(key: K): boolean;
