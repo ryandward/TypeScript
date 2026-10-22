@@ -258,7 +258,7 @@ width (soundness: TS2915, TS2916 and TS2917; 82868af24)
   fresh one checked after it, which TypeScript's overload resolution assumes never happens.
 
 open-record (soundness: TypeScript's TS2339, TS18046, TS2571 and TS2550; b4491c5d3, and as unknown typing in
-the commit after c43af225e)
+e3c46a87e)
 - isInheritedDictionaryRead is new, with the names Object.prototype and Function.prototype give every object and
   function (inheritedObjectNames and inheritedFunctionNames, at module level). A value read of a dictionary, a type
   whose index signature applies at an inherited name it doesn't declare, by a key that may be that name, is typed
