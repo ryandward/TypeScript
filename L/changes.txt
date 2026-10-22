@@ -276,8 +276,7 @@ e3c46a87e)
 call-signature (soundness: TypeScript's TS2349; 3329cd10a)
 - isUntypedFunctionCall takes only a callee of type any, so a callee assignable to Function with no signature
   of its own is reported as not callable, in a call, a tagged template or a decorator.
-- checkNewTargetMetaProperty types new.target in a function as the function or undefined (the commit after
-  a2f62c5ba).
+- checkNewTargetMetaProperty types new.target in a function as the function or undefined (7905011b8).
 
 arity (soundness: TS2919; 02d3dfcd3)
 - compareSignaturesRelated reports TS2919 at a position the target may leave without an argument and the source
@@ -285,8 +284,7 @@ arity (soundness: TS2919; 02d3dfcd3)
   valueAssignableRelation alone, through a check mode 861f1fc84 deleted.)
 - The isTopSignature shortcut that related every function to a top signature is deleted; the StrictTopSignature
   guard for subtype reduction stays.
-- checkYieldExpression adds undefined to a yield's value, since next() may be called with no argument (the commit
-  after a2f62c5ba).
+- checkYieldExpression adds undefined to a yield's value, since next() may be called with no argument (7905011b8).
 
 records (soundness: TS2923 and TypeScript's TS2339; 078128b8e)
 - isEnginePropertyOf and isEngineDeclaredProperty are new: a property the library declares on an interface or a
@@ -295,16 +293,16 @@ records (soundness: TS2923 and TypeScript's TS2339; 078128b8e)
 - getSpreadType, getAnonymousPartialType and the rest type skip engine properties, as CopyDataProperties copies
   only own enumerable ones.
 
-number-strings (soundness: TypeScript's TS2339; the commit after a2f62c5ba)
+number-strings (soundness: TypeScript's TS2339; 7905011b8)
 - isValidNumberString accepts "NaN", "Infinity" and "-Infinity", which a number converts to, as `${number}`.
 
-receivers (soundness: TS2924; the commit after a2f62c5ba)
+receivers (soundness: TS2924; 7905011b8)
 - getReceiverFreeInterfaces, isReceiverMethod, isInvokedWhereItStands and checkReceiverMethodRead are new. A read of
   an instance's method, one declared on a library interface no global value has as its type or on a class without
   static, is reported unless a call, a new or a tagged template invokes it where it stands, from property access
   and from a value read by key in getPropertyTypeForIndexType.
 
-generic-relations (soundness: TypeScript's TS2322; the commit after a2f62c5ba)
+generic-relations (soundness: TypeScript's TS2322; 7905011b8)
 - Two conditional types with the same extends type relate only if their check types relate both ways.
 - The writing constraint of an indexed access target is taken only when its object type isn't generic, or under
   comparability.
