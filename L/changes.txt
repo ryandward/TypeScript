@@ -119,7 +119,7 @@ any (soundness: TS2898, TS2900; 8ac4d727f, 2adfd653a, 29e19bf5e, f0cb8e20c)
   undefined, null and {}, and anywhere else reports TS2898. An uncheckedType source that fails to relate reports
   TS2898 as well.
 - compareSignaturesRelated compares a target parameter that is any itself (isAnyParameterType) as unknown, in
-  every relation, and reports TS2920 when the source's parameter refuses it (the commit after 816a609a5).
+  every relation, and reports TS2920 when the source's parameter refuses it (861f1fc84).
 - getBindingElementTypeFromParentType reads a parent of type any as uncheckedType, as checkExpression reads a value
   of type any, so a nested destructuring pattern, whose parent is a property's type and never an expression, takes
   apart an unknown (e0bd3fffd).
@@ -267,7 +267,7 @@ call-signature (soundness: TypeScript's TS2349; 3329cd10a)
 arity (soundness: TS2919; 02d3dfcd3)
 - compareSignaturesRelated reports TS2919 at a position the target may leave without an argument and the source
   requires, when undefined doesn't relate to the source's parameter, in every relation. (02d3dfcd3 applied it to
-  valueAssignableRelation alone, through a check mode the commit after 816a609a5 deleted.)
+  valueAssignableRelation alone, through a check mode 861f1fc84 deleted.)
 - The isTopSignature shortcut that related every function to a top signature is deleted; the StrictTopSignature
   guard for subtype reduction stays.
 
