@@ -1,0 +1,37 @@
+arity
+kind: soundness
+
+Claim. If the lab accepts a program, no function held as a type is called through it with fewer arguments than it
+requires, unless each parameter left out takes undefined.
+
+Counterexample in plain TypeScript. compareSignaturesRelated refuses a source that requires more arguments than
+the target has parameters, but not when the target has a rest parameter, which can be called with none. A
+function of one Point passes as (...points: readonly Point[]) => number, and as typeof Math.max, and is called
+with nothing. isTopSignature relates every function to (...args: never[]) => unknown without comparing its
+parameters, and that type can be called with no arguments too. Each witness's function reads a property of the
+undefined it receives, and Node throws a TypeError.
+
+Obligation 1, a parameter the target may leave out: TS2919
+  Statement. In a value flow, a function relates to a function type only if, at every position the type may be
+  called without an argument and the function requires one, the function's parameter takes undefined. A function
+  that takes fewer parameters than the type passes still relates: it ignores the rest. A type-level question,
+  such as a utility type's constraint, isn't a value flow.
+  Mechanism. compareSignaturesRelated checks each position past the target's minimum argument count and within the
+  source's, after comparing the types the target passes, and reports TS2919 when undefined doesn't relate to the
+  source's parameter. signatureRelatedTo sets SignatureCheckMode.MissingArguments for valueAssignableRelation
+  alone, and a callback parameter's comparison carries it. The isTopSignature shortcut is deleted, so a top
+  signature is compared like any other.
+  Why it suffices. A call through the target passes at least the target's minimum argument count, so the source
+  receives undefined exactly at the positions this checks. Every function held as a function type got there by a
+  value flow, which valueAssignableRelation judges.
+  Witnesses:
+    rel-rest-arity-function-type.ts    a function of one Point held as a function type with a rest parameter
+    rel-rest-arity-call-signature.ts   the same as a call signature
+    lib-rest-arity-math-max.ts         a function of one number held as typeof Math.max
+    rel-top-signature.ts               a function of one string held as (...args: never[]) => unknown
+  Rejected sound code, because the type allows a call with no argument:
+    rest-called-with-one.ts            a function of one number, held as a rest type and called with one
+  Controls:
+    fewer-parameters.ts                a callback that takes fewer parameters than it is passed
+    undefined-taking.ts                unknown, optional and default parameters left out
+    type-level-utility.ts              ReturnType of a function that requires an argument

@@ -1360,6 +1360,9 @@ export const enum SignatureCheckMode {
     IgnoreReturnTypes = 1 << 2,
     StrictArity = 1 << 3,
     StrictTopSignature = 1 << 4,
+    // L: set for a value flow, where a function held as the target type can be called with any argument list the type
+    // allows, so a parameter the target may leave out must take undefined.
+    MissingArguments = 1 << 5,
     Callback = BivariantCallback | StrictCallback,
 }
 
@@ -22036,9 +22039,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             return Ternary.True;
         }
 
-        if (!(checkMode & SignatureCheckMode.StrictTopSignature && isTopSignature(source)) && isTopSignature(target)) {
-            return Ternary.True;
-        }
+        // L: a top signature, (...args: never[]) => unknown or (...args: any[]) => any, is related to like any other: it
+        // can be called with no arguments, so a function that requires one isn't a value of it.
         if (checkMode & SignatureCheckMode.StrictTopSignature && isTopSignature(source) && !isTopSignature(target)) {
             return Ternary.False;
         }
@@ -22108,7 +22110,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                 const callbacks = sourceSig && targetSig && !getTypePredicateOfSignature(sourceSig) && !getTypePredicateOfSignature(targetSig) &&
                     getTypeFacts(sourceType, TypeFacts.IsUndefinedOrNull) === getTypeFacts(targetType, TypeFacts.IsUndefinedOrNull);
                 let related = callbacks ?
-                    compareSignaturesRelated(targetSig, sourceSig, (checkMode & SignatureCheckMode.StrictArity) | SignatureCheckMode.StrictCallback, reportErrors, errorReporter, incompatibleErrorReporter, compareTypes, reportUnreliableMarkers) :
+                    compareSignaturesRelated(targetSig, sourceSig, (checkMode & (SignatureCheckMode.StrictArity | SignatureCheckMode.MissingArguments)) | SignatureCheckMode.StrictCallback, reportErrors, errorReporter, incompatibleErrorReporter, compareTypes, reportUnreliableMarkers) :
                     compareTypes(targetType, sourceType, reportErrors);
                 // With strict arity, (x: number | undefined) => void is a subtype of (x?: number | undefined) => void
                 if (related && checkMode & SignatureCheckMode.StrictArity && i >= getMinArgumentCount(source) && i < getMinArgumentCount(target) && compareTypes(sourceType, targetType, /*reportErrors*/ false)) {
@@ -22121,6 +22123,15 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     return Ternary.False;
                 }
                 result &= related;
+            }
+            // L: an argument the target may be called without arrives as undefined, so a parameter the source requires
+            // there must take undefined. A rest parameter or an optional one in the target leaves such a position. The
+            // types the target passes are compared first, so this reports only a parameter they would satisfy.
+            if (checkMode & SignatureCheckMode.MissingArguments && sourceType && i !== restIndex && i >= getMinArgumentCount(target) && i < getMinArgumentCount(source) && !compareTypes(undefinedType, sourceType, /*reportErrors*/ false)) {
+                if (reportErrors) {
+                    errorReporter!(Diagnostics.Parameter_0_is_required_but_the_target_can_be_called_without_it_so_it_would_receive_undefined, unescapeLeadingUnderscores(getParameterNameAtPosition(source, i)));
+                }
+                return Ternary.False;
             }
         }
 
@@ -24929,6 +24940,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         function signatureRelatedTo(source: Signature, target: Signature, erase: boolean, reportErrors: boolean, intersectionState: IntersectionState, incompatibleReporter: (source: Type, target: Type) => void): Ternary {
             const checkMode = relation === subtypeRelation ? SignatureCheckMode.StrictTopSignature :
                 relation === strictSubtypeRelation ? SignatureCheckMode.StrictTopSignature | SignatureCheckMode.StrictArity :
+                relation === valueAssignableRelation ? SignatureCheckMode.MissingArguments :
                 SignatureCheckMode.None;
             return compareSignaturesRelated(erase ? getErasedSignature(source) : source, erase ? getErasedSignature(target) : target, checkMode, reportErrors, reportError, incompatibleReporter, isRelatedToWorker, reportUnreliableMapper);
             function isRelatedToWorker(source: Type, target: Type, reportErrors?: boolean) {

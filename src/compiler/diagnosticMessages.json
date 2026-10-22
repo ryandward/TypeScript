@@ -4126,6 +4126,10 @@
         "category": "Error",
         "code": 2918
     },
+    "Parameter '{0}' is required, but the target can be called without it, so it would receive undefined.": {
+        "category": "Error",
+        "code": 2919
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

@@ -2,7 +2,7 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds twenty-five diagnostics, changes the checker and two functions in utilities.ts that decide which
+things: it adds twenty-six diagnostics, changes the checker and two functions in utilities.ts that decide which
 files are checked, adds one internal type flag, declares readonly the new objects and collections the library
 hands out, deletes from the ES library every effect and every method that changes an object in place, and
 corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
@@ -17,7 +17,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Twenty-five new errors, from TS2892 to TS2918, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+Twenty-six new errors, from TS2892 to TS2919, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
 The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
 rules and TS2897 to definite-assignment.
 
@@ -82,6 +82,8 @@ rules and TS2897 to definite-assignment.
   TS2918  open-record
           A key of type '{0}' may be '{1}', which every object inherits, so a read through an index signature may
           find that instead of an entry. A Map holds entries by any key.
+  TS2919  arity
+          Parameter '{0}' is required, but the target can be called without it, so it would receive undefined.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -257,6 +259,13 @@ open-record (soundness: TS2918 and TypeScript's TS2339 and TS2550; b4491c5d3)
 call-signature (soundness: TypeScript's TS2349; 3329cd10a)
 - isUntypedFunctionCall takes only a callee of type any, so a callee assignable to Function with no signature
   of its own is reported as not callable, in a call, a tagged template or a decorator.
+
+arity (soundness: TS2919; the commit after 98522f567)
+- compareSignaturesRelated reports TS2919 at a position the target may leave without an argument and the source
+  requires, when undefined doesn't relate to the source's parameter. SignatureCheckMode.MissingArguments is new:
+  signatureRelatedTo sets it for valueAssignableRelation, and a callback parameter's comparison carries it.
+- The isTopSignature shortcut that related every function to a top signature is deleted; the StrictTopSignature
+  guard for subtype reduction stays.
 
 Rules with no checker change: effects and library-declarations are built in the library alone (below), and
 optional-field is a specification only.

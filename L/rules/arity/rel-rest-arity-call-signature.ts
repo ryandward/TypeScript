@@ -3,6 +3,6 @@
 type Point = { readonly x: number };
 type Total = { (...points: readonly Point[]): number };
 
-const firstX: Total = (p: Point) => p.x;
+const firstX: Total = (p: Point) => p.x; // rejected here: TS2919
 // Runtime: TypeError: Cannot read properties of undefined (reading 'x')
 console.log(firstX());
