@@ -2,4 +2,4 @@
 // function.
 const counts: Readonly<Record<string, number>> = {};
 const hit = counts['constructor'];
-console.log(hit === undefined ? 0 : hit.toFixed());
+console.log(hit === undefined ? 0 : hit.toFixed()); // rejected here: TS2339

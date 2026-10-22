@@ -4122,6 +4122,10 @@
         "category": "Error",
         "code": 2917
     },
+    "A key of type '{0}' may be '{1}', which every object inherits, so a read through an index signature may find that instead of an entry. A Map holds entries by any key.": {
+        "category": "Error",
+        "code": 2918
+    },
 
     "Import declaration '{0}' is using private name '{1}'.": {
         "category": "Error",

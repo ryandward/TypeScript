@@ -1485,6 +1485,11 @@ export function isInstantiatedModule(node: ModuleDeclaration, preserveConstEnums
 }
 
 /** @internal */
+// L: the names every object inherits from Object.prototype, and every function besides from Function.prototype
+// (ES2025 20.1.3 and 20.2.3, and Annex B.2.2). Neither has a property keyed by a symbol.
+const inheritedObjectNames: readonly string[] = ["constructor", "__defineGetter__", "__defineSetter__", "hasOwnProperty", "__lookupGetter__", "__lookupSetter__", "isPrototypeOf", "propertyIsEnumerable", "toString", "valueOf", "__proto__", "toLocaleString"];
+const inheritedFunctionNames: readonly string[] = ["length", "name", "apply", "bind", "call", "arguments", "caller"];
+
 export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
     // Why var? It avoids TDZ checks in the runtime which can be costly.
     // See: https://github.com/microsoft/TypeScript/issues/52924
@@ -2619,6 +2624,17 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         const constraint = getBaseConstraintOrType(type);
         return constraint.flags & TypeFlags.UnionOrIntersection ? some((constraint as UnionOrIntersectionType).types, isPrimitiveValuedType) :
             !!(constraint.flags & TypeFlags.Primitive);
+    }
+
+    // L: a read through an index signature at a key that may name an inherited member finds that member, not an
+    // entry, since an object holds its entries and its prototype's members under the same keys. A Map holds entries
+    // apart from its members.
+    function checkIndexSignatureRead(objectType: Type, keyType: Type, errorNode: Node) {
+        const names = typeHasCallOrConstructSignatures(objectType) ? concatenate(inheritedObjectNames, inheritedFunctionNames) : inheritedObjectNames;
+        const name = find(names, n => isTypeAssignableTo(getStringLiteralType(n), keyType));
+        if (name) {
+            error(errorNode, Diagnostics.A_key_of_type_0_may_be_1_which_every_object_inherits_so_a_read_through_an_index_signature_may_find_that_instead_of_an_entry_A_Map_holds_entries_by_any_key, typeToString(keyType), name);
+        }
     }
 
     // L: an object type other than the empty object type {}, whose facts say its values are objects.
@@ -19385,6 +19401,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     error(indexNode, Diagnostics.Type_0_cannot_be_used_as_an_index_type, typeToString(indexType));
                     return accessFlags & AccessFlags.IncludeUndefined ? getUnionType([indexInfo.type, missingType]) : indexInfo.type;
                 }
+                if (accessNode && accessFlags & AccessFlags.ExpressionPosition) {
+                    checkIndexSignatureRead(objectType, indexType, getIndexNodeForAccessExpression(accessNode));
+                }
                 errorIfWritingToReadonlyIndex(indexInfo);
                 // When accessing an enum object with its own type,
                 // e.g. E[E.A] for enum E { A }, undefined shouldn't
@@ -19738,8 +19757,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
         }
         objectType = getReducedType(objectType);
         // If the object type has a string index signature and no other members we know that the result will
-        // always be the type of that index signature and we can simplify accordingly.
-        if (isStringIndexSignatureOnlyType(objectType) && !(indexType.flags & TypeFlags.Nullable) && isTypeAssignableToKind(indexType, TypeFlags.String | TypeFlags.Number)) {
+        // always be the type of that index signature and we can simplify accordingly. L: but not for a read of a value,
+        // whose key checkIndexSignatureRead needs to see.
+        if (isStringIndexSignatureOnlyType(objectType) && !(indexType.flags & TypeFlags.Nullable) && isTypeAssignableToKind(indexType, TypeFlags.String | TypeFlags.Number) && !(accessFlags & AccessFlags.ExpressionPosition)) {
             indexType = stringType;
         }
         // In noUncheckedIndexedAccess mode, indexed access operations that occur in an expression in a read position and resolve to
@@ -35076,6 +35096,9 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             }
             if (indexInfo.isReadonly && (isAssignmentTarget(node) || isDeleteTarget(node))) {
                 error(node, Diagnostics.Index_signature_in_type_0_only_permits_reading, typeToString(apparentType));
+            }
+            if (isPropertyAccessExpression(node)) {
+                checkIndexSignatureRead(apparentType, getStringLiteralType(unescapeLeadingUnderscores(right.escapedText)), right);
             }
 
             propType = indexInfo.type;

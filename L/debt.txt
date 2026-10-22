@@ -91,8 +91,12 @@ width
   generic mapped types, which this rule hasn't audited.
 - A relation cached while excess-property checks were silenced can hide an excess-property error later. L's
   soundness doesn't rest on that check, since exactness reads freshness.
-- A read through a string index signature can find a member every object inherits, as constructor
-  (catalog/rule-open-record.ts), at a literal key or a computed one.
+
+open-record
+- The inherited names are the spec's, written into the checker. A shell that adds a property to Object.prototype,
+  as prototype pollution does, adds a name the check doesn't know.
+- An indexed access type, T[K] in a type, isn't a read and isn't checked, so a library function typed through one
+  reads past the check, as Reflect.get did. No other is known, but the library hasn't been searched for one.
 
 call-signature
 - Not built, so chk-call-narrowed-function.ts is open: the release and the lab both call a Function with no

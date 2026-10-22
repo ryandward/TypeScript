@@ -2,7 +2,7 @@ Changes to TypeScript 6.0.3
 
 Every change this fork makes to TypeScript 6.0.3, the tag v6.0.3 (commit 050880ce5), as of the commit that last
 changed this file. `git diff v6.0.3 -- src` shows the same changes as code. Inside src/ the fork changes six
-things: it adds twenty-four diagnostics, changes the checker and two functions in utilities.ts that decide which
+things: it adds twenty-five diagnostics, changes the checker and two functions in utilities.ts that decide which
 files are checked, adds one internal type flag, declares readonly the new objects and collections the library
 hands out, deletes from the ES library every effect and every method that changes an object in place, and
 corrects the library's declarations that lie about what the engine does. The parser, binder, emitter,
@@ -17,7 +17,7 @@ When a commit changes src/, this file changes with it.
 
 Diagnostics (src/compiler/diagnosticMessages.json)
 
-Twenty-four new errors, from TS2892 to TS2917, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
+Twenty-five new errors, from TS2892 to TS2918, each the code of one rule's mechanism in L/rules/<rule>/rule.txt.
 The codes left out belonged to mechanisms the fork has since deleted: TS2890, TS2891 and TS2894 to the write
 rules and TS2897 to definite-assignment.
 
@@ -79,6 +79,9 @@ rules and TS2897 to definite-assignment.
   TS2917  width
           Type '{0}' belongs to an object literal and names every property its value has, so a value of type '{1}',
           which may hold more, isn't one.
+  TS2918  open-record
+          A key of type '{0}' may be '{1}', which every object inherits, so a read through an index signature may
+          find that instead of an entry. A Map holds entries by any key.
 
 
 The checker (src/compiler/checker.ts), by rule
@@ -241,6 +244,14 @@ width (soundness: TS2915, TS2916 and TS2917; 82868af24)
   excessPropertyChecksSilenced, saved and restored around each use. The regular type would be stricter than the
   fresh one checked after it, which TypeScript's overload resolution assumes never happens.
 
+open-record (soundness: TS2918 and TypeScript's TS2339 and TS2550; the commit after 9606bd9cd)
+- checkIndexSignatureRead is new, with the names Object.prototype and Function.prototype give every object and
+  function (inheritedObjectNames and inheritedFunctionNames, at module level). It reports TS2918 when one of them
+  is assignable to the key of a value read through an index signature, from getPropertyTypeForIndexType (element
+  access and destructuring) and checkPropertyAccessExpressionOrQualifiedName (property access).
+- getIndexedAccessTypeOrUndefined no longer replaces a value read's key by string for a type with only a string
+  index signature, so a literal key naming a member Object declares is typed as that member.
+
 Rules with no checker change: effects and library-declarations are built in the library alone (below),
 optional-field is a specification only, and call-signature isn't built (its witness is open; see debt.txt).
 
@@ -316,6 +327,8 @@ stops compiling, which costs nothing L keeps.
 - An iterator's flatMap takes a callback that returns no string, which it throws on (es2025.iterator).
 - WeakMap and WeakSet keys are objects: WeakKeyTypes has no symbol, since a registered symbol throws as a key
   (es2023.collection).
+- Reflect.get is deleted (es2015.reflect): it reads a key as an element access does but types the result as an
+  indexed access type, which no read check sees (open-record).
 - Array.from takes a string as itself (es2015.iterable), returning its code points, since a string is no longer
   an Iterable: no primitive is a value of an object type (narrowing).
 - No constructor declares a prototype: all 56 prototype fields are deleted from the core's library, since a

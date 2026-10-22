@@ -15,19 +15,6 @@ declare namespace Reflect {
     function apply(target: Function, thisArgument: any, argumentsList: ArrayLike<any>): any;
 
     /**
-     * Gets the property of target, equivalent to `target[propertyKey]` when `receiver === target`.
-     * @param target Object that contains the property on itself or in its prototype chain.
-     * @param propertyKey The property name.
-     * @param receiver The reference to use as the `this` value in the getter function,
-     *        if `target[propertyKey]` is an accessor property.
-     */
-    function get<T extends object, P extends PropertyKey>(
-        target: T,
-        propertyKey: P,
-        receiver?: unknown,
-    ): P extends keyof T ? T[P] : any;
-
-    /**
      * Gets the own property descriptor of the specified object.
      * An own property descriptor is one that is defined directly on the object and is not inherited from the object's prototype.
      * @param target Object that contains the property.
