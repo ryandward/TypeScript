@@ -75,7 +75,9 @@ catalog/ holds crashes that TypeScript 6.0.3 accepts and that no rule closes yet
 witnesses/cases at its commit d073d92, all but the ones a rule's folder already held, the ones 6.0.3 rejects or
 runs without a crash, and four that need the host: lib-settimeout-function, lib-structuredclone-prototype and
 rel-optional-absent-lib call setTimeout or structuredClone, and lib-date-tojson-invalid needs an invalid Date,
-which only the shell can make. Every catalog case is a witness with no marked line. The tracker reports each
-one as open, when the lab accepts it, or as rejected, when the lab rejects it but no rule cites it yet. A rule
-that closes a catalog case takes it into its own folder, marks the line its mechanism rejects, and cites it, so
-every case lives in exactly one place.
+which only the shell can make. 58 more came from L-hooks' witnesses/exemptions on 2026-10-21, its audit of its
+own carve-outs, renamed to this catalog's prefixes and described in this lab's terms: every crash there that
+6.0.3 accepts, that needs no host, and that isn't about the hooks' own machinery. Every catalog case is a
+witness with no marked line. The tracker reports each one as open, when the lab accepts it, or as rejected, when
+the lab rejects it but no rule cites it yet. A rule that closes a catalog case takes it into its own folder,
+marks the line its mechanism rejects, and cites it, so every case lives in exactly one place.
